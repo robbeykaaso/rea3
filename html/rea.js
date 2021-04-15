@@ -244,7 +244,7 @@ class stream {
     async asyncCallF(aFunc, aParam = {}, aPipeline = pipelines()){
         const pip = aPipeline.add(aFunc, aParam)
         const ret = await this.asyncCall(pip.actName())
-        aPipeline.remove(pip.actName(), true)
+        aPipeline.remove(pip.actName())
         return ret
     }
 }
@@ -366,7 +366,7 @@ class pipeFuture extends pipe{
             for (let i in pip.m_next2)
                 this.insertNext(pip.m_next2[i][0], pip.m_next2[i][1])
             this.m_external = pip.m_external
-            this.m_parent.remove(aName)
+            delete this.m_parent.m_pipes[aName]
         }
 
         this.m_parent.add(e => {
@@ -374,7 +374,7 @@ class pipeFuture extends pipe{
             for (let i in this.m_next2)
                 pip.insertNext(this.m_next2[i][0], this.m_next2[i][1])
             pip.m_external = this.m_external
-            this.m_parent.remove(this.m_name)
+            delete this.m_parent.m_pipes[this.m_name]
         }, {name: aName + "_pipe_add"})
     }
 
@@ -417,6 +417,13 @@ class pipeline{
     constructor(aName){
         this.m_name = aName
         this.m_pipes = {}
+
+        if (aName == "js"){
+            this.add(aInput => {
+                console.log("js_pipe_count: " + Object.keys(this.m_pipes).length)
+                aInput.out()
+            }, {name: "reportJSLeak"})
+        }
     }
 
     name(){
@@ -434,17 +441,29 @@ class pipeline{
             pip = new pipe(this, nm)
         if (nm != ""){
             const ad = pip.actName() + "_pipe_add"
-            this.call(ad)
-            this.remove(ad)
+            if (this.m_pipes[ad]){
+                this.call(ad)
+                delete this.m_pipes[ad]
+            }
         }
         pip.initialize(aFunc, aParam)
         return pip
     }
 
     remove(aName, aOutside = false){
-        const pip = this.m_pipes[aName]
+        let pip = this.m_pipes[aName]
         if (pip)
             delete this.m_pipes[aName]
+        else{
+            pip = this.find(aName + "_pipe_add", false);
+            if (pip){
+                pip = new pipeFuture0(this, aName);
+                this.call(aName + "_pipe_add");
+                this.remove(aName + "_pipe_add", false);
+                this.remove(aName, false);
+            }
+        }
+
         if (aOutside)
             PipelineJS.removePipeOutside(aName)
     }

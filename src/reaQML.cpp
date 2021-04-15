@@ -59,9 +59,9 @@ public:
 };
 
 template <>
-class funcType<QJSValue, QJSValue>{
+class funcType<QVariant, QJSValue>{
 public:
-    void doEvent(QJSValue aFunc, std::shared_ptr<stream<QJSValue>> aStream){
+    void doEvent(QJSValue aFunc, std::shared_ptr<stream<QVariant>> aStream){
         if (!aFunc.equals(QJSValue::NullValue)){
             QJSValueList paramlist;
             qmlStream stm(aStream);
@@ -72,38 +72,41 @@ public:
 };
 
 template <>
-class typeTrait<QJSValue> : public typeTrait0{
+class typeTrait<QVariant> : public typeTrait0{
 public:
     QString name() override{
-        return "js";
+        return "qvar";
     }
     QVariant QData(stream0* aStream) override{
-        return QVariant::fromValue<QJSValue>(reinterpret_cast<stream<QJSValue>*>(aStream)->data());
+        return reinterpret_cast<stream<QVariant>*>(aStream)->data();
+        //return QVariant::fromValue<QJSValue>(reinterpret_cast<stream<QJSValue>*>(aStream)->data());
     }
 };
 
 pipelineQML::pipelineQML() : pipeline("qml"){
-    pipeline::instance()->supportType<QJSValue>();
+    pipeline::instance()->supportType<QVariant>();  //qmlEngine can only be used on main thread, so use qvariant instead of qjsvalue
 }
 
 void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
     if (aStream->dataType() == "")
         throw "not supported type";
-    pipeline::execute(aName, std::make_shared<stream<QJSValue>>(qml_engine->toScriptValue(aStream->QData()), aStream->tag(), aStream->scope()), aSync, aFromOutside);
+    pipeline::execute(aName, std::make_shared<stream<QVariant>>(aStream->QData(), aStream->tag(), aStream->scope()), aSync, aFromOutside);
 }
 
 void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag) {
-    auto dt = std::dynamic_pointer_cast<stream<QJSValue>>(aStream)->data();
-    if (dt.isObject())
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QJsonObject>>(valType<QJsonObject>::data(dt), aStream->tag(), aStream->scope()), aSync, aFlag);
-    else if (dt.isArray())
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QJsonArray>>(valType<QJsonArray>::data(dt), aStream->tag(), aStream->scope()), aSync, aFlag);
-    else if (dt.isString())
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QString>>(valType<QString>::data(dt), aStream->tag(), aStream->scope()), aSync, aFlag);
-    else if (dt.isBool())
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<bool>>(valType<bool>::data(dt), aStream->tag(), aStream->scope()), aSync, aFlag);
-    else if (dt.isNumber())
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<double>>(valType<double>::data(dt), aStream->tag(), aStream->scope()), aSync, aFlag);
+    auto aData = aStream->QData();
+    if (aData.type() == QVariant::Type::Map)
+        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QJsonObject>>(aData.toJsonObject(), aStream->tag(), aStream->scope()), aSync, aFlag);
+    else if (aData.type() == QVariant::Type::List)
+        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QJsonArray>>(aData.toJsonArray(), aStream->tag(), aStream->scope()), aSync, aFlag);
+    else if (aData.type() == QVariant::Type::String)
+        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QString>>(aData.toString(), aStream->tag(), aStream->scope()), aSync, aFlag);
+    else if (aData.type() == QVariant::Type::Bool)
+        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<bool>>(aData.toBool(), aStream->tag(), aStream->scope()), aSync, aFlag);
+    else if (aData.type() == QVariant::Type::Double)
+        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<double>>(aData.toDouble(), aStream->tag(), aStream->scope()), aSync, aFlag);
+    else if (aData.type() == QVariant::Type::Int)
+        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<double>>(aData.toInt(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else{
         throw "not supported type";
     }
@@ -115,6 +118,10 @@ static regPip<std::shared_ptr<pipeline*>> reg_create_qmlpipeline([](stream<std::
 
 qmlScopeCache::qmlScopeCache(std::shared_ptr<scopeCache> aScope){
     m_scope = aScope;
+}
+
+qmlScopeCache::~qmlScopeCache(){
+
 }
 
 QJSValue qmlScopeCache::cache(const QString& aName, QJSValue aData){
@@ -141,19 +148,39 @@ QJSValue qmlScopeCache::data(const QString& aName){
         return QJSValue::NullValue;
 }
 
+static int stream_counter = 0;
+static int pipe_counter = 0;
+
+qmlStream::qmlStream(){
+    stream_counter++;
+}
+
+qmlStream::qmlStream(std::shared_ptr<stream<QVariant>> aStream){
+    stream_counter++;
+
+    m_stream = aStream;
+}
+
+qmlStream::~qmlStream(){
+    --stream_counter;
+}
+
 QJSValue qmlStream::data(){
-    return m_stream->data();
+    return qml_engine->toScriptValue(m_stream->data());
 }
 QString qmlStream::tag(){
     return m_stream->tag();
 }
 
 QJSValue qmlStream::scope(bool aNew){
-    return qml_engine->toScriptValue(new qmlScopeCache(m_stream->scope(aNew)));
+    //https://stackoverflow.com/questions/59267782/how-to-safely-use-qqmlenginecppownership
+    auto ret = new qmlScopeCache(m_stream->scope(aNew));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
+    return qml_engine->toScriptValue(ret);
 }
 
 QJSValue qmlStream::setData(QJSValue aData){
-    m_stream->setData(aData);
+    m_stream->setData(aData.toVariant());
     return qml_engine->toScriptValue(this);
 }
 
@@ -163,23 +190,31 @@ QJSValue qmlStream::out(const QString& aTag){
 }
 
 QJSValue qmlStream::outs(QJSValue aOut, const QString& aNext, const QString& aTag){
-    m_stream->outs(aOut, aNext, aTag);
+    m_stream->outs(aOut.toVariant(), aNext, aTag);
     return qml_engine->toScriptValue(this);
 }
 
 QJSValue qmlStream::asyncCall(const QString& aName, const QString& aPipeline){
-    auto ret = new qmlStream(m_stream->asyncCall<QJSValue>(aName, pipeline::instance(aPipeline)));
+    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, pipeline::instance(aPipeline)));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
 QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, const QString& aPipeline){
-    auto ret = new qmlStream(m_stream->asyncCallF<QJSValue, pipe, QJSValue, QJSValue>(aFunc, aParam, pipeline::instance(aPipeline)));
+    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, pipeline::instance(aPipeline)));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
 qmlPipe::qmlPipe(pipeline* aParent, const QString& aName){
+    ++pipe_counter;
+
     m_parent = aParent;
     m_name = aName;
+}
+
+qmlPipe::~qmlPipe(){
+    --pipe_counter;
 }
 
 void qmlPipe::resetTopo(){
@@ -189,6 +224,7 @@ void qmlPipe::resetTopo(){
 QJSValue qmlPipe::next(const QString& aName, const QString& aTag){
     qmlPipe* ret = new qmlPipe(m_parent, aName);
     m_parent->find(m_name)->next(aName, aTag);
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
@@ -201,11 +237,11 @@ QString doAdd(QJSValue aFunc, const QJsonObject& aParam){
     auto pl = pipeline::instance("qml");
     auto tp = aParam.value("type");
     if (tp == "Partial")
-        return pl->add<QJSValue, pipePartial, QJSValue, QJSValue>(aFunc, aParam)->actName();
+        return pl->add<QVariant, pipePartial, QJSValue, QJSValue>(aFunc, aParam)->actName();
     else if (tp == "Delegate")
-        return pl->add<QJSValue, pipeDelegate, QJSValue, QJSValue>(aFunc, aParam)->actName();
+        return pl->add<QVariant, pipeDelegate, QJSValue, QJSValue>(aFunc, aParam)->actName();
     else
-        return pl->add<QJSValue, pipe, QJSValue, QJSValue>(aFunc, aParam)->actName();
+        return pl->add<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam)->actName();
 }
 
 QJSValue qmlPipe::nextF(QJSValue aFunc, const QString& aTag, const QJsonObject& aParam){
@@ -222,16 +258,17 @@ void qmlPipe::removeNext(const QString& aName){
 }
 
 void qmlPipeline::run(const QString& aName, const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache){
-    pipeline::instance("qml")->run(aName, aInput, aTag, std::make_shared<scopeCache>(aScopeCache));
+    pipeline::instance("qml")->run(aName, aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache));
 }
 
 QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache){
-    auto ret = new qmlStream(pipeline::instance("qml")->input(aInput, aTag, std::make_shared<scopeCache>(aScopeCache)));
+    auto ret = new qmlStream(pipeline::instance("qml")->input(aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache)));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
 void qmlPipeline::call(const QString& aName, const QJSValue& aInput){
-    pipeline::instance("qml")->call(aName, aInput);
+    pipeline::instance("qml")->call(aName, aInput.toVariant());
 }
 
 void qmlPipeline::remove(const QString& aName){
@@ -247,16 +284,20 @@ QObject* qmlPipeline::qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine)
 }
 
 QJSValue qmlPipeline::add(QJSValue aFunc, const QJsonObject& aParam){
-    return qml_engine->toScriptValue(new qmlPipe(pipeline::instance("qml"), doAdd(aFunc, aParam)));
+    auto ret = new qmlPipe(pipeline::instance("qml"), doAdd(aFunc, aParam));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
+    return qml_engine->toScriptValue(ret);
 }
 
 QJSValue qmlPipeline::find(const QString& aName){
     qmlPipe* ret = new qmlPipe(pipeline::instance("qml"), aName);
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
 QJSValue qmlPipeline::asyncCall(const QString& aName, const QJSValue& aInput){
-    auto ret = new qmlStream(pipeline::instance("qml")->asyncCall(aName, aInput));
+    auto ret = new qmlStream(pipeline::instance("qml")->asyncCall(aName, aInput.toVariant()));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
@@ -270,6 +311,12 @@ qmlPipeline::qmlPipeline(){
         translates = QJsonDocument::fromJson(fl.readAll()).object();
         fl.close();
     }
+
+    pipeline::instance()->add<double>([](rea::stream<double>* aInput){
+        std::cout << "qml_pipe_counter: " << pipe_counter << std::endl;
+        std::cout << "qml_stream_counter: " << stream_counter << std::endl;
+        aInput->out();
+    }, rea::Json("name", "reportQMLLeak", "external", true));
 }
 
 qmlPipeline::~qmlPipeline(){

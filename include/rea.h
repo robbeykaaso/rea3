@@ -74,17 +74,12 @@ private:
 
 class DSTDLL stream0 : public std::enable_shared_from_this<stream0>{
 public:
-    stream0(const QString& aTag = "") {
-        m_tag = aTag;
-        m_scope = nullptr;
-    }
+    stream0(const QString& aTag = "");
     stream0(const stream0&) = default;
     stream0(stream0&&) = default;
     stream0& operator=(const stream0&) = default;
     stream0& operator=(stream0&&) = default;
-    virtual ~stream0(){
-
-    }
+    virtual ~stream0();
     QString tag(){
         return m_tag;
     }
@@ -100,6 +95,8 @@ public:
         return QVariant();
     }
 protected:
+    std::shared_ptr<QEventLoop> waitLastAsync(const QString& aName);
+    void freeAsync();
     pipeline* m_parent;
     QString m_tag;
     std::shared_ptr<scopeCache> m_scope;
@@ -122,7 +119,7 @@ class DSTDLL pipe0 : public QObject{
 public:
     enum AspectType {AspectBefore, AspectAround, AspectAfter};
 public:
-    virtual ~pipe0(){}
+    virtual ~pipe0();
     virtual QString actName() {return m_name;}
 
     template <typename T, template<class, typename> class P = pipe>
@@ -186,11 +183,12 @@ private:
 class pipeFuture : public pipe0 {
 public:
     QString actName() override {return m_act_name;}
-    void execute(std::shared_ptr<stream0> aStream) override;
     void removeNext(const QString& aName) override;
     void resetTopo() override;
-protected:
+    void execute(std::shared_ptr<stream0> aStream) override;
+protected: 
     pipeFuture(pipeline* aParent, const QString& aName);
+    bool event( QEvent* e) override;
     void insertNext(const QString& aName, const QString& aTag) override;
 private:
     QString m_act_name;
@@ -215,8 +213,10 @@ public:
         auto tmp = new P<T, S>(this, nm, aParam.value("thread").toInt(), aParam.value("replace").toBool());  //https://stackoverflow.com/questions/213761/what-are-some-uses-of-template-template-parameters
         if (nm != ""){
             auto ad = tmp->actName() + "_pipe_add";
-            call<int>(ad, 0);
-            remove(ad);
+            if (m_pipes.contains(ad)){
+                call<int>(ad, 0);
+                doRemove(ad);
+            }
         }
         tmp->initialize(aFunc, aParam);
         pipe0* ret = tmp;
@@ -283,10 +283,11 @@ protected:
                          bool aFromOutside = false);
     virtual void removePipeOutside(const QString& aName);
     virtual void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag);
+    QHash<QString, pipe0*> m_pipes;
 private:
     QThread* findThread(int aNo);
+    void doRemove(const QString& aName);
     QString m_name;
-    QHash<QString, pipe0*> m_pipes;
     QHash<int, std::shared_ptr<QThread>> m_threads;
     QHash<QString, std::shared_ptr<typeTrait0>> m_types;
     friend pipe0;
@@ -362,21 +363,54 @@ public:
 
     template<typename S = T>
     std::shared_ptr<stream<S>> asyncCall(const QString& aName, pipeline* aPipeline = pipeline::instance()){
-        std::shared_ptr<stream<S>> ret = nullptr;
-        QEventLoop loop;
+        /*std::shared_ptr<stream<S>> ret = nullptr;
+
+        auto loop = waitLastAsync(aName);
         bool timeout = false;
-        auto monitor = aPipeline->find(aName)->nextF<S>([&loop, &timeout, &ret, this](stream<S>* aInput){
+        auto monitor = aPipeline->find(aName)->nextF<S>([&loop, &timeout, &ret, this, aName](stream<S>* aInput){
             ret = map<S>(aInput->data());
-            if (loop.isRunning()){
-                loop.quit();
+            if (loop->isRunning()){
+                loop->quit();
+                std::cout << "quit: " << loop->isRunning() << std::endl;
             }else
                 timeout = true;
         }, m_tag);
         aPipeline->execute(aName, shared_from_this());
-        if (!timeout)
-            loop.exec();
+        if (!timeout){
+            std::cout << aName.toStdString() << " locked" << std::endl;
+            loop->exec();
+            std::cout << aName.toStdString() << " finished" << std::endl;
+        }
         aPipeline->find(aName)->removeNext(monitor->actName());
         aPipeline->remove(monitor->actName(), true);
+        freeAsync();
+        */
+
+    //    std::cout << "enter: " << aName.toStdString() << std::endl;
+        std::promise<std::shared_ptr<stream<S>>> pr;
+        auto monitor = aPipeline->find(aName)->nextF<S>([this, &pr, aName](stream<S>* aInput){
+    //        std::cout << "quit: " << aName.toStdString() << std::endl;
+            pr.set_value(map<S>(aInput->data()));
+        }, m_tag, rea::Json("thread", 1));
+        aPipeline->execute(aName, shared_from_this());
+        auto ft = pr.get_future();
+        //std::future<std::shared_ptr<stream<S>>> ft2;
+        std::future_status st;
+        do{
+            st = ft.wait_for(std::chrono::microseconds(5));
+            /*if (st == std::future_status::deferred) {
+                std::cout << "deferred\n";
+            } else if (st == std::future_status::timeout) {
+                std::cout << "timeout\n";
+            } else if (st == std::future_status::ready) {
+                std::cout << "ready!\n";
+            }*/
+        }while(st != std::future_status::ready);
+        auto ret = ft.get();
+        aPipeline->find(aName)->removeNext(monitor->actName());
+        aPipeline->remove(monitor->actName(), true);
+       // std::cout << "finish: " << aName.toStdString() << std::endl;
+
         return ret; //std::dynamic_pointer_cast<stream<T>>(shared_from_this());
     }
 
@@ -384,7 +418,7 @@ public:
     std::shared_ptr<stream<S>> asyncCallF(F aFunc, const QJsonObject& aParam = QJsonObject(), pipeline* aPipeline = pipeline::instance()){
         auto pip = aPipeline->add<T, P, F, R>(aFunc, aParam);
         auto ret = asyncCall<S>(pip->actName(), aPipeline);
-        aPipeline->remove(pip->actName(), true);
+        aPipeline->remove(pip->actName());
         return ret;
     }
 private:

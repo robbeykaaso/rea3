@@ -3,6 +3,7 @@
 #include <sstream>
 #include <QFile>
 #include <QJsonDocument>
+#include <QQueue>
 #include "reaJS.h"
 
 namespace rea {
@@ -32,7 +33,45 @@ QVariantList scopeCache::toList(){
     return ret;
 }
 
+static int pipe_counter = 0;
+static int stream_counter = 0;
+
+stream0::stream0(const QString& aTag) {
+    stream_counter++;
+
+    m_tag = aTag;
+    m_scope = nullptr;
+}
+
+stream0::~stream0(){
+    stream_counter--;
+}
+
+static QHash<QThread*, QQueue<std::shared_ptr<QEventLoop>>> async_busy;
+std::shared_ptr<QEventLoop> stream0::waitLastAsync(const QString& aName){
+    auto lops = tryFind(&async_busy, QThread::currentThread());
+    auto lop = std::make_shared<QEventLoop>();
+    lops->push_back(lop);
+    if (lops->size() > 1){
+        std::cout << aName.toStdString() << " locked2" << std::endl;
+        lop->exec();
+    }
+    return lop;
+}
+
+void stream0::freeAsync(){
+    auto lops = tryFind(&async_busy, QThread::currentThread());
+    lops->pop_front();
+    if (lops->size() && lops->front()->isRunning())
+        lops->front()->exit();
+}
+
+pipe0::~pipe0(){
+    pipe_counter--;
+}
+
 pipe0::pipe0(pipeline* aParent, const QString& aName, int aThreadNo, bool aReplace){
+    pipe_counter++;
     m_parent = aParent;
     m_external = aParent->name();
     if (aName == "")
@@ -113,12 +152,10 @@ pipe0* pipe0::nextB(const QString& aName, const QString& aTag){
 
 void pipe0::tryExecutePipe(const QString& aName, std::shared_ptr<stream0> aStream){
     auto pip = m_parent->find(aName);
-    if (pip){
-        if (pip->m_external != m_parent->name())
-            m_parent->tryExecutePipeOutside(pip->actName(), aStream, QJsonObject(), pip->m_external);
-        else
-            pip->execute(aStream);
-    }
+    if (pip->m_external != m_parent->name())
+        m_parent->tryExecutePipeOutside(pip->actName(), aStream, QJsonObject(), pip->m_external);
+    else
+        pip->execute(aStream);
 }
 
 void pipe0::doNextEvent(const QMap<QString, QString>& aNexts, std::shared_ptr<stream0> aStream){
@@ -158,6 +195,32 @@ void pipe0::execute(std::shared_ptr<stream0> aStream){
 
 void pipeFuture::resetTopo(){
     m_next2.clear();
+}
+
+bool pipeFuture::event( QEvent* e) {
+    if(e->type()== streamEvent::type){
+        auto eve = reinterpret_cast<streamEvent*>(e);
+        if (eve->getName() == m_name){
+            QJsonObject sync;
+            QJsonArray nxts;
+            for (auto i : m_next2)
+                nxts.push_back(rea::JArray(i.first, i.second));
+            if (nxts.size() > 0)
+                sync.insert("next", nxts);
+            if (m_before != "")
+                sync.insert("before", m_before);
+            if (m_around != "")
+                sync.insert("around", m_around);
+            if (m_after != "")
+                sync.insert("after", m_after);
+            m_parent->tryExecutePipeOutside(actName(), eve->getStream(), sync, "any");
+        }
+    }
+    return true;
+}
+
+void pipeFuture::execute(std::shared_ptr<stream0> aStream){
+    pipe0::execute(aStream);
 }
 
 void pipeFuture::insertNext(const QString& aName, const QString& aTag){
@@ -207,22 +270,6 @@ void pipeline::tryExecutePipeOutside(const QString& aName, std::shared_ptr<strea
         }
 }
 
-void pipeFuture::execute(std::shared_ptr<stream0> aStream){
-    QJsonObject sync;
-    QJsonArray nxts;
-    for (auto i : m_next2)
-        nxts.push_back(rea::JArray(i.first, i.second));
-    if (nxts.size() > 0)
-        sync.insert("next", nxts);
-    if (m_before != "")
-        sync.insert("before", m_before);
-    if (m_around != "")
-        sync.insert("around", m_around);
-    if (m_after != "")
-        sync.insert("after", m_after);
-    m_parent->tryExecutePipeOutside(actName(), aStream, sync, "any");
-}
-
 void pipeFuture::removeNext(const QString& aName){
     for (auto i = m_next2.size() - 1; i >= 0; --i)
         if (m_next2[i].first == aName)
@@ -241,7 +288,7 @@ pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0 (aParent
         setAspect(m_before, pip->m_before);
         setAspect(m_around, pip->m_around);
         setAspect(m_after, pip->m_after);
-        m_parent->remove(aName);
+        m_parent->doRemove(aName);
     }
     m_parent->add<int>([this, aName](const stream<int>*){
         auto this_event = m_parent->find(aName, false);
@@ -251,18 +298,29 @@ pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0 (aParent
         setAspect(this_event->m_before, m_before);
         setAspect(this_event->m_around, m_around);
         setAspect(this_event->m_after, m_after);
-        m_parent->remove(m_name);
+        m_parent->doRemove(m_name);
     }, rea::Json("name", aName + "_pipe_add"));
 }
 
+void pipeline::doRemove(const QString& aName){
+    auto pip = m_pipes.value(aName);
+    m_pipes.remove(aName);
+    delete pip;
+}
 
 void pipeline::remove(const QString& aName, bool aOutside){
-    auto pipe = m_pipes.value(aName);
-    if (pipe){
-        //std::cout << "pipe: " + aName.toStdString() + " is removed!" << std::endl;
-        //run("re_log", STMJSON(dst::Json("msg", "pipe " + aName + " is removed")));
+    auto pip = m_pipes.value(aName);
+    if (pip){
         m_pipes.remove(aName);
-        delete pipe; //if aName is from pipe, this must be write in the end
+        delete pip;
+    }else {
+        pip = find(aName + "_pipe_add", false);
+        if (pip){
+            pip = new pipeFuture0(this, aName);
+            call<int>(aName + "_pipe_add", 0);
+            remove(aName + "_pipe_add", false);
+            remove(aName, false);
+        }
     }
     if (aOutside)
         removePipeOutside(aName);
@@ -309,6 +367,12 @@ pipeline::pipeline(const QString& aName){
         supportType<QJsonArray>();
         supportType<double>();
         supportType<bool>();
+
+        add<double>([](rea::stream<double>* aInput){
+            std::cout << "c++_pipe_counter: " << pipe_counter << std::endl;
+            std::cout << "c++_stream_counter: " << stream_counter << std::endl;
+            aInput->out();
+        }, rea::Json("name", "reportCLeak", "external", true));
     }
 }
 

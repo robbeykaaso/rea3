@@ -18,6 +18,7 @@ class qmlScopeCache : public QObject{
     Q_OBJECT
 public:
     qmlScopeCache(std::shared_ptr<scopeCache> aScope);
+    ~qmlScopeCache();
     Q_INVOKABLE QJSValue cache(const QString& aName, QJSValue aData);
     Q_INVOKABLE QJSValue data(const QString& aName);
 private:
@@ -27,13 +28,9 @@ private:
 class qmlStream : public QObject{
     Q_OBJECT
 public:
-    qmlStream(){}
-    qmlStream(std::shared_ptr<stream<QJSValue>> aStream){
-        m_stream = aStream;
-    }
-    ~qmlStream(){
-
-    }
+    qmlStream();
+    qmlStream(std::shared_ptr<stream<QVariant>> aStream);
+    ~qmlStream();
     Q_INVOKABLE QJSValue setData(QJSValue aData);
     Q_INVOKABLE QJSValue scope(bool aNew = false);
     Q_INVOKABLE QJSValue data();
@@ -43,7 +40,7 @@ public:
     Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QString& aPipeline = "qml");
     Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), const QString& aPipeline = "qml");
 private:
-    std::shared_ptr<stream<QJSValue>> m_stream;
+    std::shared_ptr<stream<QVariant>> m_stream;
 };
 
 class qmlPipe : public QObject
@@ -51,9 +48,7 @@ class qmlPipe : public QObject
     Q_OBJECT
 public:
     qmlPipe(pipeline* aParent, const QString& aName);
-    ~qmlPipe(){
-
-    }
+    ~qmlPipe();
 public:
     Q_INVOKABLE QString actName() {return m_name;}
     Q_INVOKABLE void resetTopo();
