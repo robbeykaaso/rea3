@@ -30,15 +30,15 @@ void pipelineJS::execute(const QString& aName, std::shared_ptr<stream0> aStream,
 
 void pipelineJS::tryExecuteOutsidePipe(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag){
     if (aData.type() == QVariant::Type::Map)
-        tryExecutePipeOutside(aName, std::make_shared<stream<QJsonObject>>(aData.toJsonObject(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
+        tryExecutePipeOutside(aName, in(aData.toJsonObject(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
     else if (aData.type() == QVariant::Type::List)
-        tryExecutePipeOutside(aName, std::make_shared<stream<QJsonArray>>(aData.toJsonArray(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
+        tryExecutePipeOutside(aName, in(aData.toJsonArray(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
     else if (aData.type() == QVariant::Type::String)
-        tryExecutePipeOutside(aName, std::make_shared<stream<QString>>(aData.toString(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
+        tryExecutePipeOutside(aName, in(aData.toString(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
     else if (aData.type() == QVariant::Type::Bool)
-        tryExecutePipeOutside(aName, std::make_shared<stream<bool>>(aData.toBool(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
+        tryExecutePipeOutside(aName, in(aData.toBool(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
     else if (aData.type() == QVariant::Type::Double)
-        tryExecutePipeOutside(aName, std::make_shared<stream<double>>(aData.toDouble(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
+        tryExecutePipeOutside(aName, in(aData.toDouble(), aTag, std::make_shared<scopeCache>(aScope)), aSync, aFlag);
     else{
         std::cout << aData.type() << std::endl;
         assert(0);

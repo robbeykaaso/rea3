@@ -12,15 +12,15 @@ scopeCache::scopeCache(const QJsonObject& aData){
     for (auto i : aData.keys()){
         auto val = aData.value(i);
         if (val.isObject())
-            m_data.insert(i, std::make_shared<stream<QJsonObject>>(val.toObject()));
+            m_data.insert(i, in(val.toObject()));
         else if (val.isArray())
-            m_data.insert(i, std::make_shared<stream<QJsonArray>>(val.toArray()));
+            m_data.insert(i, in(val.toArray()));
         else if (val.isBool())
-            m_data.insert(i, std::make_shared<stream<bool>>(val.toBool()));
+            m_data.insert(i, in(val.toBool()));
         else if (val.isString())
-            m_data.insert(i, std::make_shared<stream<QString>>(val.toString()));
+            m_data.insert(i, in(val.toString()));
         else if (val.isDouble())
-            m_data.insert(i, std::make_shared<stream<double>>(val.toDouble()));
+            m_data.insert(i, in(val.toDouble()));
     }
 }
 
@@ -47,7 +47,7 @@ stream0::~stream0(){
     stream_counter--;
 }
 
-static QHash<QThread*, QQueue<std::shared_ptr<QEventLoop>>> async_busy;
+/*static QHash<QThread*, QQueue<std::shared_ptr<QEventLoop>>> async_busy;
 std::shared_ptr<QEventLoop> stream0::waitLastAsync(const QString& aName){
     auto lops = tryFind(&async_busy, QThread::currentThread());
     auto lop = std::make_shared<QEventLoop>();
@@ -64,7 +64,7 @@ void stream0::freeAsync(){
     lops->pop_front();
     if (lops->size() && lops->front()->isRunning())
         lops->front()->exit();
-}
+}*/
 
 pipe0::~pipe0(){
     pipe_counter--;

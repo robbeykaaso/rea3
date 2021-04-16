@@ -46,15 +46,15 @@ class typeTrait : public typeTrait0{
 
 };
 
-class DSTDLL scopeCache{
+class DSTDLL scopeCache : public std::enable_shared_from_this<scopeCache>{
 public:
     scopeCache(){
     }
     scopeCache(const QJsonObject& aData);
     template<typename T>
-    scopeCache* cache(const QString& aName, T aData){
-        m_data.insert(aName, std::make_shared<stream<T>>(aData));
-        return this;
+    std::shared_ptr<scopeCache> cache(const QString& aName, T aData){
+        m_data.insert(aName, in(aData));
+        return shared_from_this();
     }
     template<typename T>
     T data(const QString& aName){
@@ -95,8 +95,8 @@ public:
         return QVariant();
     }
 protected:
-    std::shared_ptr<QEventLoop> waitLastAsync(const QString& aName);
-    void freeAsync();
+   // std::shared_ptr<QEventLoop> waitLastAsync(const QString& aName);
+   // void freeAsync();
     pipeline* m_parent;
     QString m_tag;
     std::shared_ptr<scopeCache> m_scope;
@@ -196,6 +196,12 @@ private:
     friend pipeline;
 };
 
+template<typename T>
+inline std::shared_ptr<stream<T>> in(T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr, bool aAutoTag = false){
+    auto tag = (aAutoTag && aTag == "") ? rea::generateUUID() : aTag;
+    return std::make_shared<stream<T>>(aInput, tag, aScope);
+}
+
 class DSTDLL pipeline : public QObject{
 public:
     static pipeline* instance(const QString& aName = "");
@@ -249,34 +255,33 @@ public:
 
     template<typename T>
     void run(const QString& aName, T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr){
-        auto stm = std::make_shared<stream<T>>(aInput, aTag, aScope);
-        execute(aName, stm);
+        execute(aName, in(aInput, aTag, aScope));
     }
 
     template<typename T, typename F = pipeFunc<T>>
-    void call(const QString& aName, T aInput = T()){
+    std::shared_ptr<stream<T>> call(const QString& aName, T aInput = T(), std::shared_ptr<scopeCache> aScope = nullptr){
         auto pip = m_pipes.value(aName);
+        auto stm = in(aInput, "", aScope);
         if (pip){
             auto pip2 = dynamic_cast<pipe<T, F>*>(pip);
-            auto stm = std::make_shared<stream<T>>(aInput);
             pip2->doEvent(stm);
         }
+        return stm;
     }
 
     template<typename T>
     std::shared_ptr<stream<T>> asyncCall(const QString& aName, T aInput = T()){
-        return input<T>(aInput)->asyncCall(aName, this);
-    }
-
-    template<typename T>
-    std::shared_ptr<stream<T>> input(T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr){
-        auto tag = aTag == "" ? rea::generateUUID() : aTag;
-        return std::make_shared<stream<T>>(aInput, tag, aScope);
+        return in<T>(aInput)->asyncCall(aName, this);
     }
 
     template<typename T>
     void supportType(){
         m_types.insert(typeid (T).name(), std::make_shared<typeTrait<T>>());
+    }
+
+    template<typename T>
+    static std::shared_ptr<stream<T>> input(T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr, bool aAutoTag = false){
+        return in(aInput, aTag, aScope, aAutoTag);
     }
 protected:
     virtual void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(),
@@ -345,7 +350,7 @@ public:
     stream<S>* outs(S aOut = S(), const QString& aNext = "", const QString& aTag = ""){
         if (!m_outs)
             m_outs = std::make_shared<std::vector<std::pair<QString, std::shared_ptr<stream0>>>>();
-        auto ot = std::make_shared<stream<S>>(aOut, aTag == "" ? m_tag : aTag, m_scope);
+        auto ot = in(aOut, aTag == "" ? m_tag : aTag, m_scope);
         m_outs->push_back(std::pair<QString, std::shared_ptr<stream0>>(aNext, ot));
         return ot.get();
     }
@@ -354,11 +359,6 @@ public:
     stream<T>* outsB(S aOut = S(), const QString& aNext = "", const QString& aTag = ""){
         outs<S>(aOut, aNext, aTag);
         return this;
-    }
-
-    template<typename S>
-    std::shared_ptr<stream<S>> map(S aInput = S()){
-        return std::make_shared<stream<S>>(aInput, m_tag, m_scope);
     }
 
     template<typename S = T>
@@ -386,30 +386,19 @@ public:
         freeAsync();
         */
 
-    //    std::cout << "enter: " << aName.toStdString() << std::endl;
         std::promise<std::shared_ptr<stream<S>>> pr;
         auto monitor = aPipeline->find(aName)->nextF<S>([this, &pr, aName](stream<S>* aInput){
-    //        std::cout << "quit: " << aName.toStdString() << std::endl;
-            pr.set_value(map<S>(aInput->data()));
+            pr.set_value(in(aInput->data(), aInput->tag(), aInput->scope()));
         }, m_tag, rea::Json("thread", 1));
         aPipeline->execute(aName, shared_from_this());
         auto ft = pr.get_future();
-        //std::future<std::shared_ptr<stream<S>>> ft2;
         std::future_status st;
         do{
             st = ft.wait_for(std::chrono::microseconds(5));
-            /*if (st == std::future_status::deferred) {
-                std::cout << "deferred\n";
-            } else if (st == std::future_status::timeout) {
-                std::cout << "timeout\n";
-            } else if (st == std::future_status::ready) {
-                std::cout << "ready!\n";
-            }*/
         }while(st != std::future_status::ready);
         auto ret = ft.get();
         aPipeline->find(aName)->removeNext(monitor->actName());
         aPipeline->remove(monitor->actName(), true);
-       // std::cout << "finish: " << aName.toStdString() << std::endl;
 
         return ret; //std::dynamic_pointer_cast<stream<T>>(shared_from_this());
     }

@@ -2,13 +2,17 @@
 #include <QFile>
 #include <QWindow>
 #include <QJsonDocument>
-#include <QQmlApplicationEngine>
 #include <QGuiApplication>
 #include <QDoubleValidator>
+#include <QQmlApplicationEngine>
 
 namespace rea {
 
 static QQmlApplicationEngine* qml_engine = nullptr;
+
+QJSValue qmlstream2JSValue(qmlStream* aStream){
+   return qml_engine->toScriptValue(aStream);
+}
 
 template <typename T>
 class valType{
@@ -59,19 +63,6 @@ public:
 };
 
 template <>
-class funcType<QVariant, QJSValue>{
-public:
-    void doEvent(QJSValue aFunc, std::shared_ptr<stream<QVariant>> aStream){
-        if (!aFunc.equals(QJSValue::NullValue)){
-            QJSValueList paramlist;
-            qmlStream stm(aStream);
-            paramlist.append(qml_engine->toScriptValue(&stm));
-            aFunc.call(paramlist);
-        }
-    }
-};
-
-template <>
 class typeTrait<QVariant> : public typeTrait0{
 public:
     QString name() override{
@@ -90,23 +81,23 @@ pipelineQML::pipelineQML() : pipeline("qml"){
 void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
     if (aStream->dataType() == "")
         throw "not supported type";
-    pipeline::execute(aName, std::make_shared<stream<QVariant>>(aStream->QData(), aStream->tag(), aStream->scope()), aSync, aFromOutside);
+    pipeline::execute(aName, in(aStream->QData(), aStream->tag(), aStream->scope()), aSync, aFromOutside);
 }
 
 void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag) {
     auto aData = aStream->QData();
     if (aData.type() == QVariant::Type::Map)
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QJsonObject>>(aData.toJsonObject(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonObject(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::List)
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QJsonArray>>(aData.toJsonArray(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonArray(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::String)
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<QString>>(aData.toString(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toString(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::Bool)
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<bool>>(aData.toBool(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toBool(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::Double)
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<double>>(aData.toDouble(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toDouble(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::Int)
-        pipeline::tryExecutePipeOutside(aName, std::make_shared<stream<double>>(aData.toInt(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in<double>(aData.toInt(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else{
         throw "not supported type";
     }
@@ -234,14 +225,11 @@ QJSValue qmlPipe::nextB(const QString& aName, const QString& aTag){
 }
 
 QString doAdd(QJSValue aFunc, const QJsonObject& aParam){
-    auto pl = pipeline::instance("qml");
-    auto tp = aParam.value("type");
-    if (tp == "Partial")
-        return pl->add<QVariant, pipePartial, QJSValue, QJSValue>(aFunc, aParam)->actName();
-    else if (tp == "Delegate")
-        return pl->add<QVariant, pipeDelegate, QJSValue, QJSValue>(aFunc, aParam)->actName();
-    else
-        return pl->add<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam)->actName();
+    return pipeline::instance()
+            ->call<QString>("createQMLPipe" + aParam.value("type").toString(),
+                            "",
+                            std::make_shared<scopeCache>()->cache("func", aFunc)->cache("param", aParam))
+            ->data();
 }
 
 QJSValue qmlPipe::nextF(QJSValue aFunc, const QString& aTag, const QJsonObject& aParam){
@@ -262,7 +250,7 @@ void qmlPipeline::run(const QString& aName, const QJSValue& aInput, const QStrin
 }
 
 QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache){
-    auto ret = new qmlStream(pipeline::instance("qml")->input(aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache)));
+    auto ret = new qmlStream(in(aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache)));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
@@ -332,11 +320,11 @@ qmlPipeline::~qmlPipeline(){
 //https://stackoverflow.com/questions/35178569/doublevalidator-is-not-checking-the-ranges-properly
 class TextFieldDoubleValidator : public QDoubleValidator {
 public:
-    TextFieldDoubleValidator (QObject * parent = 0) : QDoubleValidator(parent) {}
+    TextFieldDoubleValidator (QObject * parent = nullptr) : QDoubleValidator(parent) {}
     TextFieldDoubleValidator (double bottom, double top, int decimals, QObject * parent) :
                                                                                          QDoubleValidator(bottom, top, decimals, parent) {}
 
-    QValidator::State validate(QString & s, int & pos) const {
+    QValidator::State validate(QString & s, int&) const {
         if (s.isEmpty() || (s.startsWith("-") && s.length() == 1)) {
             // allow empty field or standalone minus sign
             return QValidator::Intermediate;
@@ -363,19 +351,19 @@ public:
 static regPip<QQmlApplicationEngine*> reg_recative2_qml([](stream<QQmlApplicationEngine*>* aInput){
     auto cfg = aInput->scope()->data<QJsonObject>("rea-qml");
     if (cfg.value("use").toBool(true)){
-        std::vector<QObject*> objs;
+        QVector<QObject*> objs;
         qml_engine = aInput->data();
         //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype
         qmlRegisterSingletonType<qmlPipeline>("Pipeline", 1, 0, "Pipeline", &qmlPipeline::qmlInstance);
         qmlRegisterType<TextFieldDoubleValidator>("TextFieldDoubleValidator", 1, 0, "TextFieldDoubleValidator");
         //engine.rootContext()->setContextProperty("applicationDirPath", QGuiApplication::applicationDirPath()); //https://recalll.co/ask/v/topic/qt-QML%3A-how-to-specify-image-file-path-relative-to-application-folder/55928bae7d3563c7088b7db1
 
-        qml_engine->connect(qml_engine, &QQmlApplicationEngine::objectCreated, [&objs](QObject *object, const QUrl &url){
+        qml_engine->connect(qml_engine, &QQmlApplicationEngine::objectCreated, [&objs](QObject *object, const QUrl){
             if (object)
                 objs.push_back(object);
         });
         auto prm = cfg.value("param").toObject();
-        aInput->map<QQmlApplicationEngine*>(qml_engine)->asyncCall("loadMain");
+        in(qml_engine, aInput->tag(), aInput->scope())->asyncCall("loadMain");
         if (qml_engine->rootObjects().isEmpty())
             return;
 
@@ -409,5 +397,9 @@ QString tr0(const QString& aOrigin){
     }
     return translates.value(key).toString(aOrigin);
 }
+
+regQMLPipe(Partial)
+regQMLPipe(Delegate)
+regQMLPipe()
 
 }

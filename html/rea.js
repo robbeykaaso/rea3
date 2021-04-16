@@ -297,7 +297,7 @@ class pipe {
 
     initialize(aFunc, aParam){
         this.m_func = aFunc
-        if (aParam["external"] != null)
+        if (aParam && aParam["external"] != null)
             this.m_external = aParam["external"]
         return this
     }
@@ -433,10 +433,8 @@ class pipeline{
     add(aFunc, aParam){
         const nm = aParam["name"]
         let pip
-        if (aParam["type"] == "Partial")
-            pip = new pipePartial(this, nm)
-        else if (aParam["type"] == "Delegate")
-            pip = new pipeDelegate(this, nm)
+        if (aParam["type"])
+            pip = pipelines().call("createJSPipe" + aParam["type"], "", new scopeCache({"parent": this, "name": nm})).data()
         else
             pip = new pipe(this, nm)
         if (nm != ""){
@@ -479,10 +477,12 @@ class pipeline{
         this.execute(aName, new stream(aInput, aTag, aScope))
     }
 
-    call(aName, aInput){
+    call(aName, aInput, aScope){
         const pip = this.m_pipes[aName]
+        const stm = new stream(aInput, "", aScope)
         if (pip)
-            pip.doEvent(new stream(aInput))
+            pip.doEvent(stm)
+        return stm
     }
 
     execute(aName, aStream, aSync, aFromOutside = false){
@@ -556,5 +556,15 @@ class pipeDelegate extends pipe{
         pipe.prototype.initialize.call(this, aFunc, aParam)
     }
 }
+
+pipelines().add(function(aInput){
+    const sp = aInput.scope()
+    aInput.setData(new pipePartial(sp.data("parent"), sp.data("name")))
+}, {name: "createJSPipePartial"})
+
+pipelines().add(function(aInput){
+    const sp = aInput.scope()
+    aInput.setData(new pipeDelegate(sp.data("parent"), sp.data("name")))
+}, {name: "createJSPipeDelegate"})
 
 //#endregion

@@ -25,7 +25,7 @@ private:
     std::shared_ptr<scopeCache> m_scope;
 };
 
-class qmlStream : public QObject{
+class DSTDLL qmlStream : public QObject{
     Q_OBJECT
 public:
     qmlStream();
@@ -41,6 +41,21 @@ public:
     Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), const QString& aPipeline = "qml");
 private:
     std::shared_ptr<stream<QVariant>> m_stream;
+};
+
+DSTDLL QJSValue qmlstream2JSValue(qmlStream* aStream);
+
+template <>
+class funcType<QVariant, QJSValue>{
+public:
+    void doEvent(QJSValue aFunc, std::shared_ptr<stream<QVariant>> aStream){
+        if (!aFunc.equals(QJSValue::NullValue)){
+            QJSValueList paramlist;
+            qmlStream stm(aStream);
+            paramlist.append(qmlstream2JSValue(&stm));
+            aFunc.call(paramlist);
+        }
+    }
 };
 
 class qmlPipe : public QObject
@@ -83,5 +98,15 @@ public:
 };
 
 DSTDLL QString tr0(const QString& aOrigin);
+
+#define regQMLPipe(aType) \
+static regPip<QString> reg_qml_pipe##aType([](stream<QString>* aInput){ \
+    auto sp = aInput->scope(); \
+    aInput->setData(pipeline::instance("qml") \
+                    ->add<QVariant, pipe##aType, QJSValue, QJSValue>( \
+                        sp->data<QJSValue>("func"), \
+                        sp->data<QJsonObject>("param")) \
+                    ->actName()); \
+}, rea::Json("name", STR(createQMLPipe##aType)));
 
 }
