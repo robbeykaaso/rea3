@@ -111,56 +111,6 @@ function generateUUID() {
 
 //#endregion
 
-//#region linker;rea
-
-var PipelineJS
-var inited = false
-var candidates_functions = []
-function initPipelineJS(){
-    return new Promise(function(resolve, reject){
-        if (typeof qt != "undefined"){
-            new QWebChannel(qt.webChannelTransport, function(channel){
-                PipelineJS = channel.objects.Pipeline;
-                if (!PipelineJS)
-                    alert("no PipelineJS")
-                PipelineJS.executeJSPipe.connect(function(aName, aData, aTag, aScope, aSync, aFromOutside){
-                    const len = Object.keys(aScope).length
-                    let sp = {}
-                    for (let i = 0; i < len; i += 2)
-                        sp[aScope[i]] = aScope[i + 1]
-                    pipelines().execute(aName, new stream(aData, aTag, new scopeCache(sp)), aSync, aFromOutside)
-                })
-                PipelineJS.removeJSPipe.connect(function(aName){
-                    pipelines().remove(aName)
-                })
-                inited = true
-
-                for (let i in candidates_functions)
-                    candidates_functions[i]()
-                candidates_functions = []
-
-                resolve()
-            })
-        }else{
-            inited = true
-            alert("qt object not exists!")
-            reject()
-        }
-    })
-}
-
-function rea(aFunc){
-    if (!inited){
-        if (!candidates_functions.length)
-            initPipelineJS()
-        candidates_functions.push(aFunc)
-    }else{
-        aFunc()
-    }
-}
-
-//#endregion
-
 //#region rea-js
 
 class scopeCache {
@@ -319,7 +269,7 @@ class pipe {
         const pip = this.m_parent.find(aName)
         if (pip)
             if (pip.m_external != this.m_parent.name())
-                PipelineJS.tryExecuteOutsidePipe(aName, aStream.data(), aStream.tag(), aStream.scope().m_data, {}, pip.m_external)
+                this.m_parent.tryExecutePipeOutside(aName, aStream, {}, pip.m_external)
             else
                 pip.execute(aStream)
     }
@@ -401,14 +351,19 @@ class pipeFuture extends pipe{
         let sync = {}
         if (this.m_next2.length)
             sync["next"] = this.m_next2
-        PipelineJS.tryExecuteOutsidePipe(this.actName(), aStream.data(), aStream.tag(), aStream.scope().m_data, sync, "any")
+        this.m_parent.tryExecutePipeOutside(this.actName(), aStream, sync, "any")
     }
 }
 
 var pipeline_s = {}
 function pipelines(aName = "js"){
     if (!pipeline_s[aName])
-        pipeline_s[aName] = new pipeline(aName)
+        if (aName == "js")
+            pipeline_s[aName] = new pipeline(aName)
+        else{
+            pipeline_s[aName] = pipelines().call("create" + aName + "pipeline").data()
+        }
+
     return pipeline_s[aName]
 }
 
@@ -463,7 +418,7 @@ class pipeline{
         }
 
         if (aOutside)
-            PipelineJS.removePipeOutside(aName)
+            this.removePipeOutside(aName)
     }
 
     find(aName, aNeedFuture = true){
@@ -503,6 +458,22 @@ class pipeline{
     input(aInput, aTag = "", aScope = null){
         const tag = aTag == "" ? generateUUID() : aTag
         return new stream(aInput, tag, aScope)
+    }
+
+    tryExecutePipeOutside(aName, aStream, aSync, aFlag){
+        for (let i in pipeline_s)
+            if (pipeline_s[i] != this){
+                if (aFlag == "any")
+                    pipeline_s[i].execute(aName, aStream, aSync, true, aFlag);
+                else if (aFlag == pipeline_s[i].name())
+                    pipeline_s[i].execute(aName, aStream, aSync, false, aFlag);
+            }
+    }
+
+    removePipeOutside(aName){
+        for (let i in pipeline_s)
+            if (pipeline_s[i] != this)
+                pipeline_s[i].remove(aName);
     }
 }
 
