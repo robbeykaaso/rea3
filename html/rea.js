@@ -539,3 +539,7 @@ pipelines().add(function(aInput){
 }, {name: "createJSPipeDelegate"})
 
 //#endregion
+
+module.exports = {
+    pipelines: pipelines
+}

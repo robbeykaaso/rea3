@@ -2,11 +2,15 @@
 this page describe how to use the framework in your codes  
 
 # Steps
-**0**: initialize the reactive engine only once  
+**0**: import the library and initialize it if necessary    
 _sample_:
 ```
+    //c++/qml end; initialize the engine only once for c++/qml
     QQmlApplicationEngine engine;
-    pipeline::run<QQmlApplicationEngine*>("regQML", &engine);
+    rea::pipeline::instance()->run<QQmlApplicationEngine*>("initRea", &engine);
+
+    //js end
+    npm install reajs
 ```    
 </br>
 
@@ -15,24 +19,42 @@ _sample_:
 **1**: add pipes and build the pipeline graph by connecting pipes  
 _sample_:
 ```
-    pipeline::add<QJsonObject>(stream<QJsonObject>* aInput){
-        aInput->setData(dst::Json("hello", "world"));  //set the data of the stream
-        aInput->out(); //output the stream and run the nexts after this pipe
-    }, Json("name", "pipe0", "thread", 2, "module", "module1"))  //add pipe0 in c++
+    //c++
+    #include "rea.h"
+    pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
+        aInput->setData(dst::Json("hello", "world"))  //set the data of the stream
+              ->out(); //output the stream and run the nexts after this pipe
+    }, Json("name", "pipe0", "thread", 2))  //add pipe0
+    .next("pipe1")  //connect pipe1 after pipe0
+
+    //qml
+    import Pipeline 1.0
+    Pipeline.add(function(aInput){  
+        aInput.setData("").out()  
+    }, {name: "pipe0"})
     .next("pipe1")
 
-    Pipeline.add(function(aInput){  //add a pipe1 and connect it after the pipe0
-        return {data: aInput, out: {}} //output the stream and run the nexts after this pipe
-    }, {name: "pipe1", "module", "module1"})
+    //js
+    //var rea = require('reajs')  //es5, common.js
+    import rea from 'reajs'  //es6
+    rea.pipelines().add(function(aInput){  
+        aInput.setData("").out()  
+    }, {name: "pipe0"})
+    .next("pipe1")
 ```  
 </br>
 
 **2**: run the pipeline  
 _sample_:  
 ```
-    pipeline::run<QJsonObject>("pipe0", QJsonObject())  //run the pipeline: pipe0 -> pipe1 in c++
+    //c++
+    pipeline::instance()->run<QJsonObject>("pipe0", QJsonObject())  //run the pipeline: pipe0 -> pipe1
 
-    Pipeline.run("pipe0") //run the pipeline: pipe0 -> pipe1 in qml
+    //qml
+    Pipeline.run("pipe0", {})
+
+    //js
+    rea.pipelines().run("pipe0", {})
 ```  
 </br>
 
@@ -41,45 +63,50 @@ _sample_:
 **1**: write your codes as a stream style or a normal coding style  
 _sample_:  
 ```
-    ////c++ coding
-    rea::pipeline::input<int>(0, "test12")  //code style like ranges
-    ->call<int>([](rea::stream<int>* aInput){
-        aInput->setData(aInput->data() + 1)->out();
+    //c++
+    rea::pipeline::instance()->input<int>(0, "test")
+    ->asyncCallF<int>([](rea::stream<int>* aInput){
+        aInput->outs("world")
     }, rea::Json("thread", 1))
-    ->call<QString>("doSomething")
-    ->call<QString>([](rea::stream<QString>* aInput){
+    ->asyncCall<QString>("doSomething")
+    ->asyncCallF<QString>([](rea::stream<QString>* aInput){
         assert(aInput->data() == "world");
-        aInput->setData("Pass: test12")->out();
+        aInput->setData("Pass")->out();
     })
-    ->call("testSuccess");
+    ->asyncCall("success");
+    //c++
+    auto dt = rea::pipeline::instance()->asyncCall<QJsonArray>("doSomething", QJsonArray())->data()
 
-    //do something
-    auto dt = rea::pipeline::call<QJsonArray>("project_label_listViewSelected", QJsonArray())->data()  //code style like await in es6
-    //do something
-
-    ////qml coding
-    Pipeline.input("testFS2.json", "testQMLStg3", true, {"testFS2.json": {hello: "world"}})
-    .call("writeJson2")
-    .call(function(aInput){
-        var dt = aInput.varData("testFS2.json", "object")
-        console.assert(dt["hello"] === "world")
-        aInput.var("testFS2.json", {hello: "world2"}).out()
+    //qml
+    Pipeline.input(0, "test")
+    .asyncCallF(function(aInput){
+        aInput.outs("world")
     })
-    .call("readJson2")
-    .call("deletePath")
-    .call(function(aInput){
-        var dt = aInput.varData("testFS2.json", "object")
-        console.assert(dt["hello"] === "world")
-        aInput.setData("Pass: testQMLStorage3 ").out()
+    .asyncCall("doSomething")
+    .asyncCallF(function(aInput){
+        console.assert(aInput.data() == "world")
+        aInput.setData("Pass").out()
     })
-    .call("testSuccess")
-    .destroy()  //explicitly destroy the qml stream to trig the end of the transaction
-
-    //do something
-    var local_scope = function(){ 
-        return Pipeline.call("service1", {}).data()
-    }
-    var dt = local_scope()
-    gc()  //explicitly destroy the qml stream to trig the end of the transaction
-    //do something
+    .asyncCall("success")
+    //qml
+    var dt = Pipeline.asyncCall("doSomething", []).data()
+    //qml
+    gc()
+    
+    //js
+    pipelines().input(0, "test")
+    .asyncCallF(function(aInput){
+        aInput.outs("world")
+    })
+    .asyncCall("doSomething")
+    .asyncCallF(function(aInput){
+        console.assert(aInput.data() == "world")
+        aInput.setData("Pass").out()
+    })
+    .asyncCall("success")
+    //js
+    var dt = pipelines().asyncCall("doSomething", []).data()
 ```
+
+# Notice  
+* <font color="red">each named pipe may be on different code environment. if you use the gramma with rea, you don't care the detail of them</font><br />  

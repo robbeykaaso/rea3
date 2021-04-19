@@ -3,84 +3,44 @@ nav:
     - Home: index.md
     - Usage: usage.md
     - API:
-      - rea-c++:
+      - util:
         - json: c++/json.md
-        - pipe: c++/pipe.md
+      - rea-c++:
         - pipeline: c++/pipeline.md
+        - pipe: c++/pipe.md
         - stream: c++/stream.md
-        - transaction: c++/transaction.md
+        - scope: c++/scope.md
         - pipes:
-          - pipeLocal: c++/pipeLocal.md
+          - pipeAsync: c++/pipeAsync.md
           - pipePartial: c++/pipePartial.md
           - pipeDelegate: c++/pipeDelegate.md
-          - pipeBuffer: c++/pipeBuffer.md
-          - pipeThrottle: c++/pipeThrottle.md
           - pipeParallel: c++/pipeParallel.md
       - rea-qml:
-        - Pipeline: qml/pipelineQML.md
-        - Pipe: qml/qmlPipe.md
-        - Stream: qml/qmlStream.md
-      - frm:
-        - imagePool: frm/imagePool.md
-        - command: frm/command.md
-        - qsgModel: frm/qsgModel.md
-        - qsgBoard: frm/qsgBoard.md
-        - qsgBoardPlugin: frm/qsgBoardPlugin.md
+        - pipeline: qml/pipeline.md
+        - pipe: qml/pipe.md
+        - stream: qml/stream.md
+        - scope: qml/scope.md
+        - pipes:
+          - pipePartial: qml/pipePartial.md
+          - pipeDelegate: qml/pipeDelegate.md
+      - rea-js:
+        - pipeline: js/pipeline.md
+        - pipe: js/pipe.md
+        - stream: js/stream.md
+        - scope: js/scope.md
+        - pipes:
+          - pipePartial: js/pipePartial.md
+          - pipeDelegate: js/pipeDelegate.md
+      - render2D:
+        - imagePool: render2D/imagePool.md
+        - command: render2D/command.md
+        - qsgModel: render2D/qsgModel.md
+        - qsgBoard: render2D/qsgBoard.md
+        - qsgBoardPlugin: render2D/qsgBoardPlugin.md
         - plugins:
-          - transform: frm/qsgPluginTransform.md
+          - transform: render2D/plugins/qsgPluginTransform.md
       - storage: 
         - stgData: storage/stgData.md
         - fsStorage0: storage/fsStorage0.md
-      - tcpSocket:
-          - normalServer: socket/normalServer.md
-          - normalClient: socket/normalClient.md
-      - serial:
-          - modbusMaster: serial/modbusMaster.md
-      - gui:
-          - basic:
-              - autosize: gui/basic/autosize.md
-              - check: gui/basic/check.md
-              - combo: gui/basic/combo.md
-              - comboe: gui/basic/comboe.md
-              - edit: gui/basic/edit.md
-              - flip: gui/basic/flip.md
-              - gridder0: gui/basic/gridder0.md
-              - histogram0: gui/basic/histogram0.md
-              - linechart0: gui/basic/linechart0.md
-              - list0: gui/basic/list0.md
-              - log0: gui/basic/log0.md
-              - matrix0: gui/basic/matrix0.md
-              - navigation0: gui/basic/navigation0.md
-              - nest: gui/basic/nest.md
-              - pagelist0: gui/basic/pagelist0.md
-#              - pwindow0: gui/basic/pwindow0.md
-              - radio: gui/basic/radio.md
-              - search0: gui/basic/search0.md
-              - sizable: gui/basic/sizable.md
-              - spin: gui/basic/spin.md
-              - status0: gui/basic/status0.md
-              - swipe: gui/basic/swipe.md
-              - thistogram: gui/basic/thistogram.md
-              - track: gui/basic/track.md
-              - treeview0: gui/basic/treeview0.md
-              - twindow: gui/basic/twindow.md
-          - pipe-basic:
-              - colorselect: gui/component/colorselect.md
-              - dynamicQML: gui/component/dynamicQML.md
-              - file: gui/component/file.md
-              - gridder: gui/component/gridder.md
-              - histogram: gui/component/histogram.md
-              - linechart: gui/component/linechart.md
-              - list: gui/component/list.md
-              - log: gui/component/log.md
-              - matrix: gui/component/matrix.md
-              - msgdialog: gui/component/msgdialog.md
-              - navigation: gui/component/navigation.md
-              - pagelist: gui/component/pagelist.md
-              - progress: gui/component/progress.md
-#              - pwindow: gui/component/pwindow.md
-              - search: gui/component/search.md
-              - status: gui/component/status.md
-#              - treeNodeView: gui/component/treeNodeView.md
     - About: about.md
 theme: readthedocs
