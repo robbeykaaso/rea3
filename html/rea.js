@@ -157,7 +157,18 @@ class stream {
     outs(aOut, aNext = "", aTag = ""){
         if (!this.m_outs)
             this.m_outs = []
-        this.m_outs.push([aNext, new stream(aOut, aTag == "" ? this.m_tag : aTag, this.m_scope)])
+        let ret = new stream(aOut, aTag == "" ? this.m_tag : aTag, this.m_scope)
+        this.m_outs.push([aNext, ret])
+        return ret
+    }
+
+    outsB(aOut, aNext = "", aTag = ""){
+        outs(aOut, aNext, aTag)
+        return this
+    }
+
+    noOut(){
+        this.m_outs = null
     }
 
     async asyncCallS(){
@@ -385,7 +396,7 @@ class pipeline{
         return this.m_name
     }
 
-    add(aFunc, aParam){
+    add(aFunc, aParam = {}){
         const nm = aParam["name"]
         let pip
         if (aParam["type"])
@@ -432,7 +443,7 @@ class pipeline{
         this.execute(aName, new stream(aInput, aTag, aScope))
     }
 
-    call(aName, aInput, aScope){
+    call(aName, aInput, aScope = null){
         const pip = this.m_pipes[aName]
         const stm = new stream(aInput, "", aScope)
         if (pip)
@@ -455,8 +466,8 @@ class pipeline{
         pip.execute(aStream)
     }
 
-    input(aInput, aTag = "", aScope = null){
-        const tag = aTag == "" ? generateUUID() : aTag
+    input(aInput, aTag = "", aScope = null, aAutoTag = false){
+        const tag = (aAutoTag && aTag == "") ? generateUUID() : aTag
         return new stream(aInput, tag, aScope)
     }
 

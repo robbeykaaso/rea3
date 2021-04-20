@@ -7,14 +7,14 @@
 
 # Sample
 ```
-pipeline::instance()->add<QJsonObject, pipeDelegate>(stream<QJsonObject>* aInput){
+Pipeline.add(function(aInput){
     
-}, dst::Json("name", "selectFolder", "delegate", "folderSelected"))
+}, {name: "selectFolder", delegate: "folderSelected"})
 ->next("doSomething")  //selectFolder -> doSomething  ==> folderSelected -> doSomething
 
-re::pipeManager::add<QJsonObject>([](stream<QJsonObject>* aInput){
-    aInput->out()
-}, dst::Json("name", "folderSelected"));
+Pipeline.add(function(aInput){
+    aInput.out()
+}, {name: "folderSelected"})
 ```  
 </br>
 

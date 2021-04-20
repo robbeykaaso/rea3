@@ -1,5 +1,5 @@
 # Abstract
-execute the function in a thread pool with 8 threads
+* execute the function in a thread pool with 8 threads
 ```
     aInput -> pipeParallel(threadPool) -> output
     aInput -> pipeParallel(threadPool) -> output

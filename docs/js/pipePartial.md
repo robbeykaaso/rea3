@@ -11,15 +11,15 @@ pipePartial
 # Sample
 **add and connect pipe:**  
 ```
-pipeline::instance()->add<QJsonObject, pipePartial>([](stream<QJsonObject>* aInput){
-    aInput.out();
-}, Json("name", "WCS2SCS"))
+pipelines().add(function(aInput){
+    aInput.out()
+}, {name: "WCS2SCS", type: "Partial"})
 ->next("doSomething", "service1")
 ```  
 
 **make it work:**  
 ```
-pipeline::instance()->run<QJsonObject>("WCS2SCS", QJsonObject(), "service1")  //the conection with service1 tag will be executed
+pipelines().run("WCS2SCS", {}, "service1")  //the conection with service1 tag will be executed
 ```  
 </br>
 

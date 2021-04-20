@@ -1,69 +1,83 @@
 # Abstract
-* a singleton class which provide the same APIs like pipeline for QML  
-* the stream in QML only support types of `string`, `number`, `bool`, `array` and `object`  
+* a singleton object which provide the interface to call pipe or run procedure for QML  
+* the stream data supports types of `string`, `number`, `bool`, `array`, `object` and the customized type in rea-c++  
 
 # API
-* **QVariant add(QJSValue aFunc, const QJsonObject& aPipeParam = QJsonObject())**  
-    - add a pipe into the line  
-    - return the qmlPipe of the specific type  
+* **QJSValue add(QJSValue aFunc, const QJsonObject& aParam = QJsonObject())**  
+    - add a pipe of the specific type into the pipeline  
+    - `aFunc` is the function to be executed  
+    - `aParam` is the pipe parameter  
+    - `return` the specific pipe  
 _sample_:  
 ```
 import Pipeline 1.0
 Pipeline.add(function(aInput){
     aInput.out()
+}, {
+    "name", "pipe0",  //the name of the pipe, if there is no name, it will be regarded as an anonymous pipe
+    "replace", false, //the pipe will reserve the old pipe's next pipes if they are existed
+    "before", "pipe1", //inject this pipe before the target pipe, it will be executed on the same thread of the target pipe
+    "after", "pipe2", //work like "before"
+    "around", "pipe3" //work like "before", replace the function of this pipe
+    "befored", "pipe4",  //inject the target pipe before this pipe, the target pipe will be executed on the same thread of this pipe
+    "aftered", "pipe5"  //work like "befored"
+    "external", "c++"  //denotes it is a pipe outside of this pipeline
 })
 ```  
+* Notice  
+    - <font color="red">the pipe could only be executed on the main thread</font><br />  
 </br>
 
-* **QVariant find(const QString& aName)**  
-    - find the specific qmlPipe by name  
+* **QJSValue find(const QString& aName)**  
+    - find the specific pipe by name  
+    - `aName` is the pipe name  
+    - `return` the pipe  
 </br>
 
-* **void run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", bool aTransaction = true, const QJsonObject& aScopeCache = QJsonObject())**  
-    - execute the specific pipe by name  
-    - `aTransaction` denotes whether to create atransaction for this whole procedure  
-    - `aScopeCache` denotes the scopecache for the stream  
+* **void run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject())**  
+    - execute the specific pipe by name and start a business procedure  
+    - `aName` is the pipe name  
+    - `aInput` is the input stream data  
+    - `aTag` is the tag name of the stream  
+    - `aScopeCache` is the stream additional data  
 _sample_:
 ```
 Pipeline.run("pathSelected", {path: ""}, "service1")
 ```  
 </br>
 
-* **void runC(const QString& aName, const QJSValue& aInput, const QString& aStreamID, const QString& aTag = "")**  
-    - execute the specific pipe by name with the cached stream  
-    - it is used with `cache` of stream for pipeDelegate  
+* **QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject())**  
+    - only execute the specific pipe and its aspects synchronously  
+    - `aName` is the pipe name  
+    - `aInput` is the input data  
+    - `aScope` is the stream additional data  
+    - `return` the input stream  
 </br>
 
-* **void syncCall<T, F\>(const QString& aName, const QJSValue& aInput)**  
-    - only execute the specific pipe synchronously on current thread  
+* **QJSValue asyncCall(const QString& aName, const QJSValue& aInput)**  
+    - only execute the specific pipe and its aspects asynchronously  
+    - `aName` is the pipe name  
+    - `aInput` is the input data  
+    - `return` the output stream  
 </br>
 
-* **QVariant call(const QString& aName, const QJSValue& aInput)**  
-    - only execute the specific pipe asynchronously  
-    - return the result stream  
-    - notice: it will create a qml object and the garbage collection of qml will delete it not instantly like smarter pointer in c++  
+* **QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject(), bool aAutoTag = false);**  
+    - generate a stream by the input data  
+    - `aInput` is the input data  
+    - `aTag` is the tag name of the stream  
+    - `aScopeCache` is the stream additional data  
+    - `aAutoTag` denotes whether to auto generating the tag if the input tag is ""  
+    - `return` the generated stream  
 </br>
 
-* **QVariant input(const QJSValue& aInput, const QString& aTag = "", bool aTransaction = true, const QJsonObject& aScopeCache = QJsonObject());**  
-    - return the stream of the input  
-    - `aTransaction` denotes whether to create atransaction for this whole procedure  
-    - `aScopeCache` denotes the scopecache for the stream  
-    - notice: it will create a qml object and the garbage collection of qml will delete it not instantly like smarter pointer in c++  
+* **void remove(const QString& aName, bool aOutside = false)**  
+    - remove the specific pipe in this pipeline or in all pipelines  
+    - `aName` is the pipe name  
+    - `aOutside` is whether to remove the samed name pipe of all the pipelines  
 </br>
 
-* **void remove(const QString& aName)**  
-    - remove the specific pipe by name  
-</br>
-
-* **void removeAspect(const QString& aPipe, pipe0::AspectType aType, const QString& aAspect = "")**  
-    - remove the aspect of the pipe  
-    - `aType` is the aspect type, 0 is before, 1 is around, 2 is after  
-    - if `aAspect` is nothing, all the aspects of this type will be removed  
-</br>
-
-* **QVariant tr(const QString& aOrigin)**  
+* **QString tr(const QString& aOrigin)**  
     - translate the string to the target string in run time  
+    - `aOrigin` is the original value  
+    - `return` the translated value  
 </br>
-
-# Test and Demo
-test_rea.cpp: test8()

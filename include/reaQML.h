@@ -37,8 +37,10 @@ public:
     Q_INVOKABLE QString tag();
     Q_INVOKABLE QJSValue out(const QString& aTag = "");
     Q_INVOKABLE QJSValue outs(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
-    Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QString& aPipeline = "qml");
-    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), const QString& aPipeline = "qml");
+    Q_INVOKABLE QJSValue outsB(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
+    Q_INVOKABLE void noOut();
+    Q_INVOKABLE QJSValue asyncCall(const QString& aName);
+    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());
 private:
     std::shared_ptr<stream<QVariant>> m_stream;
 };
@@ -66,12 +68,12 @@ public:
     ~qmlPipe();
 public:
     Q_INVOKABLE QString actName() {return m_name;}
-    Q_INVOKABLE void resetTopo();
     Q_INVOKABLE QJSValue next(const QString& aName, const QString& aTag = "");
     Q_INVOKABLE QJSValue nextB(const QString& aName, const QString& aTag = "");
     Q_INVOKABLE QJSValue nextF(QJSValue aFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject());
     Q_INVOKABLE QJSValue nextFB(QJSValue aFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject());
     Q_INVOKABLE void removeNext(const QString& aName);
+    Q_INVOKABLE void removeAspect(const QString& aType, const QString& aAspect = "");
 private:
     pipeline* m_parent;
     QString m_name;
@@ -87,14 +89,15 @@ public:
     ~qmlPipeline();
 public:
     static QObject *qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine);
+public:
     static Q_INVOKABLE void run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject());
-    static Q_INVOKABLE void call(const QString& aName, const QJSValue& aInput);
-    static Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject());
+    static Q_INVOKABLE QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject());
+    static Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject(), bool aAutoTag = false);
     static Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);
     static Q_INVOKABLE QJSValue add(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());
     static Q_INVOKABLE QJSValue find(const QString& aName);
     static Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QJSValue& aInput);
-    static Q_INVOKABLE QVariant tr(const QString& aOrigin);
+    static Q_INVOKABLE QString tr(const QString& aOrigin);
 };
 
 DSTDLL QString tr0(const QString& aOrigin);

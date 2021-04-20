@@ -56,7 +56,7 @@ next("doSomething", "tag0;tag1")  //different tags could be split by semicolon
 * **void removeAspect(pipe0::AspectType aType, const QString& aAspect = "")**  
     - remove the aspect of the self  
     - `aType` contains `AspectBefore`, `AspectAround` and `AspectAfter`  
-    - `aAspect` is the aspect pipe name  
+    - `aAspect` is the aspect pipe name. it will remove all this kind of aspects if it is ""  
 </br>
 
 # Related pipes

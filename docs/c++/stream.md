@@ -36,7 +36,7 @@
     - `return` self  
 </br>
 
-* **noOut()**  
+* **void noOut()**  
     - forbid the outflow stream  
 </br>
 

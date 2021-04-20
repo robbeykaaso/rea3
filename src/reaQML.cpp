@@ -171,18 +171,29 @@ QJSValue qmlStream::out(const QString& aTag){
 }
 
 QJSValue qmlStream::outs(QJSValue aOut, const QString& aNext, const QString& aTag){
-    m_stream->outs(aOut.toVariant(), aNext, aTag);
-    return qml_engine->toScriptValue(this);
-}
-
-QJSValue qmlStream::asyncCall(const QString& aName, const QString& aPipeline){
-    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, pipeline::instance(aPipeline)));
+    auto stm = m_stream->outs(aOut.toVariant(), aNext, aTag);
+    auto ret = new qmlStream(std::dynamic_pointer_cast<stream<QVariant>>(stm->shared_from_this()));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, const QString& aPipeline){
-    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, pipeline::instance(aPipeline)));
+QJSValue qmlStream::outsB(QJSValue aOut, const QString& aNext, const QString& aTag){
+    outs(aOut, aNext, aTag);
+    return qml_engine->toScriptValue(this);
+}
+
+void qmlStream::noOut(){
+    m_stream->noOut();
+}
+
+QJSValue qmlStream::asyncCall(const QString& aName){
+    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, pipeline::instance("qml")));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
+    return qml_engine->toScriptValue(ret);
+}
+
+QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam){
+    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, pipeline::instance("qml")));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
@@ -196,10 +207,6 @@ qmlPipe::qmlPipe(pipeline* aParent, const QString& aName){
 
 qmlPipe::~qmlPipe(){
     --pipe_counter;
-}
-
-void qmlPipe::resetTopo(){
-    m_parent->find(m_name)->resetTopo();
 }
 
 QJSValue qmlPipe::next(const QString& aName, const QString& aTag){
@@ -235,18 +242,33 @@ void qmlPipe::removeNext(const QString& aName){
     m_parent->find(m_name)->removeNext(aName);
 }
 
+void qmlPipe::removeAspect(const QString& aType, const QString& aAspect){
+    auto pip = m_parent->find(m_name);
+    if (aType == "before")
+        pip->removeAspect(pipe0::AspectBefore, aAspect);
+    else if (aType == "after")
+        pip->removeAspect(pipe0::AspectAfter, aAspect);
+    else if (aType == "around")
+        pip->removeAspect(pipe0::AspectAround, aAspect);
+    else
+        throw "no this kind of aspect";
+}
+
 void qmlPipeline::run(const QString& aName, const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache){
     pipeline::instance("qml")->run(aName, aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache));
 }
 
-QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache){
-    auto ret = new qmlStream(in(aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache)));
+QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache, bool aAutoTag){
+    auto ret = new qmlStream(in(aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache), aAutoTag));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
-void qmlPipeline::call(const QString& aName, const QJSValue& aInput){
-    pipeline::instance("qml")->call(aName, aInput.toVariant());
+QJSValue qmlPipeline::call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope){
+    auto stm = pipeline::instance("qml")->call(aName, aInput.toVariant(), std::make_shared<scopeCache>(aScope));
+    auto ret = new qmlStream(std::dynamic_pointer_cast<stream<QVariant>>(stm));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
+    return qml_engine->toScriptValue(ret);
 }
 
 void qmlPipeline::remove(const QString& aName, bool aOutside){
@@ -375,7 +397,7 @@ static regPip<QQmlApplicationEngine*> reg_recative2_qml([](stream<QQmlApplicatio
     aInput->out();
 }, rea::Json("name", "install1_qml"), "initRea");
 
-QVariant qmlPipeline::tr(const QString& aOrigin){
+QString qmlPipeline::tr(const QString& aOrigin){
     return tr0(aOrigin);
 }
 

@@ -59,7 +59,7 @@ pipeline::instance()->run<int>("pipe0", 0, "service0")
     - only execute the specific pipe and its aspects synchronously on current thread  
     - `aName` is the pipe name  
     - `aInput` is the input data  
-    - `aScopeCache` is the stream additional data  
+    - `aScope` is the stream additional data  
     - `return` the input stream  
 </br>
 
