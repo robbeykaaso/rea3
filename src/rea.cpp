@@ -362,11 +362,21 @@ pipeline::pipeline(const QString& aName){
     m_name = aName;
     if (aName == ""){
         QThreadPool::globalInstance()->setMaxThreadCount(8);
-        supportType<QString>();
-        supportType<QJsonObject>();
-        supportType<QJsonArray>();
-        supportType<double>();
-        supportType<bool>();
+        supportType<QString>([](stream0* aInput){
+            return QVariant::fromValue(reinterpret_cast<stream<QString>*>(aInput)->data());
+        });
+        supportType<QJsonObject>([](stream0* aInput){
+            return QVariant::fromValue(reinterpret_cast<stream<QJsonObject>*>(aInput)->data());
+        });
+        supportType<QJsonArray>([](stream0* aInput){
+            return QVariant::fromValue(reinterpret_cast<stream<QJsonArray>*>(aInput)->data());
+        });
+        supportType<double>([](stream0* aInput){
+            return QVariant::fromValue(reinterpret_cast<stream<double>*>(aInput)->data());
+        });
+        supportType<bool>([](stream0* aInput){
+            return QVariant::fromValue(reinterpret_cast<stream<bool>*>(aInput)->data());
+        });
 
         add<double>([](rea::stream<double>* aInput){
             std::cout << "c++_pipe_counter: " << pipe_counter << std::endl;

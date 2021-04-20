@@ -28,24 +28,6 @@ using pipeFunc = std::function<void(stream<T>*)>;
 template <typename T, typename F = pipeFunc<T>>
 class pipe;
 
-class typeTrait0{
-public:
-    virtual ~typeTrait0(){
-
-    }
-    virtual QString name(){
-        return "";
-    }
-    virtual QVariant QData(stream0*){
-        return QVariant();
-    }
-};
-
-template <typename T>
-class typeTrait : public typeTrait0{
-
-};
-
 class DSTDLL scopeCache : public std::enable_shared_from_this<scopeCache>{
 public:
     scopeCache(){
@@ -63,6 +45,7 @@ public:
         else
             return T();
     }
+public:
     QVariantList toList();
     std::shared_ptr<stream0> dataStream(const QString& aName){
         return m_data.value(aName);
@@ -83,14 +66,13 @@ public:
     QString tag(){
         return m_tag;
     }
-    virtual QString dataType(){return "";}
-
     std::shared_ptr<scopeCache> scope(bool aNew = false){
         if (!m_scope || aNew)
             m_scope = std::make_shared<scopeCache>();
         return m_scope;
     }
-
+public:
+    virtual bool supportedType(){return false;}
     virtual QVariant QData(){
         return QVariant();
     }
@@ -122,7 +104,7 @@ public:
     virtual ~pipe0();
     virtual QString actName() {return m_name;}
 
-    template <typename T, template<class, typename> class P = pipe>
+    template <typename T>
     pipe0* nextF(pipeFunc<T> aNextFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject()){
         return nextF0(m_parent, this, aNextFunc, aTag, aParam);
     }
@@ -139,8 +121,8 @@ public:
 
     virtual void removeNext(const QString& aName);
     void removeAspect(pipe0::AspectType aType, const QString& aAspect = "");
+public:
     virtual void execute(std::shared_ptr<stream0> aStream);
-
     virtual void resetTopo();
 private:
     friend pipeline;
@@ -275,8 +257,8 @@ public:
     }
 
     template<typename T>
-    void supportType(){
-        m_types.insert(typeid (T).name(), std::make_shared<typeTrait<T>>());
+    void supportType(std::function<QVariant(stream0*)> aTransfer){
+        m_types.insert(typeid (T).name(), aTransfer);
     }
 
     template<typename T>
@@ -294,7 +276,7 @@ private:
     void doRemove(const QString& aName);
     QString m_name;
     QHash<int, std::shared_ptr<QThread>> m_threads;
-    QHash<QString, std::shared_ptr<typeTrait0>> m_types;
+    QHash<QString, std::function<QVariant(stream0*)>> m_types;
     friend pipe0;
     friend pipeFuture;
     friend stream0;
@@ -312,27 +294,12 @@ public:
         m_data = aInput;
         m_scope = aScope;
     }
+public:
     stream<T>* setData(T aData) {
         m_data = aData;
         return this;
     }
     T data() {return m_data;}
-
-    QVariant QData() override{
-        auto tp = typeid (T).name();
-        if (pipeline::instance()->m_types.contains(tp))
-            return pipeline::instance()->m_types.value(tp)->QData(this);
-        else
-            return QVariant();
-    }
-
-    QString dataType() override{
-        auto tp = typeid (T).name();
-        if (pipeline::instance()->m_types.contains(tp))
-            return pipeline::instance()->m_types.value(tp)->name();
-        else
-            return "";
-    }
 
     stream<T>* out(const QString& aTag = ""){
         if (!m_outs)
@@ -410,67 +377,25 @@ public:
         aPipeline->remove(pip->actName());
         return ret;
     }
+public:
+    QVariant QData() override{
+        auto tp = typeid (T).name();
+        if (pipeline::instance()->m_types.contains(tp))
+            return pipeline::instance()->m_types.value(tp)(this);
+        else
+            return QVariant();
+    }
+
+    bool supportedType() override{
+        auto tp = typeid (T).name();
+        return pipeline::instance()->m_types.contains(tp);
+    }
 private:
     T m_data;
     template<typename T, typename F>
     friend class funcType;
     template <typename T, typename F>
     friend class pipeDelegate;
-};
-
-template <>
-class typeTrait<double> : public typeTrait0{
-public:
-    QString name() override{
-        return "number";
-    }
-    QVariant QData(stream0 *aData) override{
-        return QVariant::fromValue(reinterpret_cast<stream<double>*>(aData)->data());
-    }
-};
-
-template <>
-class typeTrait<QString> : public typeTrait0{
-public:
-    QString name() override{
-        return "string";
-    }
-    QVariant QData(stream0 *aData) override{
-        return QVariant::fromValue(reinterpret_cast<stream<QString>*>(aData)->data());
-    }
-};
-
-template <>
-class typeTrait<QJsonObject> : public typeTrait0{
-public:
-    QString name() override{
-        return "object";
-    }
-    QVariant QData(stream0 *aData) override{
-        return QVariant::fromValue(reinterpret_cast<stream<QJsonObject>*>(aData)->data());
-    }
-};
-
-template <>
-class typeTrait<bool> : public typeTrait0{
-public:
-    QString name() override{
-        return "bool";
-    }
-    QVariant QData(stream0 *aData) override{
-        return QVariant::fromValue(reinterpret_cast<stream<bool>*>(aData)->data());
-    }
-};
-
-template <>
-class typeTrait<QJsonArray> : public typeTrait0{
-public:
-    QString name() override{
-        return "array";
-    }
-    QVariant QData(stream0 *aData) override{
-        return QVariant::fromValue(reinterpret_cast<stream<QJsonArray>*>(aData)->data());
-    }
 };
 
 template <typename T>

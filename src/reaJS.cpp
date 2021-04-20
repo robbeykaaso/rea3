@@ -3,19 +3,10 @@
 
 namespace rea {
 
-template <>
-class typeTrait<pipelineJS*> : public typeTrait0{
-public:
-    QString name() override{
-        return "jsPipeline";
-    }
-    QVariant QData(stream0* aStream) override{
-        return QVariant::fromValue<QObject*>(reinterpret_cast<stream<pipelineJS*>*>(aStream)->data());
-    }
-};
-
 pipelineJS::pipelineJS() : pipeline("js"){
-    pipeline::instance()->supportType<pipelineJS*>();
+    pipeline::instance()->supportType<pipelineJS*>([](stream0* aInput){
+        return QVariant::fromValue<QObject*>(reinterpret_cast<stream<pipelineJS*>*>(aInput)->data());
+    });
     pipeline::instance()->add<double>([](stream<double>* aInput){
         auto pip_js = reinterpret_cast<pipelineJS*>(pipeline::instance("js"));
         aInput->outs<pipelineJS*>(pip_js)->scope()->cache<pipelineJS*>("pipeline", pip_js);
@@ -23,7 +14,7 @@ pipelineJS::pipelineJS() : pipeline("js"){
 };
 
 void pipelineJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
-    if (aStream->dataType() == "")
+    if (!aStream->supportedType())
         throw "not supported type";
     executeJSPipe(aName,  aStream->QData(), aStream->tag(), aStream->scope()->toList(), aSync, aFromOutside);
 }

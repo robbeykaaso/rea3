@@ -1,7 +1,8 @@
 # Abstract
 only execute the next specific pipe which satisfies some condition  
 ```
-             -> pipe3  //we will only need execute pipe3 after pipePartial sometimes
+//we will only need execute pipe3 after pipePartial sometimes rather than pipe4
+             -> pipe3  
 pipePartial
              x-> pipe4
 ```
@@ -10,25 +11,16 @@ pipePartial
 # Sample
 **add and connect pipe:**  
 ```
-pipeline::add<QJsonObject, pipePartial>([](stream<QJsonObject>* aInput){  //c++
+pipeline::instance()->add<QJsonObject, pipePartial>([](stream<QJsonObject>* aInput){
     aInput.out();
 }, Json("name", "WCS2SCS"))
-->next("doSomething", "service1;service2")  //tag the connection; support multiple services by semicolon
-
-
-Pipeline2.add(function(aInput){  //qml
-    aInput.out()  
-}, {name: "WCS2SCS", type: "Partial"})
+->next("doSomething", "service1")
 ```  
 
 **make it work:**  
 ```
-pipeline::run<QJsonObject>("WCS2SCS", QJsonObject(), "service1")  //the conection with service1 tag will be executed
+pipeline::instance()->run<QJsonObject>("WCS2SCS", QJsonObject(), "service1")  //the conection with service1 tag will be executed
 ```  
-</br>
-
-# Test and Demo
-test_rea.cpp: test6()  
 </br>
 
 # Reference

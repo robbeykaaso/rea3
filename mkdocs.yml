@@ -4,8 +4,8 @@ nav:
     - Usage: usage.md
     - API:
       - util:
-        - json: c++/json.md
-      - rea-c++:
+        - json: util/json.md
+      - c++:
         - pipeline: c++/pipeline.md
         - pipe: c++/pipe.md
         - stream: c++/stream.md
@@ -15,7 +15,8 @@ nav:
           - pipePartial: c++/pipePartial.md
           - pipeDelegate: c++/pipeDelegate.md
           - pipeParallel: c++/pipeParallel.md
-      - rea-qml:
+          - extention: c++/extention.md
+      - qml:
         - pipeline: qml/pipeline.md
         - pipe: qml/pipe.md
         - stream: qml/stream.md
@@ -23,7 +24,7 @@ nav:
         - pipes:
           - pipePartial: qml/pipePartial.md
           - pipeDelegate: qml/pipeDelegate.md
-      - rea-js:
+      - js:
         - pipeline: js/pipeline.md
         - pipe: js/pipe.md
         - stream: js/stream.md

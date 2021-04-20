@@ -90,7 +90,7 @@ public:
     static Q_INVOKABLE void run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject());
     static Q_INVOKABLE void call(const QString& aName, const QJSValue& aInput);
     static Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject());
-    static Q_INVOKABLE void remove(const QString& aName);
+    static Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);
     static Q_INVOKABLE QJSValue add(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());
     static Q_INVOKABLE QJSValue find(const QString& aName);
     static Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QJSValue& aInput);

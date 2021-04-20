@@ -94,18 +94,21 @@ _sample_:
     gc()
     
     //js
-    pipelines().input(0, "test")
-    .asyncCallF(function(aInput){
-        aInput.outs("world")
-    })
-    .asyncCall("doSomething")
-    .asyncCallF(function(aInput){
-        console.assert(aInput.data() == "world")
-        aInput.setData("Pass").out()
-    })
-    .asyncCall("success")
+    await pipelines().input(0, "test")
+          .asyncCallS([
+             function(aInput){
+                aInput.outs("world")
+            },
+            "doSomething",
+            function(aInput){
+                console.assert(aInput.data() == "world")
+                aInput.setData("Pass").out()
+            },
+            "success"
+          ])
     //js
-    var dt = pipelines().asyncCall("doSomething", []).data()
+    let stm = await pipelines().input([]).asyncCall("doSomething")
+    let dt = stm.data()
 ```
 
 # Notice  

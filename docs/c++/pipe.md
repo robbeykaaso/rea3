@@ -8,42 +8,56 @@ input -> pipe1(calculate on thread2) -> pipe2(store data on thread1) -> pipe3(re
 
 # API
 * **QString actName()**  
-    - the actual name of pipe  
+    - `return` the actual name of pipe  
 </br>
 
-* **pipe0* next(const QString& aName / pipe0\* aNext, const QString& aTag = "")**  
+* **pipe0* next(const QString& aName, const QString& aTag = "")**  
     - connect a pipe after self  
-    - return the next pipe  
-    - the next pipe will try to be executed and get the stream after self is executed  
+    - `aName` is the next pipe name
     - `aTag` is the pipe connected parameter  
+    - `return` the next pipe  
 _sample_:
 ```
-next("doSomething", "service0")  
+next("doSomething", "tag0;tag1")  //different tags could be split by semicolon
 ```  
 </br>
 
-* **pipe0* nextF(pipeFunc<T> aNextFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject())**  
-    - `aNextFunc` is the lambda function of this pipe  
-    - `aParam` is the param of this pipe  
-    - the function is like `next`  
+* **pipe0* nextP(pipe0* aNext, const QString& aTag = "")**  
+    - work like `next()`  
+    - `aNext` is the next pipe  
 </br>
 
-* **pipe0* nextB(const QString& aName / pipe0\* aNext, const QString& aTag = "")**  
-    - connect a next branch pipe  
-    - return self  
-_sample_:
-```
-nextB("doSomething", "service0")  
-```  
+* **pipe0* nextF<T\>(pipeFunc<T> aNextFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject())**  
+    - work like `next()`  
+    - `aNextFunc` is the next pipe function  
+    - `aParam` is the next pipe parameter  
+</br>
+
+* **pipe0* nextB(const QString& aName, const QString& aTag = "")**  
+    - work like `next()`  
+    - `return` self  
+</br>
+
+* **pipe0* nextPB(pipe0* aNext, const QString& aTag = "")**  
+    - work like `nextP()`  
+    - `return` self  
+</br>
+
+* **pipe0* nextFB<T\>(pipeFunc<T> aNextFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject())**  
+    - work like `nextB()`  
+    - `return` self  
 </br>
 
 * **void removeNext(const QString& aName)**  
     - remove the next pipe  
+    - `aName` is the next pipe name  
 </br>
 
-* **execute(std::shared_ptr<stream0\> aStream)**  
-    - trig the pipe and input a stream  
+* **void removeAspect(pipe0::AspectType aType, const QString& aAspect = "")**  
+    - remove the aspect of the self  
+    - `aType` contains `AspectBefore`, `AspectAround` and `AspectAfter`  
+    - `aAspect` is the aspect pipe name  
 </br>
 
-# Child classes
-_pipeFuture, [pipeLocal](pipeLocal.md), [pipeDelegate](pipeDelegate.md), [pipePartial](pipePartial.md), [pipeBuffer](pipeBuffer.md), [pipeThrottle](pipeThrottle.md), [pipeParallel](pipeParallel.md)..._
+# Related pipes
+_pipeFuture, [pipeDelegate](pipeDelegate.md), [pipePartial](pipePartial.md), [pipeAsync](pipeAsync.md), [pipeParallel](pipeParallel.md)..._

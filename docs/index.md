@@ -1,7 +1,7 @@
 # Abstract
 * a mini framework for quickly building or assembling your application  
 
-# Solution
+# [Solution](https://www.processon.com/view/link/605c497f5653bb2225e9da14)
 * solve the complex dependency relationship among codes in the complex application  
 * eliminate the details of the threads, asynchronous, eventloop, communication method, and other complex mechanism in the codes and make the codes more elegent by a graph or a stream. help the developers to only pay attentions on the business logic  
 * provide a uniform grammer and strategy for the application layer of the software in order to help application developers to get rid of the properties of program language. Developers can easily use any language to realize the functions which this language does not provide. support multiple languages in the application naturally  

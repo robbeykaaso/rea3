@@ -62,24 +62,14 @@ public:
     }
 };
 
-template <>
-class typeTrait<QVariant> : public typeTrait0{
-public:
-    QString name() override{
-        return "qvar";
-    }
-    QVariant QData(stream0* aStream) override{
-        return reinterpret_cast<stream<QVariant>*>(aStream)->data();
-        //return QVariant::fromValue<QJSValue>(reinterpret_cast<stream<QJSValue>*>(aStream)->data());
-    }
-};
-
 pipelineQML::pipelineQML() : pipeline("qml"){
-    pipeline::instance()->supportType<QVariant>();  //qmlEngine can only be used on main thread, so use qvariant instead of qjsvalue
+    pipeline::instance()->supportType<QVariant>([](stream0* aInput){
+        return reinterpret_cast<stream<QVariant>*>(aInput)->data();
+    });  //qmlEngine can only be used on main thread, so use qvariant instead of qjsvalue
 }
 
 void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
-    if (aStream->dataType() == "")
+    if (!aStream->supportedType())
         throw "not supported type";
     pipeline::execute(aName, in(aStream->QData(), aStream->tag(), aStream->scope()), aSync, aFromOutside);
 }
@@ -259,8 +249,8 @@ void qmlPipeline::call(const QString& aName, const QJSValue& aInput){
     pipeline::instance("qml")->call(aName, aInput.toVariant());
 }
 
-void qmlPipeline::remove(const QString& aName){
-    pipeline::instance("qml")->remove(aName);
+void qmlPipeline::remove(const QString& aName, bool aOutside){
+    pipeline::instance("qml")->remove(aName, aOutside);
 }
 
 QObject* qmlPipeline::qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine)
