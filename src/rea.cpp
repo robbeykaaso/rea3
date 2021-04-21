@@ -345,7 +345,7 @@ QThread* pipeline::findThread(int aNo){
 
 pipeline* pipeline::instance(const QString& aName){
     if (!pipelines.contains(aName)){
-        if (aName == "")
+        if (aName == "c++")
             pipelines.insert(aName, new pipeline());
         else{
             auto pl = std::make_shared<pipeline*>();
@@ -360,7 +360,7 @@ pipeline* pipeline::instance(const QString& aName){
 
 pipeline::pipeline(const QString& aName){
     m_name = aName;
-    if (aName == ""){
+    if (aName == "c++"){
         QThreadPool::globalInstance()->setMaxThreadCount(8);
         supportType<QString>([](stream0* aInput){
             return QVariant::fromValue(reinterpret_cast<stream<QString>*>(aInput)->data());
@@ -382,7 +382,7 @@ pipeline::pipeline(const QString& aName){
             std::cout << "c++_pipe_counter: " << pipe_counter << std::endl;
             std::cout << "c++_stream_counter: " << stream_counter << std::endl;
             aInput->out();
-        }, rea::Json("name", "reportCLeak", "external", true));
+        }, rea::Json("name", "reportCLeak", "external", "js"));
     }
 }
 

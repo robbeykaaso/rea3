@@ -1,7 +1,7 @@
 class pipelineCPlus extends pipeline{
 
     constructor(){
-        super("")
+        super("c++")
         this.candidates_functions = []
     }
 
@@ -65,6 +65,6 @@ class pipelineCPlus extends pipeline{
 
 pipelines().add(function(aInput){
     aInput.setData(new pipelineCPlus())
-}, {name: "createpipeline"})
+}, {name: "createc++pipeline"})
 
-pipelines("")
+pipelines("c++")

@@ -76,9 +76,9 @@ void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream
 
 void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag) {
     auto aData = aStream->QData();
-    if (aData.type() == QVariant::Type::Map)
+    if (aData.type() == QVariant::Type::Map || aData.type() == QMetaType::QJsonObject)
         pipeline::tryExecutePipeOutside(aName, in(aData.toJsonObject(), aStream->tag(), aStream->scope()), aSync, aFlag);
-    else if (aData.type() == QVariant::Type::List)
+    else if (aData.type() == QVariant::Type::List || aData.type() == QMetaType::QJsonArray)
         pipeline::tryExecutePipeOutside(aName, in(aData.toJsonArray(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::String)
         pipeline::tryExecutePipeOutside(aName, in(aData.toString(), aStream->tag(), aStream->scope()), aSync, aFlag);
@@ -89,6 +89,7 @@ void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<st
     else if (aData.type() == QVariant::Type::Int)
         pipeline::tryExecutePipeOutside(aName, in<double>(aData.toInt(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else{
+        std::cout << aData.type() << std::endl;
         throw "not supported type";
     }
 }
@@ -316,7 +317,7 @@ qmlPipeline::qmlPipeline(){
         std::cout << "qml_pipe_counter: " << pipe_counter << std::endl;
         std::cout << "qml_stream_counter: " << stream_counter << std::endl;
         aInput->out();
-    }, rea::Json("name", "reportQMLLeak", "external", true));
+    }, rea::Json("name", "reportQMLLeak", "external", "js"));
 }
 
 qmlPipeline::~qmlPipeline(){
@@ -395,7 +396,7 @@ static regPip<QQmlApplicationEngine*> reg_recative2_qml([](stream<QQmlApplicatio
         }
     }
     aInput->out();
-}, rea::Json("name", "install1_qml"), "initRea");
+}, rea::Json("name", "install2_qml"), "initRea");
 
 QString qmlPipeline::tr(const QString& aOrigin){
     return tr0(aOrigin);

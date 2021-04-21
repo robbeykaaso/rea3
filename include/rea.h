@@ -186,9 +186,9 @@ inline std::shared_ptr<stream<T>> in(T aInput = T(), const QString& aTag = "", s
 
 class DSTDLL pipeline : public QObject{
 public:
-    static pipeline* instance(const QString& aName = "");
+    static pipeline* instance(const QString& aName = "c++");
 public:
-    pipeline(const QString& aName = "");
+    pipeline(const QString& aName = "c++");
     pipeline(pipeline&&) = delete;
     QString name(){return m_name;}
     virtual ~pipeline();
@@ -504,6 +504,7 @@ protected:
                 auto stm0 = eve->getStream();
                 auto stm = std::dynamic_pointer_cast<stream<T>>(stm0);
                 doEvent(stm);
+                doNextEvent(pipe0::m_next, stm);
             }
         }
         return true;

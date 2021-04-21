@@ -34,12 +34,16 @@ add_library(REA SHARED
     "include/reaQML.h"
     "include/reaJS.h"
     "include/tess.h"
+    "include/qsgModel.h"
+    "include/qsgBoard.h"
 
     "src/util.cpp"
     "src/rea.cpp"
     "src/reaQML.cpp"
     "src/reaJS.cpp"
     "src/dllloader.cpp"
+    "src/qsgModel.cpp"
+    "src/qsgBoard.cpp"
     )
 
 # 创建动态库别名

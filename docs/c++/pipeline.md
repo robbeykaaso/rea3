@@ -21,7 +21,7 @@ add<int, pipe>([](stream<int>* aInput){  //the second parameter is pipe as defau
          "around", "pipe3" //work like "before", replace the function of this pipe
          "befored", "pipe4",  //inject the target pipe before this pipe, the target pipe will be executed on the same thread of this pipe
          "aftered", "pipe5"  //work like "befored"
-         "external", "js"  //denotes it is a pipe outside of this pipeline
+         "external", "js"  //decide which pipeline controls its next pipes
     ))
 
 topo result: pipe0' = pipe4 -> pipe0 -> pipe5

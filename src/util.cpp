@@ -20,7 +20,7 @@ QJsonObject Json(QJsonObject&& aTarget){
     return std::forward<QJsonObject>(aTarget);
 };
 
-void Json(QJsonObject& aTarget){
+void Json(QJsonObject&){
 
 }
 
@@ -28,7 +28,7 @@ QJsonArray JArray(QJsonArray&& aTarget){
     return std::forward<QJsonArray>(aTarget);
 };
 
-void JArray(QJsonArray& aTarget){
+void JArray(QJsonArray&){
 
 }
 
@@ -62,7 +62,7 @@ QString GetMachineFingerPrint(){
 
 int getRandom(int min,int max)
 {
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+    qsrand(uint(QTime(0, 0, 0).secsTo(QTime::currentTime())));
     if (min == max)
         return 0;
     else
@@ -109,7 +109,7 @@ QString getWMIC(const QString &cmd)
 
 QString int2Hex(int aInt){
     char hex[10];
-    sprintf(hex, "%X", aInt);
+    sprintf_s(hex, "%X", aInt);
     QString ch = QString::fromStdString(hex);
     if (ch.size() < 2)
         ch = "0" + ch;

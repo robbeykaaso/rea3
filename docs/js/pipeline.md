@@ -14,7 +14,7 @@ pipelines().add(function(aInput){
     aInput.out()
 }, {
     "name", "pipe0",  //the name of the pipe, if there is no name, it will be regarded as an anonymous pipe
-    "external", "c++"  //denotes it is a pipe outside of this pipeline
+    "external", "c++"  //decide which pipeline controls its next pipes
 })
 ```  
 </br>
