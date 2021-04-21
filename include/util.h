@@ -30,6 +30,9 @@ DSTDLL QHostAddress GetLocalIP();
 DSTDLL QString getWMIC(const QString &cmd);
 DSTDLL QString int2Hex(int aInt);
 DSTDLL QStringList parseJsons(const QString& aContent);
+DSTDLL QString QImage2Base64(const QImage& aImage);
+DSTDLL std::string base64_encode(const std::string &in);
+DSTDLL std::string base64_decode(const std::string &in);
 
 template <typename T>
 int indexOfArray(const QJsonArray& aArray, const T& aValue){

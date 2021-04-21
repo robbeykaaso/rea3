@@ -67,4 +67,4 @@ pipelines().add(function(aInput){
     aInput.setData(new pipelineCPlus())
 }, {name: "createc++pipeline"})
 
-pipelines("c++")
+pipelines("c++").init(function(){})

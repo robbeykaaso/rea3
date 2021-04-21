@@ -201,7 +201,7 @@ void qsgBoard::setName(const QString& aName){
                 m_models.back()->cacheImage(i, imgs.value(i));
             auto imgs_data = scp->data<QJsonObject>("image_data");
             for (auto i : imgs_data.keys())
-                m_models.back()->cacheImage(i, QImage::fromData(imgs_data.value(i).toString().toUtf8()));
+                m_models.back()->cacheImage(i, QImage::fromData(QByteArray::fromBase64(imgs_data.value(i).toString().toLocal8Bit())));
             for (auto i : dt)
                 addUpdate(m_models.back()->updateQSGAttr(i.toObject()));
             update();

@@ -472,13 +472,14 @@ class pipeline{
     }
 
     tryExecutePipeOutside(aName, aStream, aSync, aFlag){
-        for (let i in pipeline_s)
+        for (let i in pipeline_s){
             if (pipeline_s[i] != this){
                 if (aFlag == "any")
                     pipeline_s[i].execute(aName, aStream, aSync, true, aFlag);
                 else if (aFlag == pipeline_s[i].name())
                     pipeline_s[i].execute(aName, aStream, aSync, false, aFlag);
             }
+        }
     }
 
     removePipeOutside(aName){
