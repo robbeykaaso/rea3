@@ -255,8 +255,10 @@ void qmlPipe::removeAspect(const QString& aType, const QString& aAspect){
         throw "no this kind of aspect";
 }
 
-void qmlPipeline::run(const QString& aName, const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache){
-    pipeline::instance("qml")->run(aName, aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache));
+QJSValue qmlPipeline::run(const QString& aName, const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache){
+    auto ret = new qmlStream(pipeline::instance("qml")->run(aName, aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache)));
+    QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
+    return qml_engine->toScriptValue(ret);
 }
 
 QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache, bool aAutoTag){

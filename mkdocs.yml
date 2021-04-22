@@ -5,17 +5,19 @@ nav:
     - API:
       - util:
         - json: util/json.md
+        - command: util/command.md
       - c++:
         - pipeline: c++/pipeline.md
         - pipe: c++/pipe.md
         - stream: c++/stream.md
         - scope: c++/scope.md
+        - extension: c++/extension.md
         - pipes:
-          - pipeAsync: c++/pipeAsync.md
-          - pipePartial: c++/pipePartial.md
-          - pipeDelegate: c++/pipeDelegate.md
-          - pipeParallel: c++/pipeParallel.md
-          - extension: c++/extension.md
+          - pipeAsync: c++/pipes/pipeAsync.md
+          - pipePartial: c++/pipes/pipePartial.md
+          - pipeDelegate: c++/pipes/pipeDelegate.md
+          - pipeParallel: c++/pipes/pipeParallel.md
+          - extension: c++/pipes/extension.md
       - qml:
         - pipeline: qml/pipeline.md
         - pipe: qml/pipe.md
@@ -34,14 +36,14 @@ nav:
           - pipePartial: js/pipePartial.md
           - pipeDelegate: js/pipeDelegate.md
           - extension: js/extension.md
-      # - render2D:
-      #   - imagePool: render2D/imagePool.md
-      #   - command: render2D/command.md
-      #   - qsgModel: render2D/qsgModel.md
-      #   - qsgBoard: render2D/qsgBoard.md
-      #   - qsgBoardPlugin: render2D/qsgBoardPlugin.md
-      #   - plugins:
-      #     - transform: render2D/plugins/qsgPluginTransform.md
+      - render2D:
+        - qsgModel: render2D/qsgModel.md
+        - qsgBoard: render2D/qsgBoard.md
+        - qsgBoardPlugin: render2D/qsgBoardPlugin.md
+        - extension: render2D/extension.md
+        - plugins:
+          - transform: render2D/plugin/qsgPluginTransform.md
+          - extension: render2D/plugin/extension.md
       # - storage: 
       #   - stgData: storage/stgData.md
       #   - fsStorage0: storage/fsStorage0.md

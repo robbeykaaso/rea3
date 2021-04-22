@@ -440,7 +440,9 @@ class pipeline{
     }
 
     run(aName, aInput, aTag = "", aScope = null){
-        this.execute(aName, new stream(aInput, aTag, aScope))
+        let stm = new stream(aInput, aTag, aScope)
+        this.execute(aName, stm)
+        return stm
     }
 
     call(aName, aInput, aScope = null){

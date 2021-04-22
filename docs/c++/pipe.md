@@ -60,4 +60,4 @@ next("doSomething", "tag0;tag1")  //different tags could be split by semicolon
 </br>
 
 # Related pipes
-_pipeFuture, [pipeDelegate](pipeDelegate.md), [pipePartial](pipePartial.md), [pipeAsync](pipeAsync.md), [pipeParallel](pipeParallel.md)..._
+_pipeFuture, [pipeDelegate](pipes/pipeDelegate.md), [pipePartial](pipes/pipePartial.md), [pipeAsync](pipes/pipeAsync.md), [pipeParallel](pipes/pipeParallel.md)..._

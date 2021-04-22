@@ -19,4 +19,4 @@ re::pipeManager::add<QJsonObject>([](stream<QJsonObject>* aInput){
 </br>
 
 # Reference
-[pipe](pipe.md)
+[pipe](../pipe.md)

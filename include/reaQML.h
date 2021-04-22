@@ -90,7 +90,7 @@ public:
 public:
     static QObject *qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine);
 public:
-    static Q_INVOKABLE void run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject());
+    static Q_INVOKABLE QJSValue run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject());
     static Q_INVOKABLE QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject());
     static Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject(), bool aAutoTag = false);
     static Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);

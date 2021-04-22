@@ -32,6 +32,7 @@ pipelines().add(function(aInput){
     - `aInput` is the input stream data  
     - `aTag` is the tag name of the stream  
     - `aScope` is the stream additional data  
+    - `return` the input stream  
 _sample_:
 ```
 pipelines().run("pathSelected", {path: ""}, "service1")

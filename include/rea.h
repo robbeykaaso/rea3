@@ -236,8 +236,10 @@ public:
     }
 
     template<typename T>
-    void run(const QString& aName, T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr){
-        execute(aName, in(aInput, aTag, aScope));
+    std::shared_ptr<stream<T>> run(const QString& aName, T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr){
+        auto stm = in(aInput, aTag, aScope);
+        execute(aName, stm);
+        return stm;
     }
 
     template<typename T, typename F = pipeFunc<T>>
@@ -618,6 +620,20 @@ public:
             rea::pipeline::instance()->find(aPrevious)->next(pip->actName());
     }
 };
+
+#define extendSubject(aType, aPipe, aPipeline) \
+    rea::pipeline::instance()->add<aType>([](rea::stream<aType>* aInput){ \
+        aInput->out(); \
+    }, rea::Json("name", STR(aPipeline##_##aPipe), \
+                 "befored", #aPipe, \
+                 "external", #aPipeline))
+
+#define extendListener(aType, aPipe, aPipeline) \
+    rea::pipeline::instance()->find(#aPipe) \
+    ->nextF<aType>([](rea::stream<aType>* aInput){ \
+        aInput->out(); \
+    }, "", rea::Json("name", STR(aPipeline##_##aPipe), \
+                     "external", #aPipeline))
 
 }
 

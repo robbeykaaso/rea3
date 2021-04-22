@@ -43,12 +43,13 @@ topo result: pipe0' = pipe4 -> pipe0 -> pipe5
     - `return` the pipe  
 </br>
 
-* **void run<T\>(const QString& aName, T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache\> aScope = nullptr)**  
+* **std::shared_ptr<stream<T\>\> run<T\>(const QString& aName, T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache\> aScope = nullptr)**  
     - execute the specific pipe by name and start a business procedure  
     - `aName` is the pipe name  
     - `aInput` is the input stream data  
     - `aTag` is the tag name of the stream  
     - `aScope` is the stream additional data  
+    - `return` the input stream  
 _sample_:  
 ```
 pipeline::instance()->run<int>("pipe0", 0, "service0")

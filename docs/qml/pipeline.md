@@ -34,12 +34,13 @@ Pipeline.add(function(aInput){
     - `return` the pipe  
 </br>
 
-* **void run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject())**  
+* **QJSValue run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject())**  
     - execute the specific pipe by name and start a business procedure  
     - `aName` is the pipe name  
     - `aInput` is the input stream data  
     - `aTag` is the tag name of the stream  
     - `aScopeCache` is the stream additional data  
+    - `return` the input stream  
 _sample_:
 ```
 Pipeline.run("pathSelected", {path: ""}, "service1")

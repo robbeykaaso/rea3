@@ -24,4 +24,4 @@ pipeline::instance()->run<QJsonObject>("WCS2SCS", QJsonObject(), "service1")  //
 </br>
 
 # Reference
-[pipe](pipe.md)
+[pipe](../pipe.md)

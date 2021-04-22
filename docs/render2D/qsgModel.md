@@ -1,8 +1,8 @@
 # Abstract
-a model for qsgBoard, it will worked by the pipe apis of qsgBoard
+* a model for qsgBoard, it will worked by the pipe APIs of qsgBoard
 
 # Model format
-the same key in the object attributes will be prior to the whole attributes  
+* the same key in the object attributes will be prior to the whole attributes  
 _sample_:
 ```
 {
@@ -14,17 +14,19 @@ _sample_:
     },
     face: 200,  //the fill opacity of the shapeObject
     text: {
-        visible: true,  //whether show text on the shapeObject
+        visible: true,  //whether show text on the qsgObject
         size: [100, 50],  //the text width and height
         location: "bottom"  //the text location: "bottom", "middle", "top"
     },
     transform: [1, 0, 0, 0, 1, 0, 0, 0, 1],  //the world transformation matrix
-    color: "blue",  //the color of the shapeObject, include text, arrow, face and shape itself
+    color: "blue",  //the color of the qsgObject, include text, arrow, face and shape itself
+    max_ratio: 100,  //the maximum zoom in ratio
+    min_ratio: 0.01,  //the minimum zoom out ratio
     objects: {  //the object is saved by object name and object attributes
         img_2: {  //the fps will be affected by the scale of the data for the render feature of QSG. developers should control the scale of the input data to satisfy the specific performence
             type: "image",  //the type of imageObject
-            path: "c:/xxx/xx.png",  //the path of the image in the imagePool or file system
-            range: [0, 0, 400, 400],  //the view port of the image, the default is the boundbox of it
+            path: "c:/xxx/xx.png",  //the image alias, or the path in file system
+            range: [0, 0, 400, 400],  //the range of the image, the default is the boundbox of it. [left, bottom, right, top]
             caption: "Text",  //the text value
             color: "green"  //the text color
         },
@@ -34,7 +36,7 @@ _sample_:
             color: "red",  //as above in the whole attributes
             width: 3,  //the line width
             caption: "hello",  //the text value
-            style: "dash", //the line style
+            style: "dash", //the line style, dash/solid
             face: 50  //as above in the whole attributes
             text: {
                 visible: true,  //as above in the whole attributes
@@ -57,7 +59,7 @@ _sample_:
 </br>
 
 # Modification format
-* use "updateQSGAttr" or "updateQSGAttrs" api to update specific attribute of the qsgModel  
+* use "updateQSGAttr" api to update specific attribute of the qsgModel  
 _sample_:
 ```
 {
@@ -104,10 +106,6 @@ _sample_:
     tar: "shp_3"  //object name
 }
 ```  
-</br>
-
-# Test and Demo
-test.qml: qsTr("qsgShow"); test_qsg.cpp  
 </br>
 
 # Reference

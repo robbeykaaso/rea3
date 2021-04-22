@@ -15,4 +15,4 @@ pipeline::instance()->add<QString, pipeParallel>([](rea::stream<QString>* aInput
 </br>
 
 # Reference
-[pipe](pipe.md)
+[pipe](../pipe.md)

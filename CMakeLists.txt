@@ -36,6 +36,7 @@ add_library(REA SHARED
     "include/tess.h"
     "include/qsgModel.h"
     "include/qsgBoard.h"
+    "include/command.h"
 
     "src/util.cpp"
     "src/rea.cpp"
@@ -44,6 +45,7 @@ add_library(REA SHARED
     "src/dllloader.cpp"
     "src/qsgModel.cpp"
     "src/qsgBoard.cpp"
+    "src/command.cpp"
     )
 
 # 创建动态库别名

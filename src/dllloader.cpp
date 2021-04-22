@@ -71,7 +71,7 @@ static regPip<QString, pipePartial> reg_dynamic_qml([](stream<QString>* aInput){
         qmls.push_back("file:" + pth);
     }
     aInput->outs<QJsonArray>(qmls);
-}, Json("name", "loadDynamicQMLs"));
+}, Json("name", "loadDynamicQMLs", "external", "qml"));
 
 }
 

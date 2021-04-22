@@ -16,7 +16,7 @@ Item{
 
     Component.onCompleted: {
         Pipeline.find("loadDynamicQMLs")
-        .next(function(aInput){
+        .nextF(function(aInput){
             var pths = aInput.data()
             for (var i in pths){
                 var ld = loader.createObject(parent)
@@ -29,7 +29,7 @@ Item{
                 )
                 ld.source = pths[i]
             }
-        }, name, {vtype: "array"})
+        }, name)
         Pipeline.run("loadDynamicQMLs", name, name)
     }
 }
