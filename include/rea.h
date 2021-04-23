@@ -621,7 +621,7 @@ public:
     }
 };
 
-#define extendSubject(aType, aPipe, aPipeline) \
+#define extendTrigger(aType, aPipe, aPipeline) \
     rea::pipeline::instance()->add<aType>([](rea::stream<aType>* aInput){ \
         aInput->out(); \
     }, rea::Json("name", STR(aPipeline##_##aPipe), \

@@ -366,36 +366,10 @@ public:
 static regPip<QQmlApplicationEngine*> reg_recative2_qml([](stream<QQmlApplicationEngine*>* aInput){
     auto cfg = aInput->scope()->data<QJsonObject>("rea-qml");
     if (cfg.value("use").toBool(true)){
-        QVector<QObject*> objs;
         qml_engine = aInput->data();
         //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype
         qmlRegisterSingletonType<qmlPipeline>("Pipeline", 1, 0, "Pipeline", &qmlPipeline::qmlInstance);
         qmlRegisterType<TextFieldDoubleValidator>("TextFieldDoubleValidator", 1, 0, "TextFieldDoubleValidator");
-        //engine.rootContext()->setContextProperty("applicationDirPath", QGuiApplication::applicationDirPath()); //https://recalll.co/ask/v/topic/qt-QML%3A-how-to-specify-image-file-path-relative-to-application-folder/55928bae7d3563c7088b7db1
-
-        qml_engine->connect(qml_engine, &QQmlApplicationEngine::objectCreated, [&objs](QObject *object, const QUrl){
-            if (object)
-                objs.push_back(object);
-        });
-        auto prm = cfg.value("param").toObject();
-        in(qml_engine, aInput->tag(), aInput->scope())->asyncCall("loadMain");
-        if (qml_engine->rootObjects().isEmpty())
-            return;
-
-        if (prm.value("-md") == "TRUE"){
-            rea::pipeline::instance()->add<QJsonObject>([](rea::stream<QJsonObject>* aInput){
-                aInput->out();
-            }, rea::Json("name", "setDebugMode"));
-            aInput->asyncCall("setDebugMode");
-        }
-
-        for (int i = 0; i < objs.size() - 1; ++i){
-            objs[i]->setParent(objs[objs.size() - 1]);
-            if (objs[i]->isWindowType()){
-                auto w = reinterpret_cast<QWindow*>(objs[i]);
-                w->setTransientParent(reinterpret_cast<QWindow*>(objs[objs.size() - 1]));
-            }
-        }
     }
     aInput->out();
 }, rea::Json("name", "install2_qml"), "initRea");

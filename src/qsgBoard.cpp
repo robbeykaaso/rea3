@@ -152,6 +152,10 @@ qsgBoard::~qsgBoard(){
     rea::pipeline::instance()->remove("QSGAttrUpdated_" + m_name);
 }
 
+std::shared_ptr<scopeCache> qsgImages(std::initializer_list<std::pair<QString, QImage>> aImages){
+    return std::make_shared<scopeCache>()->cache("image", QHash<QString, QImage>(aImages));
+}
+
 qsgBoard::qsgBoard(QQuickItem *parent) : QQuickItem(parent)
 {
     setAcceptedMouseButtons(Qt::LeftButton | Qt::MidButton | Qt::RightButton);

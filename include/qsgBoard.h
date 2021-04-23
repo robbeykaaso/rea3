@@ -10,6 +10,8 @@ namespace rea {
 
 class qsgBoardPlugin;
 
+DSTDLL std::shared_ptr<scopeCache> qsgImages(std::initializer_list<std::pair<QString, QImage>> aImages);
+
 class qsgBoard : public QQuickItem{
     Q_OBJECT
     Q_PROPERTY(QString name WRITE setName READ getName)
