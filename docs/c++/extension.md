@@ -1,5 +1,7 @@
 # Abstract  
-* each pipe can only works correctly for its next pipes in his own pipeline. if other pipelines want to use these pipes correctly, the developer should manually extend the pipe interface  
+* each pipe can only work correctly for its next pipes in his own pipeline. if other pipelines want to use these pipes correctly, the developer should manually extend the pipe interface  
+* `Listener` type API is provided for developers to listen the API's output, they don't need input stream from the developer  
+* `Trigger` type API is provided for developers to initiatively manipulate some behaviors of the component or service. It has both input and output stream for developers    
 
 # Macro
 * **extendTrigger(aType, aPipe, aPipeline)**  

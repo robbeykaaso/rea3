@@ -12,7 +12,7 @@
 * **addCommand**  
     - add a command to the command manager  
     - type: pipePartial  
-    - pipeline: c++  
+    - pipeline: c++; trigger  
     - input: ICommand  
     - output: input  
 </br>
@@ -20,7 +20,7 @@
 * **doCommand**  
     - un/re do command  
     - type: pipePartial  
-    - pipeline: c++  
+    - pipeline: c++; trigger  
     - input: bool : true=redo : false=undo  
     - output: input  
 </br>  

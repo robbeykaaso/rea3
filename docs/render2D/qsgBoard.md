@@ -5,7 +5,7 @@
 * **updateQSGAttr_ + name**  
     - renew attributes of the objects or the whole model for the qsgModel  
     - type: pipeDelegate: QSGAttrUpdated_ + name  
-    - pipeline: c++  
+    - pipeline: c++; trigger    
     - input: QJsonArray  
     - scope:
         - model: the qsgModel format  
@@ -63,14 +63,14 @@ _sample_:
 * **QSGAttrUpdated_ + name**  
     - output the updated attribute modifications  
     - type: pipe  
-    - pipeline: c++  
+    - pipeline: c++; listener    
     - output: QJsonArray  
 </br>
 
 * **updateQSGCtrl_ + name**  
     - remove the old plugins and install the new plugin  
     - type: pipe  
-    - pipeline: c++  
+    - pipeline: c++; trigger  
     - input: QJsonArray  
     - output: input  
 _sample_:  

@@ -43,9 +43,25 @@ nav:
         - extension: render2D/extension.md
         - plugins:
           - transform: render2D/plugin/qsgPluginTransform.md
+          - drawrect: render2D/plugin/qsgPluginDrawRect.md
+          - drawline: render2D/plugin/qsgPluginDrawLine.md
+          - drawcircle: render2D/plugin/qsgPluginDrawCircle.md
+          - drawellipse: render2D/plugin/qsgPluginDrawEllipse.md
+          - drawfree: render2D/plugin/qsgPluginDrawFree.md
+          - drawpoly: render2D/plugin/qsgPluginDrawPoly.md
+          - drawpoint: render2D/plugin/qsgPluginDrawPoint.md
+          - editnode: render2D/plugin/qsgPluginEditNode.md
+          - select0: render2D/plugin/qsgPluginSelect0.md
+          - select: render2D/plugin/qsgPluginSelect.md
           - extension: render2D/plugin/extension.md
-      # - storage: 
+      - storage: 
+          - fsStorage: storage/fsStorage.md
       #   - stgData: storage/stgData.md
       #   - fsStorage0: storage/fsStorage0.md
+      - qml-ui:
+        - basic: 
+          - dialog: qml-ui/basic/dialog
+        - pipe:
+          - dialog: qml-ui/pipe/dialog
     - About: about.md
 theme: readthedocs
