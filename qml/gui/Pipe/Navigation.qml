@@ -11,6 +11,6 @@ Navigation0 {
         Pipeline.add(function(aInput){
             menu = aInput.data()
             aInput.out()
-        }, {name: name + "_updateNavigation", type: "Partial", vtype: "array"})
+        }, {name: name + "_updateNavigation", type: "Partial"})
     }
 }

@@ -14,7 +14,7 @@ List0 {
     Component.onCompleted: {
         Pipeline.add(function(aInput){
             aInput.setData(selects).out()
-        }, {name: name + "_listViewSelected", type: "Partial", vtype: "array"})
+        }, {name: name + "_listViewSelected", type: "Partial"})
 
         Pipeline.add(function(aInput){
             updateList(aInput.data())

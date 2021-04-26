@@ -10,6 +10,6 @@ LineChart0 {
         Pipeline.add(function(aInput){
             updateModel(aInput.data())
             aInput.out()
-        }, {name: name + "_updateLineChart", vtype: "array"})
+        }, {name: name + "_updateLineChart"})
     }
 }

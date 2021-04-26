@@ -15,6 +15,6 @@ Status0{
         Pipeline.add(function(aInput){
             updateStatus(aInput.data())
             aInput.out()
-        }, {name: name + "_updateStatus", vtype: "array"})
+        }, {name: name + "_updateStatus"})
     }
 }

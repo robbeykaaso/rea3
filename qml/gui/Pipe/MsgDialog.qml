@@ -11,12 +11,12 @@ MessageDialog {
     onAccepted: {
         if (!cache["ok"]){
             cache["ok"] = true
-            Pipeline.run("messagePoped", cache, service_tag, false)
+            Pipeline.run("messagePoped", cache, service_tag)
         }
     }
 
     onRejected: {
-        Pipeline.run("messagePoped", cache, service_tag, false)
+        Pipeline.run("messagePoped", cache, service_tag)
     }
 
     Component.onCompleted: {

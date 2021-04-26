@@ -4,5 +4,52 @@
         <file>html/rea.js</file>
         <file>html/reaCplus.js</file>
         <file>qml/gui/Pipe/DynamicQML.qml</file>
+        <file>qml/gui/Basic/AutoSize.qml</file>
+        <file>qml/gui/Basic/Check.qml</file>
+        <file>qml/gui/Basic/Combo.qml</file>
+        <file>qml/gui/Basic/ComboE.qml</file>
+        <file>qml/gui/Basic/Edit.qml</file>
+        <file>qml/gui/Basic/EditCombo.qml</file>
+        <file>qml/gui/Basic/Flip.qml</file>
+        <file>qml/gui/Basic/Gridder0.qml</file>
+        <file>qml/gui/Basic/Histogram0.qml</file>
+        <file>qml/gui/Basic/LineChart0.qml</file>
+        <file>qml/gui/Basic/List0.qml</file>
+        <file>qml/gui/Basic/Log0.qml</file>
+        <file>qml/gui/Basic/Matrix0.qml</file>
+        <file>qml/gui/Basic/Navigation0.qml</file>
+        <file>qml/gui/Basic/Nest.qml</file>
+        <file>qml/gui/Basic/PageList0.qml</file>
+        <file>qml/gui/Basic/PageSelect.qml</file>
+        <file>qml/gui/Basic/PWindow0.qml</file>
+        <file>qml/gui/Basic/Radio.qml</file>
+        <file>qml/gui/Basic/Search0.qml</file>
+        <file>qml/gui/Basic/Sizable.qml</file>
+        <file>qml/gui/Basic/Spin.qml</file>
+        <file>qml/gui/Basic/Status0.qml</file>
+        <file>qml/gui/Basic/Swipe.qml</file>
+        <file>qml/gui/Basic/THistogram.qml</file>
+        <file>qml/gui/Basic/Track.qml</file>
+        <file>qml/gui/Basic/TreeView0.qml</file>
+        <file>qml/gui/Basic/TWindow.qml</file>
+        <file>qml/gui/Pipe/ColorSelect.qml</file>
+        <file>qml/gui/Pipe/File.qml</file>
+        <file>qml/gui/Pipe/Gridder.qml</file>
+        <file>qml/gui/Pipe/Histogram.qml</file>
+        <file>qml/gui/Pipe/LineChart.qml</file>
+        <file>qml/gui/Pipe/List.qml</file>
+        <file>qml/gui/Pipe/Log.qml</file>
+        <file>qml/gui/Pipe/Matrix.qml</file>
+        <file>qml/gui/Pipe/MsgDialog.qml</file>
+        <file>qml/gui/Pipe/Navigation.qml</file>
+        <file>qml/gui/Pipe/PageList.qml</file>
+        <file>qml/gui/Pipe/Progress.qml</file>
+        <file>qml/gui/Pipe/PWindow.qml</file>
+        <file>qml/gui/Pipe/Search.qml</file>
+        <file>qml/gui/Pipe/Status.qml</file>
+        <file>qml/gui/Pipe/TreeNodeView/TreeNode.qml</file>
+        <file>qml/gui/Pipe/TreeNodeView/TreeNodeDelete.qml</file>
+        <file>qml/gui/Pipe/TreeNodeView/TreeNodeTag.qml</file>
+        <file>qml/gui/Pipe/TreeNodeView/TreeNodeView.qml</file>
     </qresource>
 </RCC>

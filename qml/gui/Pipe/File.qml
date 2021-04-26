@@ -18,16 +18,16 @@ FileDialog {
             // unescape html codes like '%23' for '#'
             //pths += fileUrls[i].substring(8, fileUrls[i].length) + ";"
         }
-        Pipeline.run(name + "_fileSelected", pths, service_tag, false)
+        Pipeline.run(name + "_fileSelected", pths, service_tag)
     }
     onRejected: {
-        Pipeline.run(name + "_fileSelected", [], service_tag, false)
+        Pipeline.run(name + "_fileSelected", [], service_tag)
     }
 
     Component.onCompleted: {
         Pipeline.add(function(aInput){
             aInput.out()
-        }, {name: name + "_fileSelected", type: "Partial", vtype: "array"})
+        }, {name: name + "_fileSelected", type: "Partial"})
 
         Pipeline.add(function(aInput){
             var mdl = aInput.data()

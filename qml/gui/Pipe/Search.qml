@@ -11,6 +11,6 @@ Search0 {
         Pipeline.add(function(aInput){
             focus = false
             aInput.setData(text).out()
-        }, {name: name + "_Searched", type: "Partial", vtype: "string"})
+        }, {name: name + "_Searched", type: "Partial"})
     }
 }

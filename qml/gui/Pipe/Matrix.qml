@@ -11,7 +11,7 @@ Matrix0 {
     Component.onCompleted: {
         Pipeline.add(function(aInput){
             aInput.out()
-        }, {name: name + "_matrixSelected", type: "Partial", vtype: "number"})
+        }, {name: name + "_matrixSelected", type: "Partial"})
 
         Pipeline.add(function(aInput){
             updateModel(aInput.data())
