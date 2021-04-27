@@ -3,5 +3,5 @@
 * inherits from ChartView  
 
 # Attribute
-* content: array : the points y data  
+* content: QJsonArray: the points y data  
 </br>

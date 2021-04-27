@@ -2,10 +2,10 @@
 * a spin edit component for qml  
 
 # Attribute
-* caption: the Text object  
-* background: the Rectangle object for background  
-* spin: the Spin object for editting  
-* ratio: the ratio between caption and background  
+* caption: Text object  
+* background: Rectangle object: background  
+* spin: Spin object: edit  
+* ratio: double: the ratio between caption and background  
 _sample_:  
 ```
     Spin{

@@ -2,11 +2,12 @@
 * the treeview component for qml  
 
 # Attribute
-* imagePath: the icon list, the key is decided by the `type` of item  
-* selectWay: the style of the selected item. it includes `color`, `background` and `bold`  
-* selectColor: the background color of selected item  
-* openWay: the way of opening folder. it includes `single`, `double` and `all`  
-* setCurrentSelect: it will be emitted when selecting one item, the output is `id` of item  
+* imagePath: QJsonObject: the icon list, the key is decided by the `type` of item  
+    - [type name]: QString: image path  
+* selectWay: QString: the style of the selected item. it includes `color`, `background` and `bold`  
+* selectColor: QString: the background color of selected item  
+* openWay: QString: the way of opening folder. it includes `single`, `double` and `all`  
+* setCurrentSelect: signal: it will be emitted when selecting one item, the output is `id` of item  
 
 # API
 * **buildDefaultTree(data, select)**  

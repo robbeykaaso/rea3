@@ -2,11 +2,11 @@
 * the list component for qml
 
 # Attribute
-* title: the titles for each column  
-* selects: the selected indexes in the list  
-* selcolor: the selected color  
-* tr: the translation function  
-* signal selected: it will be emitted on selecting items  
+* title: QJsonArray: each column title  
+* selects: QJsonArray: the selected indexes  
+* selcolor: QString: the selected color  
+* tr: function: the translation function  
+* selected: signal: it will be emitted on selecting items  
 </br>
 
 # Performance

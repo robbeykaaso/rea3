@@ -2,8 +2,8 @@
 * the log component for qml  
 
 # Attribute
-* type: the default is `["system", "train"]`, it could be overwritten by customized values  
-* level: the default is `["info", "warning", "error"]`, it could be overwritten by customized values  
+* type: QJsonArray: default is `["system", "train"]`  
+* level: QJsonArray: default is `["info", "warning", "error"]`  
 _sample_:
 ```
     Log{

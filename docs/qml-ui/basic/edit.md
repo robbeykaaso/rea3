@@ -2,10 +2,10 @@
 * the text edit component for qml  
 
 # Attribute
-* caption: the Text object  
-* background: the Rectangle object for background  
-* input: the TextInput object for editing  
-* ratio: the ratio between caption and background  
+* caption: Text object  
+* background: Rectangle object: background  
+* input: TextInput object: edit  
+* ratio: double: the ratio between caption and background  
 _sample_:  
 ```
     Edit{

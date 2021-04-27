@@ -5,6 +5,7 @@ import Pipeline 1.0
 FileDialog {
     property string name
     property string service_tag
+    property var service_scope
 
     title: Pipeline.tr("Please choose files")
     selectMultiple: true
@@ -18,10 +19,10 @@ FileDialog {
             // unescape html codes like '%23' for '#'
             //pths += fileUrls[i].substring(8, fileUrls[i].length) + ";"
         }
-        Pipeline.run(name + "_fileSelected", pths, service_tag)
+        Pipeline.run(name + "_fileSelected", pths, service_tag, service_scope)
     }
     onRejected: {
-        Pipeline.run(name + "_fileSelected", [], service_tag)
+        Pipeline.run(name + "_fileSelected", [], service_tag, service_scope)
     }
 
     Component.onCompleted: {
@@ -42,6 +43,7 @@ FileDialog {
             }
             selectExisting = mdl["save"] === undefined
             service_tag = aInput.tag()
+            service_scope = aInput.scope()
             open()
         }, {name: name + "_selectFile", type: "Delegate", delegate: name + "_fileSelected"})
     }

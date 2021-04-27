@@ -4,11 +4,10 @@ import Pipeline 1.0
 
 List0 {
     property string name: ""
-    property string selectSuffix: ""
 
     tr: Pipeline.tr
     onSelected: {
-        Pipeline.run(name + "_listViewSelected", [], selectSuffix + "manual")
+        Pipeline.run(name + "_listViewSelected", [], "manual")
     }
 
     Component.onCompleted: {

@@ -1,19 +1,24 @@
 # Abstract
-the wrapper of matrix0  
+* the wrapper of matrix0  
 
 # Attribute
-* name: the instance name  
+* name: QString: the instance name  
 </br>
 
 # API Pipe
 * **name + _updateMatrix**  
     - update the matrix show  
-    - input: QJsonObject  
-    - output: QJsonObject  
     - type: pipe  
+    - pipeline: qml; trigger  
+    - input: QJsonObject:  
+        - rowcap: QString: row title  
+        - colcap: QString: column title  
+        - content: QJsonArray: maxtrix data  
+            - QJsonArray: each row data  
+    - output: input  
 _sample_:  
 ```
-Pipeline.run("_updateMatrix", {rowcap: "hello2",  //the row title
+Pipeline.run("_updateMatrix", { rowcap: "hello2",  //the row title
                                 colcap: "world2",  //the column title
                                 content: [[1, 2, 3, 4],  //the content
                                           [5, 6, 7, 8],
@@ -24,11 +29,8 @@ Pipeline.run("_updateMatrix", {rowcap: "hello2",  //the row title
 </br>
 
 * **name + _matrixSelected**
-    - output the 1D index in the content. its type is PipePartial  
-    - output: number  
-    - type: pipe  
-</br>
-
-# Test and Demo
-test.qml: qsTr("matrix")  
+    - get the 1D index in the content  
+    - type: pipePartial  
+    - pipeline: qml; listener  
+    - output: double: selected index  
 </br>

@@ -1,8 +1,8 @@
 # Abstract
-the wrapper of list0  
+* the wrapper of pagelist0  
 
 # Attribute
-* name: the instance name  
+* name: QString: the instance name  
 _sample_:  
 ```
     PageList{
@@ -14,9 +14,18 @@ _sample_:
 # API Pipe
 * **name + _updateListView**  
     - renew the list gui by model data  
-    - input: QJsonObject  
-    - output: QJsonObject  
     - type: pipe  
+    - pipeline: qml; trigger  
+    - input: QJsonObject:  
+        - title: QJsonArray: each column title  
+        - selects: QJsonArray: selected items indexes  
+        - fontclr: QString: entry font color  
+        - data: QJsonArray: entry data  
+            - QJsonObject: each entry  
+                - entry: QJsonArray: each column data  
+        - entrycount: int: entrycount for each page  
+        - pageindex: int: current page index  
+    - output: input  
 _sample_:  
 ```
     Pipeline.run("_updateListView", {title: ["cat", "dog", "sheep", "rat"],  //the list title names
@@ -36,16 +45,13 @@ _sample_:
 
 * **name + _listViewSelected**  
     - output the selected indexes in the list  
+    - type: pipePartial  
+    - pipeline: qml; listener  
     - output: QJsonArray  
-    - type: pipePartial: tag: "manual"  
 _sample_:  
 ```
-    Pipeline.find("_listViewSelected").next(function(aInput){
+    Pipeline.find("_listViewSelected").nextF(function(aInput){
         console.log(aInput)
-    }, "manual", {vtype: "array"})  //"manual"
+    }, "manual")
 ```  
-</br>
-
-# Test and Demo
-test.qml: qsTr("pagelist")  
 </br>

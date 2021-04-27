@@ -2,11 +2,11 @@
 * the track component for qml  
 
 # Attribute
-* caption: the Text object  
+* caption: QString: the Text object  
 * slider: the Slider object  
-* ratio: the ratio between caption and background  
-* interval: the interval count  
-* signal indexChanged: it will be emitted when the value changes  
+* ratio: double: the ratio between caption and background  
+* interval: int: the interval count  
+* indexChanged: signal: it will be emitted when the value changes  
 _sample_:  
 ```
     Track{

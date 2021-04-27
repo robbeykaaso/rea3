@@ -1,19 +1,15 @@
 # Abstract
-the wrapper of navigation0  
+* the wrapper of navigation0  
 
 # Attribute
-* name: the instance name  
+* name: QString: the instance name  
 </br>
 
 # API Pipe
 * **name + _updateNavigation**  
-    - update the content in the navigation
-    - input: QJsonArray  
-    - output: QJsonArray  
+    - update the content in the navigation  
     - type: pipePartial  
-    - tag: manual
-</br>
-
-# Test and Demo
-test.qml: qsTr("navigation")
+    - pipeline: qml; trigger  
+    - input: QJsonArray: sequencial menu names  
+    - output: input  
 </br>

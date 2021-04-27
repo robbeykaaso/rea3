@@ -2,10 +2,16 @@
 * the uniform window component for qml  
 
 # Attribute
-* caption: the title of the window  
-* content: the content of the window
-* titlebuttons: the head buttons on the title bar
-* footbuttons: the foot buttons on the window foot  
+* caption: QString: the title of the window  
+* content: QMLObject: the content of the window  
+* titlebuttons: QJsonArray: the head buttons on the title bar  
+    - QJsonObject: each button  
+        - cap: QString: button caption  
+        - func: function: button function  
+* footbuttons: QJsonArray: the foot buttons on the window foot  
+    - QJsonObject: each button  
+        - cap: QString: button caption  
+        - func: function: button function  
 _sample_:
 ```
     TWindow{

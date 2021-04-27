@@ -14,6 +14,8 @@ protected:
     void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag) override;
 };
 
+class qmlPipeline;
+
 class qmlScopeCache : public QObject{
     Q_OBJECT
 public:
@@ -23,6 +25,7 @@ public:
     Q_INVOKABLE QJSValue data(const QString& aName);
 private:
     std::shared_ptr<scopeCache> m_scope;
+    friend qmlPipeline;
 };
 
 class DSTDLL qmlStream : public QObject{
@@ -90,7 +93,7 @@ public:
 public:
     static QObject *qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine);
 public:
-    static Q_INVOKABLE QJSValue run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject());
+    static Q_INVOKABLE QJSValue run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJSValue& aScope = QJSValue::NullValue);
     static Q_INVOKABLE QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject());
     static Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject(), bool aAutoTag = false);
     static Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);

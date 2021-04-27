@@ -2,13 +2,13 @@
 * the pagelist component for qml
 
 # Attribute
-* title: the titles for each column  
-* selects: the selected indexes in the list  
-* selcolor: the selected color  
-* tr: the translation function  
-* entrycount: the entry count for each page  
-* pageindex: the current page index  
-* signal selected: it will be emitted on selecting items  
+* title: QJsonArray: each column title  
+* selects: QJsonArray: the selected indexes  
+* selcolor: QString: the selected color  
+* tr: function: the translation function  
+* entrycount: int: the entry count for each page  
+* pageindex: int: the current page index  
+* selected: signal: it will be emitted on selecting items  
 </br>
 
 # Performance

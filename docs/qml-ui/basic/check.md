@@ -2,9 +2,9 @@
 * the check component for qml  
 
 # Attribute
-* caption: the Text object  
-* check: the CheckBox object
-* ratio: the ratio between caption and background  
+* caption: Text object  
+* check: CheckBox object  
+* ratio: double: the ratio between caption and background  
 _sample_:  
 ```
     Check{

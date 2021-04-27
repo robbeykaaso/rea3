@@ -2,10 +2,10 @@
 * the combobox component for qml  
 
 # Attribute
-* caption: the Text object  
-* background: the Rectangle object for background  
-* combo: the ComboBox object for selecting  
-* ratio: the ratio between caption and background  
+* caption: Text object  
+* background: Rectangle object: background  
+* combo: ComboBox object  
+* ratio: double: the ratio between caption and background  
 _sample_:  
 ```
     Combo{

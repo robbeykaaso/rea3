@@ -2,9 +2,9 @@
 * an automatic grid component for qml  
 
 # Attribute
-* name: a grid name and also the prefix of its item name, the item name is `name + "_gridder" + index`  
-* com: the component of the grid item, it must have `width`, `height` and `name` attributes  
-* size: the grid size. if it is integer, the layout will be automatically calculated. else if it is an array, the layout will be specified by the size  
+* name: QString: a grid name and also the prefix of its item name, the item name is `name + "_gridder" + index`  
+* com: Component: the component of the grid item, it must have `width`, `height` and `name` attributes  
+* size: int or QJsonArray: the grid size. if it is integer, the layout will be automatically calculated. else if it is an array, the layout will be specified by the size  
 _sample_:  
 ```
 Gridder{

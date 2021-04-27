@@ -2,10 +2,11 @@
 * a matrix component for qml  
 
 # Attribute
-* rowcap: the row title Label  
-* colcap: the column title Label  
-* content: the matrix data, it is a 2D array  
-* signal selected: emit the signal when the item is selected  
+* rowcap: Label object: the row title  
+* colcap: Label object: the column title  
+* content: QJsonArray: the matrix data  
+    - QJsonArray: each line data  
+* selected: signal: it is emitted when the item is selected  
 _sample_:  
 ```
 Matrix{
