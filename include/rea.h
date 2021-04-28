@@ -499,18 +499,6 @@ public:
     }
 protected:
     pipeDelegate(pipeline* aParent, const QString& aName = "", int aThreadNo = 0, bool aReplace = false) : pipe<T, F>(aParent, aName, aThreadNo, aReplace) {}
-    bool event( QEvent* e) override{
-        if(e->type()== pipe0::streamEvent::type){
-            auto eve = reinterpret_cast<pipe0::streamEvent*>(e);
-            if (eve->getName() == pipe0::m_name){
-                auto stm0 = eve->getStream();
-                auto stm = std::dynamic_pointer_cast<stream<T>>(stm0);
-                doEvent(stm);
-                doNextEvent(pipe0::m_next, stm);
-            }
-        }
-        return true;
-    }
     pipe0* initialize(F aFunc, const QJsonObject& aParam = QJsonObject()) override{
         m_delegate = aParam.value("delegate").toString();
         auto del = pipe0::m_parent->find(m_delegate);
@@ -525,6 +513,22 @@ private:
     QString m_delegate;
     QVector<QPair<QString, QString>> m_next2;
     friend pipeline;
+};
+
+template <typename T, typename F>
+class parallelTask : public QRunnable{
+public:
+    parallelTask(pipeParallel<T, F>* aPipe, std::shared_ptr<stream<T>> aStream) : QRunnable(){
+        m_pipe = aPipe;
+        m_source = aStream;
+    }
+    void run() override{
+        m_pipe->doEvent(m_source);
+        m_pipe->doNextEvent(m_pipe->m_next2.value(m_source->tag()), m_source);
+    }
+private:
+    std::shared_ptr<stream<T>> m_source;
+    pipeParallel<T, F>* m_pipe;
 };
 
 template <typename T, typename F>
@@ -555,28 +559,13 @@ protected:
 private:
     QHash<QString, QMap<QString, QString>> m_next2;
     friend pipeline;
-};
-
-template <typename T, typename F>
-class parallelTask : public QRunnable{
-public:
-    parallelTask(pipeParallel<T, F>* aPipe, std::shared_ptr<stream<T>> aStream) : QRunnable(){
-        m_pipe = aPipe;
-        m_source = aStream;
-    }
-    void run() override{
-        m_pipe->doEvent(m_source);
-        m_pipe->doNextEvent(m_pipe->m_next, m_source);
-    }
-private:
-    std::shared_ptr<stream<T>> m_source;
-    pipeParallel<T, F>* m_pipe;
+    friend parallelTask<T, F>;
 };
 
 template <typename T, typename F = pipeFunc<T>>
-class pipeParallel : public pipe<T, F> {
+class pipeParallel : public pipePartial<T, F> {
 protected:
-    pipeParallel(pipeline* aParent, const QString& aName, int aThreadNo = 0, bool aReplace = false) : pipe<T, F>(aParent, aName, aThreadNo, aReplace) {
+    pipeParallel(pipeline* aParent, const QString& aName, int aThreadNo = 0, bool aReplace = false) : pipePartial<T, F>(aParent, aName, aThreadNo, aReplace) {
 
     }
     ~pipeParallel() override{
@@ -625,7 +614,7 @@ public:
     rea::pipeline::instance()->add<aType>([](rea::stream<aType>* aInput){ \
         aInput->out(); \
     }, rea::Json("name", STR(aPipeline##_##aPipe), \
-                 "befored", #aPipe, \
+                 "aftered", #aPipe, \
                  "external", #aPipeline))
 
 #define extendListener(aType, aPipe, aPipeline) \

@@ -186,7 +186,7 @@ class stream {
         let got_ret = false
 
         const monitor = aPipeline.find(aName).nextF(aInput => {
-            ret = new stream(aInput.data(), this.m_tag)
+            ret = new stream(aInput.data(), this.m_tag, aInput.scope())
             got_ret = true
 
         }, this.m_tag)

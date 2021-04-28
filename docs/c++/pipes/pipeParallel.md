@@ -1,5 +1,6 @@
 # Abstract
-* execute the function in a thread pool with 8 threads
+* execute the function in a thread pool with 8 threads  
+* inherit from `pipePartial`  
 ```
     aInput -> pipeParallel(threadPool) -> output
     aInput -> pipeParallel(threadPool) -> output

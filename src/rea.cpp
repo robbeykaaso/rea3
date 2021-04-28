@@ -97,9 +97,6 @@ pipe0::pipe0(pipeline* aParent, const QString& aName, int aThreadNo, bool aRepla
 
 void pipe0::resetTopo(){
     m_next.clear();
-    m_before = "";
-    m_around = "";
-    m_after = "";
 }
 
 pipe0* pipe0::nextP(pipe0* aNext, const QString& aTag){
