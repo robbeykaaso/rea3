@@ -8,39 +8,6 @@
 
 namespace rea {
 
-QString QSImage::uri(){
-    return "data:image/png;base64, " + rea::QImage2Base64(*this);
-}
-
-QVariant storageCache::cache(const QVariant& aData, const QString& aTag){
-    if (aData.type() == QVariant::Type::Map)
-        cache(aData.toJsonObject(), aTag);
-    else if (aData.type() == QVariant::Type::List)
-        cache(aData.toJsonArray(), aTag);
-    else if (aData.type() == QVariant::Type::String)
-        cache(aData.toString(), aTag);
-    else if (aData.type() == QVariant::Type::Bool)
-        cache(aData.toBool(), aTag);
-    else if (aData.type() == QVariant::Type::Double)
-        cache(aData.toDouble(), aTag);
-    else{
-        std::cout << aData.type() << std::endl;
-        assert(0);
-    }
-    return QVariant::fromValue(this);
-}
-
-QVariant storageCache::nextQData(){
-    m_cur++;
-    if (m_cur > int(m_data.size()) - 1){
-        m_cur = - 1;
-        return QVariant();
-    }
-    auto tmp = m_data.at(size_t(m_cur))->QData();
-    tmp = QVariant::fromValue<QObject*>(this);
-    return tmp;
-}
-
 void fsStorage::checkPath(const QString &aPath){
     auto dirs = aPath.split("/");
     QDir dir;
@@ -65,7 +32,7 @@ QString fsStorage::stgRoot(const QString& aPath){
         return m_root + "/" + aPath;
 }
 
-bool fsStorage::writeSImage(const QString& aPath, const QSImage& aData){
+bool fsStorage::writeImage(const QString& aPath, const QImage& aData){
     auto pth = stgRoot(aPath);
     checkPath(pth);
     return aData.save(pth);
@@ -83,33 +50,30 @@ bool fsStorage::writeByteArray(const QString& aPath, const QByteArray& aData){
     return false;
 }
 
-QJsonObject fsStorage::readJsonObject(const QString& aPath){
-    QJsonObject ret;
+bool fsStorage::readJsonObject(const QString& aPath, QJsonObject& aData){
     QFile fl(stgRoot(aPath));
     if (fl.open(QFile::ReadOnly)){
         QJsonDocument doc = QJsonDocument::fromJson(fl.readAll());
-        ret = doc.object();
+        aData = doc.object();
         fl.close();
-    }else{
-//        qDebug() << "read json: " + aPath + " failed!\n";
+        return true;
     }
-    return ret;
+    return false;
 }
 
-QSImage fsStorage::readSImage(const QString& aPath){
-    return QSImage(stgRoot(aPath));
+bool fsStorage::readImage(const QString& aPath, QImage& aData){
+    aData = QImage(stgRoot(aPath));
+    return !aData.isNull();
 }
 
-QByteArray fsStorage::readByteArray(const QString& aPath){
-    QByteArray ret;
+bool fsStorage::readByteArray(const QString& aPath, QByteArray& aData){
     QFile fl(stgRoot(aPath));
     if (fl.open(QFile::ReadOnly)){
-        ret = fl.readAll();
+        aData = fl.readAll();
         fl.close();
-    }else{
-//        qDebug() << "read bytearray: " + aPath + " failed!\n";
+        return true;
     }
-    return ret;
+    return false;
 }
 
 void fsStorage::deletePath(const QString& aPath){
@@ -136,57 +100,36 @@ std::vector<QString> fsStorage::getFileList(const QString& aPath){
     return ret;
 }
 
-fsStorage::fsStorage(const QString& aRoot){
-    m_root = aRoot;
-
-    pipeline::instance()->supportType<std::shared_ptr<storageCache>>([](stream0* aInput){
-        auto ret = reinterpret_cast<stream<std::shared_ptr<storageCache>>*>(aInput)->data().get();
-        return QVariant::fromValue<QObject*>(new storageCache(*ret));
-    });
-
+void fsStorage::initialize(){
+//https://blog.csdn.net/github_37382319/article/details/104723421 for file system
     READSTORAGE(JsonObject);
     READSTORAGE(ByteArray);
-    //READSTORAGE(SImage);
-
-    rea::pipeline::instance()->add<bool, pipeParallel>([this](rea::stream<bool>* aInput) { \
-        QString pth;
-        QSImage tmp;
-        auto dt = aInput->scope()->data<std::shared_ptr<storageCache>>("data"); \
-        if (dt->reset()->nextData(tmp, pth)){
-            dt->cache(readSImage(pth), pth);
-            aInput->setData(true);
-        }else
-            aInput->setData(false);
-        aInput->out();
-    }, rea::Json("name", m_root + "readSImage"));
-
+    READSTORAGE(Image);
     WRITESTORAGE(JsonObject);
     WRITESTORAGE(ByteArray);
-    WRITESTORAGE(SImage);
+    WRITESTORAGE(Image);
 
     rea::pipeline::instance()->add<QString, pipePartial>([this](rea::stream<QString>* aInput){
         auto fls = listFiles(aInput->data());
-        QJsonArray ret;
-        for (auto i : fls)
-            ret.push_back(i);
-        aInput->scope()->cache("data", std::make_shared<storageCache>()->cache(ret));
+        aInput->scope()->cache("data", fls);
         aInput->out();
     }, rea::Json("name", m_root + "listFiles"));
 
     rea::pipeline::instance()->add<QString, pipePartial>([this](rea::stream<QString>* aInput){
         std::vector<QString> fls;
         listAllFiles(aInput->data(), fls);
-        QJsonArray ret;
-        for (auto i : fls)
-            ret.push_back(i);
-        aInput->scope()->cache("data", std::make_shared<storageCache>()->cache(ret));
+        aInput->scope()->cache("data", fls);
         aInput->out();
     }, rea::Json("name", m_root + "listAllFiles"));
 
-    rea::pipeline::instance()->add<QString, pipeParallel>([this](rea::stream<QString>* aInput){
+    rea::pipeline::instance()->add<QString, pipePartial>([this](rea::stream<QString>* aInput){
         deletePath(aInput->data());
         aInput->out();
-    }, rea::Json("name", m_root + "deletePath"));
+    }, rea::Json("name", m_root + "deletePath", "thread", 11));
+}
+
+fsStorage::fsStorage(const QString& aRoot){
+    m_root = aRoot;
 }
 
 /*bool safetyWrite(const QString& aPath, const QByteArray& aData){

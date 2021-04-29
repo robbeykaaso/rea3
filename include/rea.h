@@ -614,7 +614,7 @@ public:
     rea::pipeline::instance()->add<aType>([](rea::stream<aType>* aInput){ \
         aInput->out(); \
     }, rea::Json("name", STR(aPipeline##_##aPipe), \
-                 "aftered", #aPipe, \
+                 "befored", #aPipe, \
                  "external", #aPipeline))
 
 #define extendListener(aType, aPipe, aPipeline) \
