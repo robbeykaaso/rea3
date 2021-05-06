@@ -28,24 +28,10 @@ protected:
     virtual std::vector<QString> getFileList(const QString& aPath);
     virtual QString stgRoot(const QString& aPath);
     void checkPath(const QString& aPath);
+    void listAllFiles(const QString& aDirectory, std::vector<QString>& aList);
 protected:
     QString m_root;
-private:
-    void listAllFiles(const QString& aDirectory, std::vector<QString>& aList);
 };
-
-#define READSTORAGE(aType) \
-    rea::pipeline::instance()->add<bool, pipePartial>([this](rea::stream<bool>* aInput) { \
-        Q##aType dt; \
-        auto ret = read##aType(aInput->scope()->data<QString>("path"), dt); \
-        aInput->scope()->cache("data", dt); \
-        aInput->setData(ret)->out(); \
-    }, rea::Json("name", m_root + STR(read##aType), "thread", 10))
-
-#define WRITESTORAGE(aType) \
-    rea::pipeline::instance()->add<bool, pipePartial>([this](rea::stream<bool>* aInput){ \
-        aInput->setData(write##aType(aInput->scope()->data<QString>("path"), aInput->scope()->data<Q##aType>("data")))->out(); \
-}, rea::Json("name", m_root + STR(write##aType), "thread", 11))
 
 }  // namespace rea
 

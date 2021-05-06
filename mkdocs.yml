@@ -54,10 +54,10 @@ nav:
           - select0: render2D/plugin/qsgPluginSelect0.md
           - select: render2D/plugin/qsgPluginSelect.md
           - extension: render2D/plugin/extension.md
-      #- storage: 
-      #  - fsStorage: storage/fsStorage.md
-      #   - stgData: storage/stgData.md
-      #   - fsStorage0: storage/fsStorage0.md
+      - storage: 
+        - fsStorage: storage/fsStorage.md
+        - plugins:
+          - awsStorage: storage/plugins/awsStorage.md
       - qml-ui:
         - basic: 
           - autosize: qml-ui/basic/autosize.md

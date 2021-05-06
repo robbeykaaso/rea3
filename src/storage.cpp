@@ -101,6 +101,20 @@ std::vector<QString> fsStorage::getFileList(const QString& aPath){
 }
 
 void fsStorage::initialize(){
+
+#define READSTORAGE(aType) \
+    rea::pipeline::instance()->add<bool, rea::pipePartial>([this](rea::stream<bool>* aInput) { \
+        Q##aType dt; \
+        auto ret = read##aType(aInput->scope()->data<QString>("path"), dt); \
+        aInput->scope()->cache("data", dt); \
+        aInput->setData(ret)->out(); \
+    }, rea::Json("name", m_root + STR(read##aType), "thread", 10))
+
+#define WRITESTORAGE(aType) \
+    rea::pipeline::instance()->add<bool, rea::pipePartial>([this](rea::stream<bool>* aInput){ \
+        aInput->setData(write##aType(aInput->scope()->data<QString>("path"), aInput->scope()->data<Q##aType>("data")))->out(); \
+}, rea::Json("name", m_root + STR(write##aType), "thread", 11))
+
 //https://blog.csdn.net/github_37382319/article/details/104723421 for file system
     READSTORAGE(JsonObject);
     READSTORAGE(ByteArray);
