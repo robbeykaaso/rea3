@@ -508,6 +508,10 @@ class pipePartial extends pipe{
             delete this.m_next2[i][aName]
     }
 
+    resetTopo(){
+        this.m_next2 = {}
+    }
+
     execute(aStream){
         this.doEvent(aStream)
         this.doNextEvent(this.m_next2[aStream.tag()], aStream)
@@ -529,6 +533,10 @@ class pipeDelegate extends pipe{
     }
     insertNext(aName, aTag){
         this.m_next2.push([aName, aTag])
+    }
+    resetTopo(){
+        this.m_next2 = []
+        this.m_parent.find(this.m_delegate).resetTopo()
     }
     execute(aStream){
         this.doEvent(aStream)

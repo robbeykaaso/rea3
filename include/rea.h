@@ -141,7 +141,10 @@ protected:
         QString m_name;
         std::shared_ptr<stream0> m_stream;
     };
-    pipe0(pipeline* aParent, const QString& aName = "", int aThreadNo = 0, bool aReplace = false);
+
+    pipe0(pipeline* aParent, const QString& aName = "", int aThreadNo = 0);
+    void inPool(bool aReplace);
+    virtual void replaceTopo(pipe0* aOldPipe);
     virtual void insertNext(const QString& aName, const QString& aTag) {
         m_next.insert(aName, aTag);
     }
@@ -198,7 +201,8 @@ public:
     template<typename T, template<class, typename> class P = pipe, typename F = pipeFunc<T>, typename S = pipeFunc<T>>
     pipe0* add(F aFunc, const QJsonObject& aParam = QJsonObject()){
         auto nm = aParam.value("name").toString();
-        auto tmp = new P<T, S>(this, nm, aParam.value("thread").toInt(), aParam.value("replace").toBool());  //https://stackoverflow.com/questions/213761/what-are-some-uses-of-template-template-parameters
+        auto tmp = new P<T, S>(this, nm, aParam.value("thread").toInt());  //https://stackoverflow.com/questions/213761/what-are-some-uses-of-template-template-parameters
+        tmp->inPool(aParam.value("replace").toBool());
         if (nm != ""){
             auto ad = tmp->actName() + "_pipe_add";
             if (m_pipes.contains(ad)){
@@ -231,6 +235,7 @@ public:
         auto ret = m_pipes.value(aName);
         if (!ret && aNeedFuture){
             ret = new pipeFuture(this, aName);
+            ret->inPool(false);
         }
         return ret;
     }
@@ -416,7 +421,7 @@ public:
 template <typename T, typename F>
 class pipe : public pipe0{
 protected:
-    pipe(pipeline* aParent, const QString& aName = "", int aThreadNo = 0, bool aReplace = false) : pipe0(aParent, aName, aThreadNo, aReplace) {}
+    pipe(pipeline* aParent, const QString& aName = "", int aThreadNo = 0) : pipe0(aParent, aName, aThreadNo) {}
     virtual pipe0* initialize(F aFunc, const QJsonObject& aParam = QJsonObject()){
         m_func = aFunc;
         m_external = aParam.value("external").toString(m_parent->name());
@@ -497,8 +502,12 @@ public:
     void removeNext(const QString& aName) override{
         pipe0::m_parent->find(m_delegate)->removeNext(aName);
     }
+    void resetTopo() override{
+        m_next2.clear();
+        pipe0::m_parent->find(m_delegate)->resetTopo();
+    }
 protected:
-    pipeDelegate(pipeline* aParent, const QString& aName = "", int aThreadNo = 0, bool aReplace = false) : pipe<T, F>(aParent, aName, aThreadNo, aReplace) {}
+    pipeDelegate(pipeline* aParent, const QString& aName = "", int aThreadNo = 0) : pipe<T, F>(aParent, aName, aThreadNo) {}
     pipe0* initialize(F aFunc, const QJsonObject& aParam = QJsonObject()) override{
         m_delegate = aParam.value("delegate").toString();
         auto del = pipe0::m_parent->find(m_delegate);
@@ -508,6 +517,10 @@ protected:
     }
     void insertNext(const QString& aName, const QString& aTag) override{
         m_next2.push_back(QPair<QString, QString>(aName, aTag));
+    }
+    void replaceTopo(pipe0* aOldPipe) override{
+        pipe0::replaceTopo(aOldPipe);
+        m_next2 = reinterpret_cast<pipeDelegate<T, F>*>(aOldPipe)->m_next2;
     }
 private:
     QString m_delegate;
@@ -538,12 +551,19 @@ public:
         for (auto i = m_next2.begin(); i != m_next2.end(); ++i)  //: for will not remove
             i.value().remove(aName);
     }
+    void resetTopo() override{
+        m_next2.clear();
+    }
 protected:
-    pipePartial(pipeline* aParent, const QString& aName, int aThreadNo = 0, bool aReplace = false) : pipe<T, F>(aParent, aName, aThreadNo, aReplace) {
+    pipePartial(pipeline* aParent, const QString& aName, int aThreadNo = 0) : pipe<T, F>(aParent, aName, aThreadNo) {
 
     }
     void insertNext(const QString& aName, const QString& aTag) override {
         rea::tryFind(&m_next2, aTag)->insert(aName, aTag);
+    }
+    void replaceTopo(pipe0* aOldPipe) override{
+        pipe0::replaceTopo(aOldPipe);
+        m_next2 = reinterpret_cast<pipePartial<T, F>*>(aOldPipe)->m_next2;
     }
     bool event( QEvent* e) override{
         if(e->type()== pipe0::streamEvent::type){
@@ -565,7 +585,7 @@ private:
 template <typename T, typename F = pipeFunc<T>>
 class pipeParallel : public pipePartial<T, F> {
 protected:
-    pipeParallel(pipeline* aParent, const QString& aName, int aThreadNo = 0, bool aReplace = false) : pipePartial<T, F>(aParent, aName, aThreadNo, aReplace) {
+    pipeParallel(pipeline* aParent, const QString& aName, int aThreadNo = 0) : pipePartial<T, F>(aParent, aName, aThreadNo) {
 
     }
     ~pipeParallel() override{

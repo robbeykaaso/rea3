@@ -70,7 +70,24 @@ pipe0::~pipe0(){
     pipe_counter--;
 }
 
-pipe0::pipe0(pipeline* aParent, const QString& aName, int aThreadNo, bool aReplace){
+void pipe0::replaceTopo(pipe0* aOldPipe){
+    m_next = aOldPipe->m_next;
+    m_before = aOldPipe->m_before;
+    m_around = aOldPipe->m_around;
+    m_after = aOldPipe->m_after;
+}
+
+void pipe0::inPool(bool aReplace){
+    auto old = m_parent->find(m_name, false);
+    if (old){
+        if (aReplace)
+            replaceTopo(old);
+        m_parent->remove(m_name);
+    }
+    m_parent->m_pipes.insert(m_name, this);
+}
+
+pipe0::pipe0(pipeline* aParent, const QString& aName, int aThreadNo){
     pipe_counter++;
     m_parent = aParent;
     m_external = aParent->name();
@@ -82,17 +99,6 @@ pipe0::pipe0(pipeline* aParent, const QString& aName, int aThreadNo, bool aRepla
         m_thread = m_parent->findThread(aThreadNo);
         moveToThread(m_thread);
     }
-    auto old = m_parent->find(m_name, false);
-    if (old){
-        if (aReplace){
-            m_next = old->m_next;
-            m_before = old->m_before;
-            m_around = old->m_around;
-            m_after = old->m_after;
-        }
-        m_parent->remove(m_name);
-    }
-    m_parent->m_pipes.insert(m_name, this);
 }
 
 void pipe0::resetTopo(){
@@ -248,7 +254,7 @@ void pipeline::execute(const QString& aName, std::shared_ptr<stream0> aStream, c
         auto nxts = aSync.value("next").toArray();
         for (auto i : nxts){
             auto nxt = i.toArray();
-            pip->insertNext(nxt[0].toString(), nxt[1].toString());
+            pip->next(nxt[0].toString(), nxt[1].toString());
         }
         pip->setAspect(pip->m_before, aSync.value("before").toString());
         pip->setAspect(pip->m_after, aSync.value("after").toString());
@@ -278,6 +284,7 @@ pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0 (aParent
 
     if (m_parent->find(aName + "_pipe_add", false)){  //there will be another pipeFuture before, this future should inherit its records before it is removed
         auto pip = new pipeFuture0(m_parent, aName);
+        pip->inPool(false);
         m_parent->call<int>(aName + "_pipe_add", 0);
         for (auto i : pip->m_next2)
             insertNext(i.first, i.second);
@@ -314,6 +321,7 @@ void pipeline::remove(const QString& aName, bool aOutside){
         pip = find(aName + "_pipe_add", false);
         if (pip){
             pip = new pipeFuture0(this, aName);
+            pip->inPool(false);
             call<int>(aName + "_pipe_add", 0);
             remove(aName + "_pipe_add", false);
             remove(aName, false);
