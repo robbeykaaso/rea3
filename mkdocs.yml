@@ -77,7 +77,7 @@ nav:
           - navigation0: qml-ui/basic/navigation0.md
           - nest: qml-ui/basic/nest.md
           - pagelist0: qml-ui/basic/pagelist0.md
-#              - pwindow0: qml-ui/basic/pwindow0.md
+          - pwindow0: qml-ui/basic/pwindow0.md
           - radio: qml-ui/basic/radio.md
           - search0: qml-ui/basic/search0.md
           - sizable: qml-ui/basic/sizable.md
@@ -102,7 +102,7 @@ nav:
           - navigation: qml-ui/pipe/navigation.md
           - pagelist: qml-ui/pipe/pagelist.md
           - progress: qml-ui/pipe/progress.md
-#              - pwindow: qml-ui/pipe/pwindow.md
+          - pwindow: qml-ui/pipe/pwindow.md
           - search: qml-ui/pipe/search.md
           - status: qml-ui/pipe/status.md
 #              - treeNodeView: qml-ui/pipe/treeNodeView.md

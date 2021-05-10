@@ -4,26 +4,32 @@ import Pipeline 1.0
 
 PWindow0 {
     property string service_tag
+    property var service_scope
     tr: Pipeline.tr
+    customGetParam: function(aTrig){
+        return Pipeline.input("").asyncCall(aTrig).data()
+    }
 
     onAccept: {
         close()
-        Pipeline.run("_objectNew", outputModel(), service_tag)
+        Pipeline.run("_paramSet", outputModel(), service_tag, service_scope)
     }
 
     onReject: {
         close()
-        Pipeline.run("_objectNew", {}, service_tag)
+        Pipeline.run("_paramSet", {}, service_tag, service_scope)
     }
 
     Component.onCompleted: {
         Pipeline.add(function(aInput){
             aInput.out()
-        }, {name: "_objectNew", type: "Partial"})
+        }, {name: "_paramSet", type: "Partial"})
 
         Pipeline.add(function(aInput){
             service_tag = aInput.tag()
+            service_scope = aInput.scope()
             showModel(aInput.data())
-        }, {name: "_newObject", type: "Delegate", delegate: "_objectNew"})
+            aInput.out()
+        }, {name: "_setParam", type: "Delegate", delegate: "_paramSet"})
     }
 }
