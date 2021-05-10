@@ -33,7 +33,7 @@ topo result: pipe0' = pipe4 -> pipe0 -> pipe5
     - <font color="red">aop attributes include `before`, `after`, `around`, `befored`, and `aftered` could only work in the same pipeline</font><br />  
     - <font color="red">if there is a pipe with the same name, the original pipe will be removed</font><br />  
     - <font color="red">the `external` pipe's `next` could only be modified by the specific pipeline</font><br />  
-    - <font color="red">thread 1 is occupied by `asyncCall`</font><br />  
+    - <font color="red">thread 1 is occupied by `asyncCall` on not event level</font><br />  
 </br>
 
 * **pipe0\* find(const QString& aName, bool aNeedFuture = true)**  
@@ -64,10 +64,11 @@ pipeline::instance()->run<int>("pipe0", 0, "service0")
     - `return` the input stream  
 </br>
 
-* **std::shared_ptr<stream<T\>\> asyncCall(const QString& aName, T aInput = T())**  
+* **std::shared_ptr<stream<T\>\> asyncCall(const QString& aName, T aInput = T(), bool aEventLevel = true)**  
     - only execute the specific pipe and its aspects asynchronously  
     - `aName` is the pipe name  
     - `aInput` is the input data  
+    - `aEventLevel` is whether not to block current thread  
     - `return` the output stream  
 </br>
 

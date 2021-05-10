@@ -55,10 +55,11 @@ Pipeline.run("pathSelected", {path: ""}, "service1")
     - `return` the input stream  
 </br>
 
-* **QJSValue asyncCall(const QString& aName, const QJSValue& aInput)**  
+* **QJSValue asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel = true)**  
     - only execute the specific pipe and its aspects asynchronously  
     - `aName` is the pipe name  
     - `aInput` is the input data  
+    - `aEventLevel` is whether not to block current thread  
     - `return` the output stream  
 </br>
 

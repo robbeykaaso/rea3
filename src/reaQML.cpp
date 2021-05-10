@@ -187,14 +187,14 @@ void qmlStream::noOut(){
     m_stream->noOut();
 }
 
-QJSValue qmlStream::asyncCall(const QString& aName){
-    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, pipeline::instance("qml")));
+QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel){
+    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, pipeline::instance("qml")));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam){
-    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, pipeline::instance("qml")));
+QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, bool aEventLevel){
+    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, aEventLevel, pipeline::instance("qml")));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
@@ -304,8 +304,8 @@ QJSValue qmlPipeline::find(const QString& aName){
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlPipeline::asyncCall(const QString& aName, const QJSValue& aInput){
-    auto ret = new qmlStream(pipeline::instance("qml")->asyncCall(aName, aInput.toVariant()));
+QJSValue qmlPipeline::asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel){
+    auto ret = new qmlStream(pipeline::instance("qml")->asyncCall(aName, aInput.toVariant(), aEventLevel));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }

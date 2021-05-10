@@ -29,7 +29,8 @@ _sample_:
             key3: {
                 type: "edit", //default is when value type is string
                 value: "",  //default is ""
-                caption: "key3"  //default is key
+                caption: "key3",  //default is key
+                trig: "" //the custom command to set edit value
             },
             key4: {
                 type: "combo",

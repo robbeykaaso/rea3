@@ -47,9 +47,9 @@ stream0::~stream0(){
     stream_counter--;
 }
 
-/*static QHash<QThread*, QQueue<std::shared_ptr<QEventLoop>>> async_busy;
+/*static QHash<QString, QQueue<std::shared_ptr<QEventLoop>>> async_busy;
 std::shared_ptr<QEventLoop> stream0::waitLastAsync(const QString& aName){
-    auto lops = tryFind(&async_busy, QThread::currentThread());
+    auto lops = tryFind(&async_busy, aName);
     auto lop = std::make_shared<QEventLoop>();
     lops->push_back(lop);
     if (lops->size() > 1){
@@ -59,8 +59,8 @@ std::shared_ptr<QEventLoop> stream0::waitLastAsync(const QString& aName){
     return lop;
 }
 
-void stream0::freeAsync(){
-    auto lops = tryFind(&async_busy, QThread::currentThread());
+void stream0::freeAsync(const QString& aName){
+    auto lops = tryFind(&async_busy, aName);
     lops->pop_front();
     if (lops->size() && lops->front()->isRunning())
         lops->front()->exit();

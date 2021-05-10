@@ -42,8 +42,8 @@ public:
     Q_INVOKABLE QJSValue outs(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
     Q_INVOKABLE QJSValue outsB(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
     Q_INVOKABLE void noOut();
-    Q_INVOKABLE QJSValue asyncCall(const QString& aName);
-    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());
+    Q_INVOKABLE QJSValue asyncCall(const QString& aName, bool aEventLevel = true);
+    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true);
 private:
     std::shared_ptr<stream<QVariant>> m_stream;
 };
@@ -99,7 +99,7 @@ public:
     static Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);
     static Q_INVOKABLE QJSValue add(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());
     static Q_INVOKABLE QJSValue find(const QString& aName);
-    static Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QJSValue& aInput);
+    static Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel = true);
     static Q_INVOKABLE QString tr(const QString& aOrigin);
 };
 

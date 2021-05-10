@@ -7,7 +7,7 @@ PWindow0 {
     property var service_scope
     tr: Pipeline.tr
     customGetParam: function(aTrig){
-        return Pipeline.input("").asyncCall(aTrig).data()
+        return Pipeline.input("", "", {}, true).asyncCall(aTrig).data()
     }
 
     onAccept: {

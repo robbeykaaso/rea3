@@ -77,8 +77,8 @@ public:
         return QVariant();
     }
 protected:
-   // std::shared_ptr<QEventLoop> waitLastAsync(const QString& aName);
-   // void freeAsync();
+    //std::shared_ptr<QEventLoop> waitLastAsync(const QString& aName);
+   // void freeAsync(const QString& aName);
     pipeline* m_parent;
     QString m_tag;
     std::shared_ptr<scopeCache> m_scope;
@@ -259,8 +259,8 @@ public:
     }
 
     template<typename T>
-    std::shared_ptr<stream<T>> asyncCall(const QString& aName, T aInput = T()){
-        return in<T>(aInput)->asyncCall(aName, this);
+    std::shared_ptr<stream<T>> asyncCall(const QString& aName, T aInput = T(), bool aEventLevel = true){
+        return in<T>(aInput)->asyncCall(aName, aEventLevel, this);
     }
 
     template<typename T>
@@ -336,51 +336,50 @@ public:
     }
 
     template<typename S = T>
-    std::shared_ptr<stream<S>> asyncCall(const QString& aName, pipeline* aPipeline = pipeline::instance()){
-        /*std::shared_ptr<stream<S>> ret = nullptr;
-
-        auto loop = waitLastAsync(aName);
-        bool timeout = false;
-        auto monitor = aPipeline->find(aName)->nextF<S>([&loop, &timeout, &ret, this, aName](stream<S>* aInput){
-            ret = map<S>(aInput->data());
-            if (loop->isRunning()){
-                loop->quit();
-                std::cout << "quit: " << loop->isRunning() << std::endl;
-            }else
-                timeout = true;
-        }, m_tag);
-        aPipeline->execute(aName, shared_from_this());
-        if (!timeout){
-            std::cout << aName.toStdString() << " locked" << std::endl;
-            loop->exec();
-            std::cout << aName.toStdString() << " finished" << std::endl;
+    std::shared_ptr<stream<S>> asyncCall(const QString& aName, bool aEventLevel = true, pipeline* aPipeline = pipeline::instance()){
+        std::shared_ptr<stream<S>> ret = nullptr;
+        if (aEventLevel){
+            auto loop = std::make_shared<QEventLoop>(); //waitLastAsync(aName);//
+            bool timeout = false;
+            auto monitor = aPipeline->find(aName)->nextF<S>([&loop, &timeout, &ret, this, aName](stream<S>* aInput){
+                ret = in(aInput->data(), aInput->tag(), aInput->scope());
+                if (loop->isRunning()){
+                    loop->quit();
+                    std::cout << "quit: " << loop->isRunning() << std::endl;
+                }else
+                    timeout = true;
+            }, m_tag);
+            aPipeline->execute(aName, shared_from_this());
+            if (!timeout){
+                std::cout << aName.toStdString() << " locked" << std::endl;
+                loop->exec();
+                std::cout << aName.toStdString() << " finished" << std::endl;
+            }
+            aPipeline->find(aName)->removeNext(monitor->actName());
+            aPipeline->remove(monitor->actName(), true);
+            //freeAsync(aName);
+        }else{
+            std::promise<std::shared_ptr<stream<S>>> pr;
+            auto monitor = aPipeline->find(aName)->nextF<S>([this, &pr, aName](stream<S>* aInput){
+                pr.set_value(in(aInput->data(), aInput->tag(), aInput->scope()));
+            }, m_tag, rea::Json("thread", 1));
+            aPipeline->execute(aName, shared_from_this());
+            auto ft = pr.get_future();
+            std::future_status st;
+            do{
+                st = ft.wait_for(std::chrono::microseconds(5));
+            }while(st != std::future_status::ready);
+            ret = ft.get();
+            aPipeline->find(aName)->removeNext(monitor->actName());
+            aPipeline->remove(monitor->actName(), true);
         }
-        aPipeline->find(aName)->removeNext(monitor->actName());
-        aPipeline->remove(monitor->actName(), true);
-        freeAsync();
-        */
-
-        std::promise<std::shared_ptr<stream<S>>> pr;
-        auto monitor = aPipeline->find(aName)->nextF<S>([this, &pr, aName](stream<S>* aInput){
-            pr.set_value(in(aInput->data(), aInput->tag(), aInput->scope()));
-        }, m_tag, rea::Json("thread", 1));
-        aPipeline->execute(aName, shared_from_this());
-        auto ft = pr.get_future();
-        std::future_status st;
-        do{
-            st = ft.wait_for(std::chrono::microseconds(5));
-        }while(st != std::future_status::ready);
-        auto ret = ft.get();
-        aPipeline->find(aName)->removeNext(monitor->actName());
-        aPipeline->remove(monitor->actName(), true);
-
         return ret; //std::dynamic_pointer_cast<stream<T>>(shared_from_this());
     }
 
     template<typename S = T, template<class, typename> class P = pipe, typename F = pipeFunc<T>, typename R = pipeFunc<T>>
-    std::shared_ptr<stream<S>> asyncCallF(F aFunc, const QJsonObject& aParam = QJsonObject(), pipeline* aPipeline = pipeline::instance()){
+    std::shared_ptr<stream<S>> asyncCallF(F aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true, pipeline* aPipeline = pipeline::instance()){
         auto pip = aPipeline->add<T, P, F, R>(aFunc, aParam);
-        auto ret = asyncCall<S>(pip->actName(), aPipeline);
+        auto ret = asyncCall<S>(pip->actName(), aEventLevel, aPipeline);
         aPipeline->remove(pip->actName());
         return ret;
     }
