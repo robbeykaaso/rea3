@@ -371,6 +371,7 @@ public:
 
 static regPip<QQmlApplicationEngine*> reg_recative2_qml([](stream<QQmlApplicationEngine*>* aInput){
     auto cfg = aInput->scope()->data<QJsonObject>("rea-qml");
+    //qInstallMessageHandler
     if (cfg.value("use").toBool(true)){
         qml_engine = aInput->data();
         //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype

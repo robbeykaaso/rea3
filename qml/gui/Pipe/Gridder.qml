@@ -5,7 +5,7 @@ import Pipeline 1.0
 Gridder0{
     Component.onCompleted: {
         Pipeline.add(function(aInput){
-            updateViewCount(aInput.data()["size"])
+            updateViewCount(aInput.data())
             aInput.out()
         }, {name: name + "_updateViewCount"})
     }
