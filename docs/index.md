@@ -16,7 +16,7 @@
 * *eventloop(qt)*  
 * *ranges(c++20)*  
 * *qtconcurrent(qt6)*  
-* *async(es6)*  
+* *async/await(es6)*  
 
 # Concept  
 * pipe: a function wrapper which does something with some special logic  
