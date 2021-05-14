@@ -265,7 +265,8 @@ QSGNode* qsgBoard::updatePaintNode(QSGNode* aOldNode, UpdatePaintNodeData*){
     }
     if (m_models.size() > 1){
         while (m_updates.size() > 0 && m_updates_model_index.front() < m_models.size() - 1){
-            m_updates.front()(m_trans_node);
+            if (m_updates.front())
+                m_updates.front()(m_trans_node);
             m_updates.pop_front();
             m_updates_model_index.pop_front();
         }
