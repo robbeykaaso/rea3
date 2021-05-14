@@ -33,13 +33,13 @@ Grid{
 
     function updateViewCount(aScale){
         var sum = 0
-        if (aScale["layout"] || aScale["sum"]){
+        if (aScale["layout"] || aScale["sum"] !== undefined){
             if (aScale["layout"]){
                 rows = aScale["layout"][0]
                 columns = aScale["layout"][1]
                 sum = rows * columns
             }
-            if (aScale["sum"])
+            if (aScale["sum"] !== undefined)
                 sum = aScale["sum"]
             if (!aScale["layout"])
                 autoRowsAndColumns(sum)
@@ -62,12 +62,14 @@ Grid{
         if (aScale["invisible"]){
             if (!sum)
                 sum = children.length
-            for (var j = 0; j < children.length; ++j){
+            for (var j = 0; j < sum; ++j){
                 children[j].visible = !aScale["invisible"][j]
                 if (aScale["invisible"][j])
                     sum--
             }
             rows = Math.ceil(sum / columns)
+            if (sum < columns)
+                columns = sum
         }
     }
 
