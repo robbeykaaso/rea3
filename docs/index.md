@@ -14,6 +14,10 @@
 * *reactive program*  
 * *aspect oriented program*  
 * *eventloop*  
+* *ranges(c++20)*
+* *qtconcurrent(qt6)*
+* *async(es6)*
+* "aop(spring)"
 
 # Concept  
 * pipe: a function wrapper which does something with some special logic  
