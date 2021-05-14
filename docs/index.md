@@ -10,14 +10,13 @@
 * support the modularization and distribution for the application with complex structure  
 
 # Rreference
-* *stream program*  
-* *reactive program*  
-* *aspect oriented program*  
-* *eventloop*  
+* *stream program(underscore)*  
+* *reactive program(rxcpp)*  
+* *aspect oriented program(spring)*  
+* *eventloop(qt)*  
 * *ranges(c++20)*  
 * *qtconcurrent(qt6)*  
 * *async(es6)*  
-* "aop(spring)"  
 
 # Concept  
 * pipe: a function wrapper which does something with some special logic  
