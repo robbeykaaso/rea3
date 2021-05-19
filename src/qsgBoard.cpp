@@ -251,17 +251,17 @@ void qsgBoard::installPlugins(const QJsonArray& aPlugins){
 QSGNode* qsgBoard::updatePaintNode(QSGNode* aOldNode, UpdatePaintNodeData*){
     auto ret = aOldNode;
     if (ret == nullptr){
-        /*m_clip_node = new QSGClipNode();
-        m_clip_node->setFlag(QSGNode::OwnedByParent);
-        m_clip_node->setClipRect(boundingRect());
-        m_clip_node->setIsRectangular(true);
-        ret = m_clip_node;*/
+        auto root_node = new QSGNode();
+        root_node->setFlag(QSGNode::OwnedByParent);
+        //clip_node->setClipRect(boundingRect());
+        //clip_node->setIsRectangular(true);
+        ret = root_node;
 
         m_trans_node = new QSGTransformNode();
         m_trans_node->setMatrix(QMatrix4x4(QTransform()));
         m_trans_node->setFlag(QSGNode::OwnedByParent);
-        //ret->appendChildNode(m_trans_node);
-        ret = m_trans_node;
+        ret->appendChildNode(m_trans_node);
+        //ret = m_trans_node;
     }
     if (m_models.size() > 1){
         while (m_updates.size() > 0 && m_updates_model_index.front() < m_models.size() - 1){

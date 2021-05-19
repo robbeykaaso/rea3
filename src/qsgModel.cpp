@@ -878,7 +878,8 @@ IUpdateQSGAttr qsgModel::updateQSGAttr(const QJsonObject& aModification){
                         setObjects(objs);
                         auto nd = addObject(rea::Json(attr, "id", obj));
                         return [this, nd](QSGNode*){
-                            nd->getQSGNodes(m_window, m_trans_node, m_trans_node);
+                            if (m_window) //m_window is null until the model is showed at first
+                                nd->getQSGNodes(m_window, m_trans_node, m_trans_node);
                         };
                     }
                 }else if (aModification.value("type") == "del"){
