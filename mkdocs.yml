@@ -107,7 +107,8 @@ nav:
         - status: qml-ui/pipe/status.md
 #              - treeNodeView: qml-ui/pipe/treeNodeView.md
   - About: about.md
-theme: 
-  name: material
-  features:
-    - navigation.tabs
+theme: readthedocs
+#theme: 
+#  name: material
+#  features:
+#    - navigation.tabs
