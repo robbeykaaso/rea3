@@ -1,110 +1,113 @@
 site_name: Rea
 nav:
-    - Home: index.md
-    - Usage: usage.md
-    - API:
-      - util:
-        - json: util/json.md
-        - command: util/command.md
-      - rea-c++:
-        - pipeline: c++/pipeline.md
-        - pipe: c++/pipe.md
-        - stream: c++/stream.md
-        - scope: c++/scope.md
-        - extension: c++/extension.md
-        - pipes:
-          - pipeAsync: c++/pipes/pipeAsync.md
-          - pipePartial: c++/pipes/pipePartial.md
-          - pipeDelegate: c++/pipes/pipeDelegate.md
-          - pipeParallel: c++/pipes/pipeParallel.md
-          - extension: c++/pipes/extension.md
-      - rea-qml:
-        - pipeline: qml/pipeline.md
-        - pipe: qml/pipe.md
-        - stream: qml/stream.md
-        - scope: qml/scope.md
-        - pipes:
-          - pipePartial: qml/pipePartial.md
-          - pipeDelegate: qml/pipeDelegate.md
-          - extension: qml/extension.md
-      - rea-js:
-        - pipeline: js/pipeline.md
-        - pipe: js/pipe.md
-        - stream: js/stream.md
-        - scope: js/scope.md
-        - pipes:
-          - pipePartial: js/pipePartial.md
-          - pipeDelegate: js/pipeDelegate.md
-          - extension: js/extension.md
-      - render2D:
-        - qsgModel: render2D/qsgModel.md
-        - qsgBoard: render2D/qsgBoard.md
-        - qsgBoardPlugin: render2D/qsgBoardPlugin.md
-        - extension: render2D/extension.md
-        - plugins:
-          - transform: render2D/plugin/qsgPluginTransform.md
-          - drawrect: render2D/plugin/qsgPluginDrawRect.md
-          - drawline: render2D/plugin/qsgPluginDrawLine.md
-          - drawcircle: render2D/plugin/qsgPluginDrawCircle.md
-          - drawellipse: render2D/plugin/qsgPluginDrawEllipse.md
-          - drawfree: render2D/plugin/qsgPluginDrawFree.md
-          - drawpoly: render2D/plugin/qsgPluginDrawPoly.md
-          - drawpoint: render2D/plugin/qsgPluginDrawPoint.md
-          - editnode: render2D/plugin/qsgPluginEditNode.md
-          - select0: render2D/plugin/qsgPluginSelect0.md
-          - select: render2D/plugin/qsgPluginSelect.md
-          - extension: render2D/plugin/extension.md
-      - storage: 
-        - fsStorage: storage/fsStorage.md
-        - extension: storage/extension.md
-        - plugins:
-          - awsStorage: storage/plugins/awsStorage.md
-      - qml-ui:
-        - basic: 
-          - autosize: qml-ui/basic/autosize.md
-          - check: qml-ui/basic/check.md
-          - combo: qml-ui/basic/combo.md
-          - comboe: qml-ui/basic/comboe.md
-          - edit: qml-ui/basic/edit.md
+  - Home: index.md
+  - Usage: usage.md
+  - API:
+    - util:
+      - json: util/json.md
+      - command: util/command.md
+    - rea-c++:
+      - pipeline: c++/pipeline.md
+      - pipe: c++/pipe.md
+      - stream: c++/stream.md
+      - scope: c++/scope.md
+      - extension: c++/extension.md
+      - pipes:
+        - pipeAsync: c++/pipes/pipeAsync.md
+        - pipePartial: c++/pipes/pipePartial.md
+        - pipeDelegate: c++/pipes/pipeDelegate.md
+        - pipeParallel: c++/pipes/pipeParallel.md
+        - extension: c++/pipes/extension.md
+    - rea-qml:
+      - pipeline: qml/pipeline.md
+      - pipe: qml/pipe.md
+      - stream: qml/stream.md
+      - scope: qml/scope.md
+      - pipes:
+        - pipePartial: qml/pipePartial.md
+        - pipeDelegate: qml/pipeDelegate.md
+        - extension: qml/extension.md
+    - rea-js:
+      - pipeline: js/pipeline.md
+      - pipe: js/pipe.md
+      - stream: js/stream.md
+      - scope: js/scope.md
+      - pipes:
+        - pipePartial: js/pipePartial.md
+        - pipeDelegate: js/pipeDelegate.md
+        - extension: js/extension.md
+    - render2D:
+      - qsgModel: render2D/qsgModel.md
+      - qsgBoard: render2D/qsgBoard.md
+      - qsgBoardPlugin: render2D/qsgBoardPlugin.md
+      - extension: render2D/extension.md
+      - plugins:
+        - transform: render2D/plugin/qsgPluginTransform.md
+        - drawrect: render2D/plugin/qsgPluginDrawRect.md
+        - drawline: render2D/plugin/qsgPluginDrawLine.md
+        - drawcircle: render2D/plugin/qsgPluginDrawCircle.md
+        - drawellipse: render2D/plugin/qsgPluginDrawEllipse.md
+        - drawfree: render2D/plugin/qsgPluginDrawFree.md
+        - drawpoly: render2D/plugin/qsgPluginDrawPoly.md
+        - drawpoint: render2D/plugin/qsgPluginDrawPoint.md
+        - editnode: render2D/plugin/qsgPluginEditNode.md
+        - select0: render2D/plugin/qsgPluginSelect0.md
+        - select: render2D/plugin/qsgPluginSelect.md
+        - extension: render2D/plugin/extension.md
+    - storage: 
+      - fsStorage: storage/fsStorage.md
+      - extension: storage/extension.md
+      - plugins:
+        - awsStorage: storage/plugins/awsStorage.md
+    - qml-ui:
+      - basic: 
+        - autosize: qml-ui/basic/autosize.md
+        - check: qml-ui/basic/check.md
+        - combo: qml-ui/basic/combo.md
+        - comboe: qml-ui/basic/comboe.md
+        - edit: qml-ui/basic/edit.md
 #           - editcombo: qml-ui/basic/editcombo.md
-          - flip: qml-ui/basic/flip.md
-          - gridder0: qml-ui/basic/gridder0.md
-          - histogram0: qml-ui/basic/histogram0.md
-          - linechart0: qml-ui/basic/linechart0.md
-          - list0: qml-ui/basic/list0.md
-          - log0: qml-ui/basic/log0.md
-          - matrix0: qml-ui/basic/matrix0.md
-          - navigation0: qml-ui/basic/navigation0.md
-          - nest: qml-ui/basic/nest.md
-          - pagelist0: qml-ui/basic/pagelist0.md
-          - pwindow0: qml-ui/basic/pwindow0.md
-          - radio: qml-ui/basic/radio.md
-          - search0: qml-ui/basic/search0.md
-          - sizable: qml-ui/basic/sizable.md
-          - spin: qml-ui/basic/spin.md
-          - status0: qml-ui/basic/status0.md
-          - swipe: qml-ui/basic/swipe.md
-          - thistogram: qml-ui/basic/thistogram.md
-          - track: qml-ui/basic/track.md
-          - treeview0: qml-ui/basic/treeview0.md
-          - twindow: qml-ui/basic/twindow.md
-        - pipe:
-          - colorselect: qml-ui/pipe/colorselect.md
-          - dynamicQML: qml-ui/pipe/dynamicQML.md
-          - file: qml-ui/pipe/file.md
-          - gridder: qml-ui/pipe/gridder.md
-          - histogram: qml-ui/pipe/histogram.md
-          - linechart: qml-ui/pipe/linechart.md
-          - list: qml-ui/pipe/list.md
-          - log: qml-ui/pipe/log.md
-          - matrix: qml-ui/pipe/matrix.md
-          - msgdialog: qml-ui/pipe/msgdialog.md
-          - navigation: qml-ui/pipe/navigation.md
-          - pagelist: qml-ui/pipe/pagelist.md
-          - progress: qml-ui/pipe/progress.md
-          - pwindow: qml-ui/pipe/pwindow.md
-          - search: qml-ui/pipe/search.md
-          - status: qml-ui/pipe/status.md
+        - flip: qml-ui/basic/flip.md
+        - gridder0: qml-ui/basic/gridder0.md
+        - histogram0: qml-ui/basic/histogram0.md
+        - linechart0: qml-ui/basic/linechart0.md
+        - list0: qml-ui/basic/list0.md
+        - log0: qml-ui/basic/log0.md
+        - matrix0: qml-ui/basic/matrix0.md
+        - navigation0: qml-ui/basic/navigation0.md
+        - nest: qml-ui/basic/nest.md
+        - pagelist0: qml-ui/basic/pagelist0.md
+        - pwindow0: qml-ui/basic/pwindow0.md
+        - radio: qml-ui/basic/radio.md
+        - search0: qml-ui/basic/search0.md
+        - sizable: qml-ui/basic/sizable.md
+        - spin: qml-ui/basic/spin.md
+        - status0: qml-ui/basic/status0.md
+        - swipe: qml-ui/basic/swipe.md
+        - thistogram: qml-ui/basic/thistogram.md
+        - track: qml-ui/basic/track.md
+        - treeview0: qml-ui/basic/treeview0.md
+        - twindow: qml-ui/basic/twindow.md
+      - pipe:
+        - colorselect: qml-ui/pipe/colorselect.md
+        - dynamicQML: qml-ui/pipe/dynamicQML.md
+        - file: qml-ui/pipe/file.md
+        - gridder: qml-ui/pipe/gridder.md
+        - histogram: qml-ui/pipe/histogram.md
+        - linechart: qml-ui/pipe/linechart.md
+        - list: qml-ui/pipe/list.md
+        - log: qml-ui/pipe/log.md
+        - matrix: qml-ui/pipe/matrix.md
+        - msgdialog: qml-ui/pipe/msgdialog.md
+        - navigation: qml-ui/pipe/navigation.md
+        - pagelist: qml-ui/pipe/pagelist.md
+        - progress: qml-ui/pipe/progress.md
+        - pwindow: qml-ui/pipe/pwindow.md
+        - search: qml-ui/pipe/search.md
+        - status: qml-ui/pipe/status.md
 #              - treeNodeView: qml-ui/pipe/treeNodeView.md
-    - About: about.md
-theme: readthedocs
+  - About: about.md
+theme: 
+  name: material
+  features:
+    - navigation.tabs
