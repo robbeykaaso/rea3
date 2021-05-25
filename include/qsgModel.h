@@ -34,9 +34,10 @@ public:
     virtual void removeQSGNodes();
     virtual void transformChanged();
     virtual IUpdateQSGAttr updateQSGAttr(const QString& aModification);
-    virtual bool bePointSelected(double, double) {return false;}
+    virtual bool bePointSelected(double, double);
     virtual void setParent(qsgModel* aParent) {m_parent = aParent;}
-    QMatrix4x4 OCS2WCSMatrix();
+    static QMatrix4x4 getTransform(const QJsonObject& aConfig);
+    QRectF getBoundBox() {return m_bound;}
 protected:
     void checkTextVisible();
     QJsonObject getTextConfig();
@@ -44,16 +45,15 @@ protected:
     void updateTextValue(const QJsonObject& aTextConfig);
     QString getText();
     QColor getColor();
-    virtual QRectF getBoundBox() {return QRectF(0, 0, 0, 0);}
     virtual QSGNode* getRootQSGNode(){return nullptr;}
     virtual void checkColor();
     void checkCaption();
-    QMatrix4x4 getTransform2();
     virtual void checkTransform();
-    void updateTransform();
+    virtual void updateTransform();
     QQuickItem* m_window;
     qsgModel* m_parent;
     QSGSimpleTextureNode* m_text = nullptr;
+    QRectF m_bound = QRectF(0, 0, 0, 0); //leftbottomrighttop
 };
 
 class DSTDLL imageObject : public qsgObject{
@@ -62,13 +62,12 @@ public:
     std::vector<QSGNode*> getQSGNodes(QQuickItem* aWindow = nullptr, QSGNode* aParent = nullptr, QSGTransformNode* aTransform = nullptr) override;
     void removeQSGNodes() override;
     IUpdateQSGAttr updateQSGAttr(const QString& aModification) override;
-    bool bePointSelected(double aX, double aY) override;
     QImage getImage();
 protected:
     virtual QImage updateImagePath(bool aForce = false);
-    QRectF getBoundBox() override;
     QSGNode* getRootQSGNode() override {return m_node;}
     QSGSimpleTextureNode* m_node = nullptr;
+    void updateTransform() override;
 private:
     QString getPath();
     QRectF getRange(const QImage& aImage);
@@ -79,12 +78,9 @@ public:
     shapeObject(const QJsonObject& aConfig) : qsgObject(aConfig){
 
     }
-    QRectF getBoundBox() override {return m_bound;}
-    bool bePointSelected(double aX, double aY) override;
     std::vector<QSGNode*> getQSGNodes(QQuickItem* aWindow = nullptr, QSGNode* aParent = nullptr, QSGTransformNode* aTransform = nullptr) override;
     void removeQSGNodes() override;
     IUpdateQSGAttr updateQSGAttr(const QString& aModification) override;
-    static QTransform getTransform(const QJsonObject& aConfig);
 protected:
     void setQSGGemoetry(const pointList& aPointList, QSGGeometryNode& aNode, unsigned int aMode,
                         const QString& aStyle, std::vector<uint32_t>* aIndecies = nullptr);
@@ -94,12 +90,13 @@ protected:
     void checkColor() override;
     void checkWidth();
     void checkTransform() override;
-    virtual size_t updateGeometry(QSGTransformNode* aNode = nullptr){return 0;}
+    virtual size_t updateGeometry(){return 0;}
     virtual void updateArrowLocation(){}
     void calcArrow(const QPointF& aStart, const QPointF& aEnd, QSGGeometryNode& aNode);
     void updateQSGFace(QSGGeometryNode& aNode, int aOpacity);
     QSGNode* getRootQSGNode() override {return m_outline;}
-    QRectF m_bound = QRectF(0, 0, 0, 0); //leftbottomrighttop
+    virtual void toPoints() {}
+    void updateTransform() override;
     std::vector<pointList> m_points;
     QSGGeometryNode* m_outline = nullptr;
     QSGGeometryNode* m_face = nullptr;
@@ -124,10 +121,10 @@ public:
     std::vector<QSGNode*> getQSGNodes(QQuickItem* aWindow = nullptr, QSGNode* aParent = nullptr, QSGTransformNode* aTransform = nullptr) override;
     void transformChanged() override;
     IUpdateQSGAttr updateQSGAttr(const QString& aModification) override;
-    std::vector<pointList> toPoints();
+    void toPoints() override;
 protected:
     QJsonArray getPoints();
-    size_t updateGeometry(QSGTransformNode* aNode = nullptr) override;
+    size_t updateGeometry() override;
     void updateArrowLocation() override;
     void checkArrowPole();
     void checkGeometry();
@@ -140,9 +137,9 @@ public:
     std::vector<QSGNode*> getQSGNodes(QQuickItem* aWindow = nullptr, QSGNode* aParent = nullptr, QSGTransformNode* aTransform = nullptr) override;
     void transformChanged() override;
     IUpdateQSGAttr updateQSGAttr(const QString& aModification) override;
-    std::vector<pointList> toPoints();
+    void toPoints() override;
 protected:
-    size_t updateGeometry(QSGTransformNode* aNode = nullptr) override;
+    size_t updateGeometry() override;
     void updateArrowLocation() override;
 private:
     class l_qsgPoint3D : public QPointF{
