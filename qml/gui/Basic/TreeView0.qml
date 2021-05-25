@@ -2,6 +2,7 @@
 import QtQuick 2.0
 
 Item {
+    id: root
     width: 600
     height: 600
     property string sel
@@ -44,6 +45,10 @@ Item {
         }
     }
 
+    function valid(){
+        return objModel.count > 0
+    }
+
     //Model
     ListModel {
         id: objModel
@@ -76,7 +81,7 @@ Item {
                     }
                 } else if (selectWay === 'background') {
                     rowRectangle.color = selectColor
-                    rowRectangle.width = 200
+                    rowRectangle.width = root.width
                     txt.color = '#fff'
                     if (currentText && currentText !== txt) {
                         currentText.color = '#000'
@@ -113,7 +118,7 @@ Item {
                     id: objRow
                     Rectangle {
                         id: rowRectangle
-                        width: 200
+                        width: root.width
                         height: 20
                         color: (selectWay === 'background'
                                 && sel === idd) ? selectColor : 'transparent'

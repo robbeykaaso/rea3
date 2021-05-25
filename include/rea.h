@@ -345,15 +345,15 @@ public:
                 ret = in(aInput->data(), aInput->tag(), aInput->scope());
                 if (loop->isRunning()){
                     loop->quit();
-                    std::cout << "quit: " << loop->isRunning() << std::endl;
+                    //std::cout << "quit: " << loop->isRunning() << std::endl;
                 }else
                     timeout = true;
             }, m_tag);
             aPipeline->execute(aName, shared_from_this());
             if (!timeout){
-                std::cout << aName.toStdString() << " locked" << std::endl;
+                //std::cout << aName.toStdString() << " locked" << std::endl;
                 loop->exec();
-                std::cout << aName.toStdString() << " finished" << std::endl;
+                //std::cout << aName.toStdString() << " finished" << std::endl;
             }
             aPipeline->find(aName)->removeNext(monitor->actName());
             aPipeline->remove(monitor->actName(), true);

@@ -36,6 +36,7 @@ public:
     virtual IUpdateQSGAttr updateQSGAttr(const QString& aModification);
     virtual bool bePointSelected(double, double) {return false;}
     virtual void setParent(qsgModel* aParent) {m_parent = aParent;}
+    QMatrix4x4 OCS2WCSMatrix();
 protected:
     void checkTextVisible();
     QJsonObject getTextConfig();
@@ -47,6 +48,9 @@ protected:
     virtual QSGNode* getRootQSGNode(){return nullptr;}
     virtual void checkColor();
     void checkCaption();
+    QMatrix4x4 getTransform2();
+    virtual void checkTransform();
+    void updateTransform();
     QQuickItem* m_window;
     qsgModel* m_parent;
     QSGSimpleTextureNode* m_text = nullptr;
@@ -61,9 +65,6 @@ public:
     bool bePointSelected(double aX, double aY) override;
     QImage getImage();
 protected:
-    virtual void appendToParent(QSGNode* aTransformNode){
-        aTransformNode->appendChildNode(m_node);
-    }
     virtual QImage updateImagePath(bool aForce = false);
     QRectF getBoundBox() override;
     QSGNode* getRootQSGNode() override {return m_node;}
@@ -83,6 +84,7 @@ public:
     std::vector<QSGNode*> getQSGNodes(QQuickItem* aWindow = nullptr, QSGNode* aParent = nullptr, QSGTransformNode* aTransform = nullptr) override;
     void removeQSGNodes() override;
     IUpdateQSGAttr updateQSGAttr(const QString& aModification) override;
+    static QTransform getTransform(const QJsonObject& aConfig);
 protected:
     void setQSGGemoetry(const pointList& aPointList, QSGGeometryNode& aNode, unsigned int aMode,
                         const QString& aStyle, std::vector<uint32_t>* aIndecies = nullptr);
@@ -91,8 +93,8 @@ protected:
     void checkFaceOpacity();
     void checkColor() override;
     void checkWidth();
-    void checkAngle();
-    virtual size_t updateGeometry(){return 0;}
+    void checkTransform() override;
+    virtual size_t updateGeometry(QSGTransformNode* aNode = nullptr){return 0;}
     virtual void updateArrowLocation(){}
     void calcArrow(const QPointF& aStart, const QPointF& aEnd, QSGGeometryNode& aNode);
     void updateQSGFace(QSGGeometryNode& aNode, int aOpacity);
@@ -113,7 +115,6 @@ protected:
     QJsonObject getArrowConfig();
     bool getArrowVisible(const QJsonObject& aConfig);
     bool getPoleArrow(const QJsonObject& aConfig);
-    double getAngle();
     QSGTransformNode* m_trans_node = nullptr;
 };
 
@@ -126,7 +127,7 @@ public:
     std::vector<pointList> toPoints();
 protected:
     QJsonArray getPoints();
-    size_t updateGeometry() override;
+    size_t updateGeometry(QSGTransformNode* aNode = nullptr) override;
     void updateArrowLocation() override;
     void checkArrowPole();
     void checkGeometry();
@@ -141,7 +142,7 @@ public:
     IUpdateQSGAttr updateQSGAttr(const QString& aModification) override;
     std::vector<pointList> toPoints();
 protected:
-    size_t updateGeometry() override;
+    size_t updateGeometry(QSGTransformNode* aNode = nullptr) override;
     void updateArrowLocation() override;
 private:
     class l_qsgPoint3D : public QPointF{
@@ -150,11 +151,10 @@ private:
         float z;
         std::shared_ptr<l_qsgPoint3D> nxt = nullptr;
     };
-
-    std::shared_ptr<l_qsgPoint3D> evalPoint(const QPointF& aCenter, const QPointF& aRadius, double aParam);
+    void checkRadius();
+    std::shared_ptr<l_qsgPoint3D> evalPoint(const QPointF& aRadius, double aParam);
     bool getCCW();
     QPointF getRadius();
-    QPointF getCenter();
 };
 
 class DSTDLL qsgModel : public QJsonObject{
