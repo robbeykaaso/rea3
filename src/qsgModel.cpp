@@ -406,13 +406,16 @@ void shapeObject::setQSGGemoetry(const pointList& aPointList, QSGGeometryNode& a
     else if (wth){
         if (aStyle == "dash"){
             float dis = 0;
-            auto rt = m_trans_node->matrix().data()[0];
-            for (size_t i = 0; i < aPointList.size(); ++i){
+            auto tr = getTransform(*this) * m_trans_node->matrix();
+            pointList src_lst;
+            for (auto i : aPointList)
+                src_lst.push_back(tr.map(i));
+            for (size_t i = 0; i < src_lst.size(); ++i){
                 if (i > 0){
-                    auto del = aPointList[i] - aPointList[i - 1];
+                    auto del = src_lst[i] - src_lst[i - 1];
                     dis += float(sqrt(QPointF::dotProduct(del, del)));
                 }
-                vertices[i].set(float(aPointList[i].x()), float(aPointList[i].y()), dis * rt / 10, 0);
+                vertices[i].set(float(aPointList[i].x()), float(aPointList[i].y()), dis / 10, 0);
             }
         }else
             for (size_t i = 0; i < aPointList.size(); ++i)
@@ -556,6 +559,8 @@ void shapeObject::checkWidth(){
 
 void shapeObject::checkTransform(){
     qsgObject::checkTransform();
+    if (m_outline)
+        updateGeometry(false);
     if (m_arrows.size() > 0)
         updateArrowLocation();
 }
@@ -631,8 +636,9 @@ void polyObject::toPoints(){
     m_points = pts2;
 }
 
-size_t polyObject::updateGeometry(){
-    toPoints();
+size_t polyObject::updateGeometry(bool aCalcPoints){
+    if (aCalcPoints)
+        toPoints();
     if (m_points.size() == 0)
         return 0;
     auto stl = getLineStyle();
@@ -848,8 +854,9 @@ void ellipseObject::toPoints(){
     m_points = ret;
 }
 
-size_t ellipseObject::updateGeometry(){
-    toPoints();
+size_t ellipseObject::updateGeometry(bool aCalcPoints){
+    if (aCalcPoints)
+        toPoints();
     setQSGGemoetry(m_points[0], *m_outline, QSGGeometry::DrawLineStrip, getLineStyle());
     return 0;
 }

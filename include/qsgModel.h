@@ -90,7 +90,7 @@ protected:
     void checkColor() override;
     void checkWidth();
     void checkTransform() override;
-    virtual size_t updateGeometry(){return 0;}
+    virtual size_t updateGeometry(bool aCalcPoints = true){return 0;}
     virtual void updateArrowLocation(){}
     void calcArrow(const QPointF& aStart, const QPointF& aEnd, QSGGeometryNode& aNode);
     void updateQSGFace(QSGGeometryNode& aNode, int aOpacity);
@@ -124,7 +124,7 @@ public:
     void toPoints() override;
 protected:
     QJsonArray getPoints();
-    size_t updateGeometry() override;
+    size_t updateGeometry(bool aCalcPoints = true) override;
     void updateArrowLocation() override;
     void checkArrowPole();
     void checkGeometry();
@@ -139,7 +139,7 @@ public:
     IUpdateQSGAttr updateQSGAttr(const QString& aModification) override;
     void toPoints() override;
 protected:
-    size_t updateGeometry() override;
+    size_t updateGeometry(bool aCalcPoints = true) override;
     void updateArrowLocation() override;
 private:
     class l_qsgPoint3D : public QPointF{
