@@ -43,8 +43,8 @@ void loadExtendLibraries(){
     std::vector<std::string> m_list;
     getAllFormatFiles0((QApplication::applicationDirPath() + "/plugin").toStdString(), m_list, ".dll");
     for (auto i : m_list){
-        std::cout << "load: " << i << std::endl;
-        LoadLibrary(i.data());
+        auto hdl = LoadLibrary(i.data());
+        std::cout << "load: " << i << " " << (hdl == NULL ? "fail" : "success") << std::endl;
     }
 }
 #else
