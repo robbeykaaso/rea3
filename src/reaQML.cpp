@@ -62,6 +62,22 @@ public:
     }
 };
 
+static QHash<QString, pipeline*> pipelines;
+
+pipeline* pipelineQML::qmlinstance(const QString& aName){
+    if (!pipelines.contains(aName)){
+        if (aName == "c++" || aName == "qml")
+            pipelines.insert(aName, pipeline::instance());
+        else{
+            auto pl = std::make_shared<pipeline*>();
+            instance()->call<std::shared_ptr<pipeline*>>("createqml" + aName + "pipeline", pl);
+            if (*pl)
+                pipelines.insert(aName, *pl);
+        }
+    }
+    return pipelines.value(aName);
+}
+
 pipelineQML::pipelineQML() : pipeline("qml"){
     pipeline::instance()->supportType<QVariant>([](stream0* aInput){
         return reinterpret_cast<stream<QVariant>*>(aInput)->data();
@@ -74,20 +90,61 @@ void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream
     pipeline::execute(aName, in(aStream->QData(), aStream->tag(), aStream->scope()), aSync, aFromOutside);
 }
 
-void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag) {
+pipelineQMLJS::pipelineQMLJS() : pipeline("js"){
+    pipeline::instance()->supportType<pipelineQML*>([](stream0* aInput){
+        return QVariant::fromValue<QObject*>(reinterpret_cast<stream<pipelineQML*>*>(aInput)->data());
+    });
+    pipeline::instance()->add<double>([](stream<double>* aInput){
+        auto pip_qml = reinterpret_cast<pipelineQML*>(pipeline::instance("qmljs"));
+        aInput->outs<pipelineQML*>(pip_qml)->scope()->cache<pipelineQML*>("pipeline", pip_qml);
+    }, rea::Json("name", "pipelineQMLObject", "external", "qml"));
+}
+
+void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag){
+    if (aFlag == "any")
+        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(aScope)), aSync, true);
+    else if (aFlag == "qml")
+        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(aScope)), aSync);
+}
+
+void pipelineQMLJS::removeFromJS(const QString& aName){
+    pipeline::instance("qml")->remove(aName, false);
+}
+
+void pipelineQMLJS::remove(const QString& aName, bool){
+    removeJSPipe(aName);
+}
+
+void pipelineQMLJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
+    if (!aStream->supportedType())
+        throw "not supported type";
+    executeJSPipe(aName,  aStream->QData(), aStream->tag(), aStream->scope()->toList(), aSync, aFromOutside);
+}
+
+static regPip<std::shared_ptr<pipeline*>> reg_create_qmljspipeline([](stream<std::shared_ptr<pipeline*>>* aInput){
+    *aInput->data() = new pipelineQMLJS();
+}, rea::Json("name", "createqmljspipeline"));
+
+static QSet<QString> qml_ranges = {"c++", "qml", "qmljs"};
+
+void pipelineQML::removePipeOutside(const QString& aName, QSet<QString>*){
+    pipeline::removePipeOutside(aName, &qml_ranges);
+}
+
+void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>*) {
     auto aData = aStream->QData();
     if (aData.type() == QVariant::Type::Map || aData.type() == QMetaType::QJsonObject)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonObject(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonObject(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
     else if (aData.type() == QVariant::Type::List || aData.type() == QMetaType::QJsonArray)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonArray(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonArray(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
     else if (aData.type() == QVariant::Type::String)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toString(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toString(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
     else if (aData.type() == QVariant::Type::Bool)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toBool(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toBool(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
     else if (aData.type() == QVariant::Type::Double)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toDouble(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toDouble(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
     else if (aData.type() == QVariant::Type::Int)
-        pipeline::tryExecutePipeOutside(aName, in<double>(aData.toInt(), aStream->tag(), aStream->scope()), aSync, aFlag);
+        pipeline::tryExecutePipeOutside(aName, in<double>(aData.toInt(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
     else{
         std::cout << aData.type() << std::endl;
         throw "not supported type";
@@ -397,5 +454,11 @@ QString tr0(const QString& aOrigin){
 regQMLPipe(Partial)
 regQMLPipe(Delegate)
 regQMLPipe()
+
+static regPip<QQmlApplicationEngine*> reg_qmljs_linker([](stream<QQmlApplicationEngine*>* aInput){
+    //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype
+    rea::pipeline::instance("qmljs");
+    aInput->out();
+}, rea::Json("name", "install0_qmljs"), "initRea");
 
 }

@@ -263,13 +263,19 @@ void pipeline::execute(const QString& aName, std::shared_ptr<stream0> aStream, c
     pip->execute(aStream);
 }
 
-void pipeline::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag){
-    for (auto i : pipelines)
-        if (i != this){
-            if (aFlag == "any")
-                i->execute(aName, aStream, aSync, true);
-            else if (aFlag == i->name())
-                i->execute(aName, aStream, aSync);
+static QSet<QString> cplus_ranges = {"c++", "qml", "js"};
+void pipeline::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>* aRanges){
+    if (!aRanges)
+        aRanges = &cplus_ranges;
+    for (auto i : pipelines.keys())
+        if (aRanges->contains(i)){
+            auto ln = pipelines.value(i);
+            if (ln != this){
+                if (aFlag == "any")
+                    ln->execute(aName, aStream, aSync, true);
+                else if (aFlag == ln->name())
+                    ln->execute(aName, aStream, aSync);
+            }
         }
 }
 
@@ -331,10 +337,15 @@ void pipeline::remove(const QString& aName, bool aOutside){
         removePipeOutside(aName);
 }
 
-void pipeline::removePipeOutside(const QString& aName){
-    for (auto i : pipelines.values())
-        if (i != this)
-            i->remove(aName);
+void pipeline::removePipeOutside(const QString& aName, QSet<QString>* aRanges){
+    if (!aRanges)
+        aRanges = &cplus_ranges;
+    for (auto i : pipelines.keys())
+        if (aRanges->contains(i)){
+            auto ln = pipelines.value(i);
+            if (ln != this)
+                ln->remove(aName);
+        }
 }
 
 QThread* pipeline::findThread(int aNo){

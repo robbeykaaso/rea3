@@ -137,9 +137,8 @@ class stream {
         return this
     }
     scope(aNew = false){
-        if (!this.m_scope || aNew){
-            this.m_scope = new scopeCache()
-        }
+        if (!this.m_scope || aNew)
+            this.m_scope = new scopeCache({})
         return this.m_scope
     }
     data(){
@@ -563,71 +562,53 @@ pipelines().add(function(aInput){
 
 //#endregion
 
-//#region Pipeline Linker
-let webc = null
-if (typeof module === 'object') 
-    webc = require("./qwebchannel").QWebChannel
-else if (typeof QWebChannel === 'function')
-    webc = QWebChannel
+//#region C++Linker
+const webc = require("./qwebchannel")
 
-let candidates_functions0 = []
-let web_channel = null
-function initLinker(aFunc){
-    if (web_channel)
-        aFunc(web_channel)
-    else{
-        if (!candidates_functions0.length){
-            if (typeof qt == "undefined"){
-                console.log("qt object not exists!")
-                return
-            }
-            if (!webc){
-                console.log("no qwebChannel.js!")
-                return
-            }
-            new webc(qt.webChannelTransport, channel=>{
-                for (let i in candidates_functions0)
-                    candidates_functions0[i](channel)
-                candidates_functions0 = []
-                web_channel = channel
-            })
-        }
-        candidates_functions0.push(aFunc)
-    }
-}
+class pipelineCPlus extends pipeline{
 
-class pipelineOutside extends pipeline{
-
-    constructor(aName){
-        super(aName)
+    constructor(){
+        super("c++")
         this.candidates_functions = []
     }
 
-    init(aFunc){
-        if (!web_channel){
-            if (!this.candidates_functions.length){
-                initLinker(channel=>{
-                    this.Linker = channel.objects["Pipeline" + this.name()]
-                    if (!this.Linker){
-                        console.log("no " + this.name() + " linker")
-                        return
-                    }
-                    this.Linker.executeJSPipe.connect(function(aName, aData, aTag, aScope, aSync, aFromOutside){
+    initPipelineJS(){
+        return new Promise((resolve, reject) => {
+            if (typeof qt != "undefined"){
+                new webc.QWebChannel(qt.webChannelTransport, (channel) => {
+                    this.CplusLinker = channel.objects.Pipeline;
+                    if (!this.CplusLinker)
+                        alert("no c++ linker")
+                    this.CplusLinker.executeJSPipe.connect(function(aName, aData, aTag, aScope, aSync, aFromOutside){
                         const len = Object.keys(aScope).length
                         let sp = {}
                         for (let i = 0; i < len; i += 2)
                             sp[aScope[i]] = aScope[i + 1]
                         pipelines().execute(aName, new stream(aData, aTag, new scopeCache(sp)), aSync, aFromOutside)
                     })
-                    this.Linker.removeJSPipe.connect(function(aName){
+                    this.CplusLinker.removeJSPipe.connect(function(aName){
                         pipelines().remove(aName)
                     })
+                    this.inited = true
 
                     for (let i in this.candidates_functions)
                         this.candidates_functions[i]()
                     this.candidates_functions = []
+
+                    resolve()
                 })
+            }else{
+                this.inited = true
+                console.log("qt object not exists!")
+                reject()
             }
+        })
+    }
+
+    init(aFunc){
+        if (!this.inited){
+            if (!this.candidates_functions.length)
+                this.initPipelineJS()
             this.candidates_functions.push(aFunc)
         }else{
             aFunc()
@@ -636,26 +617,20 @@ class pipelineOutside extends pipeline{
 
     execute(aName, aStream, aSync, aFromOutside = false, aFlag = "any"){
         this.init(e=>{
-            if (this.Linker)
-                this.Linker.executeFromJS(aName, aStream.data(), aStream.tag(), aStream.scope().m_data, aSync, aFlag)
+            if (this.CplusLinker)
+                this.CplusLinker.tryExecuteOutsidePipe(aName, aStream.data(), aStream.tag(), aStream.scope().m_data, aSync, aFlag)
         })
     }
 
     remove(aName, aOutside = false){
         this.init(e=>{
-            if (this.Linker)
-                this.Linker.removeFromJS(aName)
+            if (this.CplusLinker)
+                this.CplusLinker.removePipeOutside(aName)
         })
     }
 }
 
 //#endregion
-
-class pipelineCPlus extends pipelineOutside{
-    constructor(){
-        super("c++")
-    }
-}
 
 pipelines().add(function(aInput){
     aInput.setData(new pipelineCPlus())
@@ -663,19 +638,6 @@ pipelines().add(function(aInput){
 
 pipelines("c++").init(function(){})
 
-class pipelineQML extends pipelineOutside{
-    constructor(){
-        super("qml")
-    }
+module.exports = {
+    pipelines: pipelines
 }
-
-pipelines().add(function(aInput){
-    aInput.setData(new pipelineQML())
-}, {name: "createqmlpipeline"})
-
-pipelines("qml").init(function(){})
-
-if (typeof module == "object")
-    module.exports = {
-        pipelines: pipelines
-    }

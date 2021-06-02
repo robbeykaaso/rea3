@@ -272,11 +272,12 @@ public:
     static std::shared_ptr<stream<T>> input(T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr, bool aAutoTag = false){
         return in(aInput, aTag, aScope, aAutoTag);
     }
-protected:
+
     virtual void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(),
                          bool aFromOutside = false);
-    virtual void removePipeOutside(const QString& aName);
-    virtual void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag);
+protected:
+    virtual void removePipeOutside(const QString& aName, QSet<QString>* aRanges = nullptr);
+    virtual void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>* aRanges = nullptr);
     QHash<QString, pipe0*> m_pipes;
 private:
     QThread* findThread(int aNo);

@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>html/qwebchannel.js</file>
         <file>html/rea.js</file>
-        <file>html/reaCplus.js</file>
         <file>qml/gui/Pipe/DynamicQML.qml</file>
         <file>qml/gui/Basic/AutoSize.qml</file>
         <file>qml/gui/Basic/Check.qml</file>
