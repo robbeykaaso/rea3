@@ -13,10 +13,10 @@ pipelineJS::pipelineJS() : pipeline("js"){
     }, rea::Json("name", "pipelineJSObject", "external", "qml"));
 };
 
-void pipelineJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
+void pipelineJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
     if (!aStream->supportedType())
         throw "not supported type";
-    executeJSPipe(aName,  aStream->QData(), aStream->tag(), aStream->scope()->toList(), aSync, aFromOutside);
+    executeJSPipe(aName,  aStream->QData(), aStream->tag(), aStream->scope()->toList(), aSync, aFutureNeed, aFrom);
 }
 
 void pipelineJS::remove(const QString& aName, bool){
@@ -43,7 +43,7 @@ void pipelineJS::executeFromJS(const QString& aName, const QVariant& aData, cons
         return ret;
     };
     if (aFlag == "any")
-        rea::pipeline::instance()->execute(aName, stm(), aSync, true);
+        rea::pipeline::instance()->execute(aName, stm(), aSync, true, name());
     else if (aFlag == "c++")
         rea::pipeline::instance()->execute(aName, stm(), aSync);
 }

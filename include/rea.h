@@ -274,10 +274,11 @@ public:
     }
 
     virtual void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(),
-                         bool aFromOutside = false);
+                         bool aFutureNeed = false, const QString& aFrom = "");
 protected:
     virtual void removePipeOutside(const QString& aName, QSet<QString>* aRanges = nullptr);
     virtual void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>* aRanges = nullptr);
+    virtual bool externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom, QSet<QString>* aRanges = nullptr);
     QHash<QString, pipe0*> m_pipes;
 private:
     QThread* findThread(int aNo);

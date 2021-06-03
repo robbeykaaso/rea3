@@ -454,10 +454,20 @@ class pipeline{
         return stm
     }
 
-    execute(aName, aStream, aSync, aFromOutside = false){
-        let pip = this.find(aName, !aFromOutside)
+    externalNextGot(aPipe, aStream, aFrom){
+        if (aPipe.m_external != this.name() && aPipe.m_external != aFrom){
+            this.tryExecutePipeOutside(aPipe.actName(), aStream, {}, aPipe.m_external);
+            return false;
+        }
+        return true;
+    }
+
+    execute(aName, aStream, aSync, aFutureNeed = false, aFrom = ""){
+        let pip = this.find(aName, !aFutureNeed)
         if (!pip)
             return
+        if (aFrom != "" && !this.externalNextGot(pip, aStream, aFrom))
+            return;
         pip = this.find(aName)
         if (aSync){
             if (Object.keys(aSync).length > 0)
@@ -612,12 +622,12 @@ class pipelineOutside extends pipeline{
                         console.log("no " + this.name() + " linker")
                         return
                     }
-                    this.Linker.executeJSPipe.connect(function(aName, aData, aTag, aScope, aSync, aFromOutside){
+                    this.Linker.executeJSPipe.connect(function(aName, aData, aTag, aScope, aSync, aFutureNeed, aFrom){
                         const len = Object.keys(aScope).length
                         let sp = {}
                         for (let i = 0; i < len; i += 2)
                             sp[aScope[i]] = aScope[i + 1]
-                        pipelines().execute(aName, new stream(aData, aTag, new scopeCache(sp)), aSync, aFromOutside)
+                        pipelines().execute(aName, new stream(aData, aTag, new scopeCache(sp)), aSync, aFutureNeed, aFrom)
                     })
                     this.Linker.removeJSPipe.connect(function(aName){
                         pipelines().remove(aName)
@@ -634,7 +644,7 @@ class pipelineOutside extends pipeline{
         }
     }
 
-    execute(aName, aStream, aSync, aFromOutside = false, aFlag = "any"){
+    execute(aName, aStream, aSync, aFutureNeed = false, aFlag = "any"){
         this.init(e=>{
             if (this.Linker)
                 this.Linker.executeFromJS(aName, aStream.data(), aStream.tag(), aStream.scope().m_data, aSync, aFlag)
@@ -677,5 +687,6 @@ pipelines("qml").init(function(){})
 
 if (typeof module == "object")
     module.exports = {
-        pipelines: pipelines
+        pipelines: pipelines,
+        scopeCache: scopeCache
     }

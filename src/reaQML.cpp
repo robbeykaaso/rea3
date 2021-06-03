@@ -84,10 +84,10 @@ pipelineQML::pipelineQML() : pipeline("qml"){
     });  //qmlEngine can only be used on main thread, so use qvariant instead of qjsvalue
 }
 
-void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
+void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
     if (!aStream->supportedType())
         throw "not supported type";
-    pipeline::execute(aName, in(aStream->QData(), aStream->tag(), aStream->scope()), aSync, aFromOutside);
+    pipeline::execute(aName, in(aStream->QData(), aStream->tag(), aStream->scope()), aSync, aFutureNeed, aFrom);
 }
 
 pipelineQMLJS::pipelineQMLJS() : pipeline("js"){
@@ -102,7 +102,7 @@ pipelineQMLJS::pipelineQMLJS() : pipeline("js"){
 
 void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag){
     if (aFlag == "any")
-        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(aScope)), aSync, true);
+        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(aScope)), aSync, true, name());
     else if (aFlag == "qml")
         pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(aScope)), aSync);
 }
@@ -115,10 +115,10 @@ void pipelineQMLJS::remove(const QString& aName, bool){
     removeJSPipe(aName);
 }
 
-void pipelineQMLJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
+void pipelineQMLJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
     if (!aStream->supportedType())
         throw "not supported type";
-    executeJSPipe(aName,  aStream->QData(), aStream->tag(), aStream->scope()->toList(), aSync, aFromOutside);
+    executeJSPipe(aName,  aStream->QData(), aStream->tag(), aStream->scope()->toList(), aSync, aFutureNeed, aFrom);
 }
 
 static regPip<std::shared_ptr<pipeline*>> reg_create_qmljspipeline([](stream<std::shared_ptr<pipeline*>>* aInput){
@@ -149,6 +149,10 @@ void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<st
         std::cout << aData.type() << std::endl;
         throw "not supported type";
     }
+}
+
+bool pipelineQML::externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom, QSet<QString>*){
+    return pipeline::externalNextGot(aPipe, aStream, aFrom, &qml_ranges);
 }
 
 static regPip<std::shared_ptr<pipeline*>> reg_create_qmlpipeline([](stream<std::shared_ptr<pipeline*>>* aInput){

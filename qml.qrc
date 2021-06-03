@@ -50,5 +50,6 @@
         <file>qml/gui/Pipe/TreeNodeView/TreeNodeDelete.qml</file>
         <file>qml/gui/Pipe/TreeNodeView/TreeNodeTag.qml</file>
         <file>qml/gui/Pipe/TreeNodeView/TreeNodeView.qml</file>
+        <file>qml/gui/Custom/BoardMenu.qml</file>
     </qresource>
 </RCC>

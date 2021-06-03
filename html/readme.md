@@ -1,1 +1,1 @@
-reactive program: https://rea2.readthedocs.io/en/latest/
+home: https://rea2.readthedocs.io/en/latest/

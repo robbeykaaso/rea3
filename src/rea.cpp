@@ -245,9 +245,19 @@ private:
 
 static QHash<QString, pipeline*> pipelines;
 
-void pipeline::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFromOutside){
-    auto pip = find(aName, !aFromOutside);
+bool pipeline::externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom, QSet<QString>* aRanges){
+    if (aPipe->m_external != this->name() && aPipe->m_external != aFrom){
+        tryExecutePipeOutside(aPipe->actName(), aStream, QJsonObject(), aPipe->m_external, aRanges);
+        return false;
+    }
+    return true;
+}
+
+void pipeline::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
+    auto pip = find(aName, !aFutureNeed);
     if (!pip)
+        return;
+    if (aFrom != "" && !externalNextGot(pip, aStream, aFrom))
         return;
     if (!aSync.empty()){
         pip->resetTopo();
@@ -272,7 +282,7 @@ void pipeline::tryExecutePipeOutside(const QString& aName, std::shared_ptr<strea
             auto ln = pipelines.value(i);
             if (ln != this){
                 if (aFlag == "any")
-                    ln->execute(aName, aStream, aSync, true);
+                    ln->execute(aName, aStream, aSync, true, name());
                 else if (aFlag == ln->name())
                     ln->execute(aName, aStream, aSync);
             }

@@ -11,10 +11,11 @@ public:
     static pipeline* qmlinstance(const QString& aName = "qml");
 public:
     pipelineQML();
-    void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFromOutside = false) override;
+    void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFutureNeed = false, const QString& aFrom = "") override;
 protected:
     void removePipeOutside(const QString& aName, QSet<QString>* aRanges = nullptr) override;
     void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>* aRanges = nullptr) override;
+    bool externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom, QSet<QString>* aRanges = nullptr) override;
 };
 
 class pipelineQMLJS : public pipeline{
@@ -26,9 +27,9 @@ public:
     Q_INVOKABLE void executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag);
     Q_INVOKABLE void removeFromJS(const QString& aName);
     void remove(const QString& aName, bool) override;
-    void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFromOutside = false) override;
+    void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFutureNeed = false, const QString& aFrom = "") override;
 signals:
-    void executeJSPipe(const QString& aName, const QVariant& aData, const QString& aTag, const QVariantList& aScope, const QJsonObject& aSync, bool aFromOutside);
+    void executeJSPipe(const QString& aName, const QVariant& aData, const QString& aTag, const QVariantList& aScope, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom);
     void removeJSPipe(const QString& aName);
 };
 
