@@ -147,9 +147,9 @@ void qsgBoard::beforeDestroy(){
 }
 
 qsgBoard::~qsgBoard(){
-    rea::pipeline::instance()->remove("updateQSGAttr_" + m_name);
-    rea::pipeline::instance()->remove("updateQSGCtrl_" + m_name);
-    rea::pipeline::instance()->remove("QSGAttrUpdated_" + m_name);
+    //rea::pipeline::instance()->remove("updateQSGAttr_" + m_name);
+    //rea::pipeline::instance()->remove("updateQSGCtrl_" + m_name);
+    //rea::pipeline::instance()->remove("QSGAttrUpdated_" + m_name);
 }
 
 std::shared_ptr<scopeCache> qsgImages(std::initializer_list<std::pair<QString, QImage>> aImages){
@@ -214,12 +214,15 @@ void qsgBoard::setName(const QString& aName){
             m_updates_modification = QJsonArray();
         }
         aInput->out();
-    }, rea::Json("name", "updateQSGAttr_" + m_name, "delegate", "QSGAttrUpdated_" + m_name));
+    }, rea::Json("name", "updateQSGAttr_" + m_name,
+                 "delegate", "QSGAttrUpdated_" + m_name,
+                 "replace", true));
 
     rea::pipeline::instance()->add<QJsonArray>([this](rea::stream<QJsonArray>* aInput){
         aInput->scope()->cache("hasModel", m_models.size() > 0);
         aInput->out();
-    }, rea::Json("name", "QSGAttrUpdated_" + m_name));
+    }, rea::Json("name", "QSGAttrUpdated_" + m_name,
+                 "replace", true));
 
     rea::pipeline::instance()->add<QJsonArray>([this](rea::stream<QJsonArray>* aInput){
         for (auto i : m_plugins)
@@ -229,7 +232,8 @@ void qsgBoard::setName(const QString& aName){
             installPlugins(aInput->data());
         }
         aInput->out();
-    }, rea::Json("name", "updateQSGCtrl_" + m_name));
+    }, rea::Json("name", "updateQSGCtrl_" + m_name,
+                 "replace", true));
 }
 
 QJsonArray qsgBoard::getPlugins() {

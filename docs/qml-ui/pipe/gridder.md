@@ -6,8 +6,7 @@
     - renew the grid count and layout
     - type: pipe
     - pipeline: qml; trigger
-    - input: QJsonObject :
-        - size : QJsonObject: grid scale
+    - input: QJsonObject: gridder0 `scale`
     - output: input
 _sample_:
 ```

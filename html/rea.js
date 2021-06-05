@@ -442,7 +442,7 @@ class pipeline{
 
     run(aName, aInput, aTag = "", aScope = null){
         let stm = new stream(aInput, aTag, aScope)
-        this.execute(aName, stm)
+        this.execute(aName, stm, {}, false, this.name())
         return stm
     }
 

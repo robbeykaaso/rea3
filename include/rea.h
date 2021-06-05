@@ -243,7 +243,7 @@ public:
     template<typename T>
     std::shared_ptr<stream<T>> run(const QString& aName, T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr){
         auto stm = in(aInput, aTag, aScope);
-        execute(aName, stm);
+        execute(aName, stm, QJsonObject(), false, name());
         return stm;
     }
 
