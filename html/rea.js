@@ -606,6 +606,11 @@ function initLinker(aFunc){
     }
 }
 
+let environment = {}
+function getEnv(){
+    return environment
+}
+
 class pipelineOutside extends pipeline{
 
     constructor(aName){
@@ -622,6 +627,8 @@ class pipelineOutside extends pipeline{
                         console.log("no " + this.name() + " linker")
                         return
                     }
+                    if (channel.objects["Environment"])
+                        environment = channel.objects["Environment"].env
                     this.Linker.executeJSPipe.connect(function(aName, aData, aTag, aScope, aSync, aFutureNeed, aFrom){
                         const len = Object.keys(aScope).length
                         let sp = {}
@@ -688,5 +695,6 @@ pipelines("qml").init(function(){})
 if (typeof module == "object")
     module.exports = {
         pipelines: pipelines,
-        scopeCache: scopeCache
+        scopeCache: scopeCache,
+        env: getEnv
     }

@@ -3,14 +3,14 @@
 
 namespace rea {
 
-pipelineJS::pipelineJS() : pipeline("js"){
+pipelineJS::pipelineJS(const QString& aName) : pipeline(aName){
     pipeline::instance()->supportType<pipelineJS*>([](stream0* aInput){
         return QVariant::fromValue<QObject*>(reinterpret_cast<stream<pipelineJS*>*>(aInput)->data());
     });
-    pipeline::instance()->add<double>([](stream<double>* aInput){
-        auto pip_js = reinterpret_cast<pipelineJS*>(pipeline::instance("js"));
+    pipeline::instance()->add<double>([this](stream<double>* aInput){
+        auto pip_js = reinterpret_cast<pipelineJS*>(pipeline::instance(name()));
         aInput->outs<pipelineJS*>(pip_js)->scope()->cache<pipelineJS*>("pipeline", pip_js);
-    }, rea::Json("name", "pipelineJSObject", "external", "qml"));
+    }, rea::Json("name", "pipeline" + name().toUpper() + "Object", "external", "qml"));
 };
 
 void pipelineJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
@@ -52,12 +52,21 @@ void pipelineJS::removeFromJS(const QString& aName){
     rea::pipeline::instance()->remove(aName, false);
 }
 
+void environmentJS::setEnv(const QJsonObject& aEnvs){
+    m_envs = aEnvs;
+}
+
+QJsonObject environmentJS::getEnv(){
+    return m_envs;
+}
+
 static regPip<std::shared_ptr<pipeline*>> reg_create_jspipeline([](stream<std::shared_ptr<pipeline*>>* aInput){
     *aInput->data() = new pipelineJS();
 }, rea::Json("name", "createjspipeline"));
 
 
 static regPip<QQmlApplicationEngine*> reg_js_linker([](stream<QQmlApplicationEngine*>* aInput){
+    qmlRegisterType<environmentJS>("EnvJS", 1, 0, "EnvJS");
     //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype
     rea::pipeline::instance("js");
     aInput->out();

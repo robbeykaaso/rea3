@@ -82,6 +82,8 @@ pipelineQML::pipelineQML() : pipeline("qml"){
     pipeline::instance()->supportType<QVariant>([](stream0* aInput){
         return reinterpret_cast<stream<QVariant>*>(aInput)->data();
     });  //qmlEngine can only be used on main thread, so use qvariant instead of qjsvalue
+
+    updateOutsideRanges({"c++", "qml", "qmljs"});
 }
 
 void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
@@ -125,34 +127,32 @@ static regPip<std::shared_ptr<pipeline*>> reg_create_qmljspipeline([](stream<std
     *aInput->data() = new pipelineQMLJS();
 }, rea::Json("name", "createqmljspipeline"));
 
-static QSet<QString> qml_ranges = {"c++", "qml", "qmljs"};
-
-void pipelineQML::removePipeOutside(const QString& aName, QSet<QString>*){
-    pipeline::removePipeOutside(aName, &qml_ranges);
+void pipelineQML::removePipeOutside(const QString& aName){
+    pipeline::removePipeOutside(aName);
 }
 
-void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>*) {
+void pipelineQML::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag) {
     auto aData = aStream->QData();
     if (aData.type() == QVariant::Type::Map || aData.type() == QMetaType::QJsonObject)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonObject(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonObject(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::List || aData.type() == QMetaType::QJsonArray)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonArray(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toJsonArray(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::String)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toString(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toString(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::Bool)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toBool(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toBool(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::Double)
-        pipeline::tryExecutePipeOutside(aName, in(aData.toDouble(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
+        pipeline::tryExecutePipeOutside(aName, in(aData.toDouble(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else if (aData.type() == QVariant::Type::Int)
-        pipeline::tryExecutePipeOutside(aName, in<double>(aData.toInt(), aStream->tag(), aStream->scope()), aSync, aFlag, &qml_ranges);
+        pipeline::tryExecutePipeOutside(aName, in<double>(aData.toInt(), aStream->tag(), aStream->scope()), aSync, aFlag);
     else{
         std::cout << aData.type() << std::endl;
         throw "not supported type";
     }
 }
 
-bool pipelineQML::externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom, QSet<QString>*){
-    return pipeline::externalNextGot(aPipe, aStream, aFrom, &qml_ranges);
+bool pipelineQML::externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom){
+    return pipeline::externalNextGot(aPipe, aStream, aFrom);
 }
 
 static regPip<std::shared_ptr<pipeline*>> reg_create_qmlpipeline([](stream<std::shared_ptr<pipeline*>>* aInput){

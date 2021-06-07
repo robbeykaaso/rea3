@@ -13,9 +13,9 @@ public:
     pipelineQML();
     void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFutureNeed = false, const QString& aFrom = "") override;
 protected:
-    void removePipeOutside(const QString& aName, QSet<QString>* aRanges = nullptr) override;
-    void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>* aRanges = nullptr) override;
-    bool externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom, QSet<QString>* aRanges = nullptr) override;
+    void removePipeOutside(const QString& aName) override;
+    void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag) override;
+    bool externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom) override;
 };
 
 class pipelineQMLJS : public pipeline{

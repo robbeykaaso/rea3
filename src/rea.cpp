@@ -245,9 +245,9 @@ private:
 
 static QHash<QString, pipeline*> pipelines;
 
-bool pipeline::externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom, QSet<QString>* aRanges){
+bool pipeline::externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom){
     if (aPipe->m_external != this->name() && aPipe->m_external != aFrom){
-        tryExecutePipeOutside(aPipe->actName(), aStream, QJsonObject(), aPipe->m_external, aRanges);
+        tryExecutePipeOutside(aPipe->actName(), aStream, QJsonObject(), aPipe->m_external);
         return false;
     }
     return true;
@@ -273,12 +273,9 @@ void pipeline::execute(const QString& aName, std::shared_ptr<stream0> aStream, c
     pip->execute(aStream);
 }
 
-static QSet<QString> cplus_ranges = {"c++", "qml", "js"};
-void pipeline::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>* aRanges){
-    if (!aRanges)
-        aRanges = &cplus_ranges;
+void pipeline::tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag){
     for (auto i : pipelines.keys())
-        if (aRanges->contains(i)){
+        if (m_outside_pipelines.contains(i)){
             auto ln = pipelines.value(i);
             if (ln != this){
                 if (aFlag == "any")
@@ -347,11 +344,14 @@ void pipeline::remove(const QString& aName, bool aOutside){
         removePipeOutside(aName);
 }
 
-void pipeline::removePipeOutside(const QString& aName, QSet<QString>* aRanges){
-    if (!aRanges)
-        aRanges = &cplus_ranges;
+void pipeline::updateOutsideRanges(const QSet<QString>& aRanges){
+    for (auto i : aRanges)
+        m_outside_pipelines.insert(i);
+}
+
+void pipeline::removePipeOutside(const QString& aName){
     for (auto i : pipelines.keys())
-        if (aRanges->contains(i)){
+        if (m_outside_pipelines.contains(i)){
             auto ln = pipelines.value(i);
             if (ln != this)
                 ln->remove(aName);
@@ -409,6 +409,8 @@ pipeline::pipeline(const QString& aName){
             std::cout << "c++_stream_counter: " << stream_counter << std::endl;
             aInput->out();
         }, rea::Json("name", "reportCLeak", "external", "js"));
+
+        m_outside_pipelines = {"c++", "qml", "js"};
     }
 }
 

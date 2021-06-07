@@ -275,10 +275,12 @@ public:
 
     virtual void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(),
                          bool aFutureNeed = false, const QString& aFrom = "");
+
+    void updateOutsideRanges(const QSet<QString>& aRanges);
 protected:
-    virtual void removePipeOutside(const QString& aName, QSet<QString>* aRanges = nullptr);
-    virtual void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag, QSet<QString>* aRanges = nullptr);
-    virtual bool externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom, QSet<QString>* aRanges = nullptr);
+    virtual void removePipeOutside(const QString& aName);
+    virtual void tryExecutePipeOutside(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, const QString& aFlag);
+    virtual bool externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream, const QString& aFrom);
     QHash<QString, pipe0*> m_pipes;
 private:
     QThread* findThread(int aNo);
@@ -286,6 +288,7 @@ private:
     QString m_name;
     QHash<int, std::shared_ptr<QThread>> m_threads;
     QHash<QString, std::function<QVariant(stream0*)>> m_types;
+    QSet<QString> m_outside_pipelines;
     friend pipe0;
     friend pipeFuture;
     friend stream0;
