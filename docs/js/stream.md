@@ -17,6 +17,7 @@
     - `return` self  
 * Notice  
     - <font color="red">if the `outs()` is not used, the executing sequence of next pipes will be by alphabet sequence</font><br />  
+    - <font color="red">it cannot correctly work by sequence in the async function </font><br />  
 </br>
 
 * **outs(aOut, aNext = "", aTag = "")**  
@@ -28,11 +29,15 @@
 * Notice  
     - <font color="red">if `aNext` equals to "", it will only execute all the next pipes like `out()`</font><br />  
     - <font color="red">if `aNext` doesn't equal to "", it will try to execute the specific next pipe</font><br />  
+    - <font color="red">it cannot correctly work by sequence in the async function </font><br />  
 </br>
 
 * **outsB(aOut, aNext = "", aTag = "")**  
     - work like `outs()`  
     - `return` self  
+* Notice  
+    - <font color="red">it cannot correctly work by sequence in the async function </font><br />  
+</br>
 </br>
 
 * **void noOut()**  

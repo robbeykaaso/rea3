@@ -18,10 +18,10 @@ Menu{
         Pipeline.find("qml_updateQSGMenu_" + parent.name).nextF(function(aInput){
             var dt = aInput.data()
             visible = dt["x"] !== undefined && dt["y"] !== undefined
+            for (var i = count - 1; i >= 0; --i)
+                removeItem(itemAt(i))
             if (dt["menu"]){
                 var mn = dt["menu"]
-                for (var i = count - 1; i >= 0; --i)
-                    removeItem(itemAt(i))
                 for (var j in mn){
                     cmenu[mn[j]["cap"]] = mn[j]
                     var src = "import QtQuick 2.12; import QtQuick.Controls 2.5;"

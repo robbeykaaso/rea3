@@ -133,7 +133,7 @@ QStringList parseJsons(const QString& aContent){
     return ret;
 }
 
-QString QImage2Base64(const QImage& aImage){
+QByteArray QImage2Base64(const QImage& aImage){
     QBuffer bf;
     bf.open(QIODevice::WriteOnly);
     aImage.save(&bf, "png");

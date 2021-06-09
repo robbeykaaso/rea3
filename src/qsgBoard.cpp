@@ -128,6 +128,10 @@ void qsgPluginTransform::updatePos(const QPoint &aPos){
                                                                                  "transform", mdl ? mdl->value("transform") : QJsonArray()));
 }
 
+QJsonObject qsgPluginTransform::getMenu() {
+    return rea::Json("menu", rea::JArray(rea::Json("cap", "fitView", "cmd", "updateQSGAttr_" + getParentName(), "param", rea::JArray(rea::Json("key", rea::JArray("transform"), "type", "zoom")))));
+}
+
 static rea::regPip<QJsonObject, rea::pipePartial> create_qsgboardplugin_transform([](rea::stream<QJsonObject>* aInput){
     aInput->scope()->cache<std::shared_ptr<qsgBoardPlugin>>("result", std::make_shared<qsgPluginTransform>(aInput->data()));
     aInput->out();
