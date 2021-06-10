@@ -188,7 +188,7 @@ QJSValue qmlScopeCache::data(const QString& aName){
     if (stm)
         return qml_engine->toScriptValue(stm->QData());
     else
-        return QJSValue::NullValue;
+        return QJSValue::UndefinedValue;
 }
 
 static int stream_counter = 0;

@@ -24,6 +24,10 @@ scopeCache::scopeCache(const QJsonObject& aData){
     }
 }
 
+scopeCache::~scopeCache(){
+
+}
+
 QVariantList scopeCache::toList(){
     QVariantList ret;
     for (auto i : m_data.keys()){

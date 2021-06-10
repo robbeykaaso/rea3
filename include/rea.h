@@ -33,6 +33,8 @@ public:
     scopeCache(){
     }
     scopeCache(const QJsonObject& aData);
+    scopeCache(scopeCache&&) = default;
+    ~scopeCache();
     template<typename T>
     std::shared_ptr<scopeCache> cache(const QString& aName, T aData){
         m_data.insert(aName, in(aData));

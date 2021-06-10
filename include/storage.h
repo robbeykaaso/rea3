@@ -30,7 +30,7 @@ protected:
     void checkPath(const QString& aPath);
     void listAllFiles(const QString& aDirectory, std::vector<QString>& aList);
 protected:
-    QString m_root;
+    QString m_root = "";
 };
 
 }  // namespace rea
