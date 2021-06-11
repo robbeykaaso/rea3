@@ -23,29 +23,33 @@ void pipelineJS::remove(const QString& aName, bool){
     removeJSPipe(aName);
 }
 
+std::shared_ptr<stream0> makeInput(const QVariant& aData, const QString& aTag, const QJsonObject& aScope){
+    std::shared_ptr<stream0> ret = nullptr;
+    QJsonObject scp;
+    for (auto i : aScope.keys())
+        scp.insert(i, aScope.value(i));
+    if (aData.type() == QVariant::Type::Map)
+        ret = in(aData.toJsonObject(), aTag, std::make_shared<scopeCache>(scp));
+    else if (aData.type() == QVariant::Type::List)
+        ret = in(aData.toJsonArray(), aTag, std::make_shared<scopeCache>(scp));
+    else if (aData.type() == QVariant::Type::String)
+        ret = in(aData.toString(), aTag, std::make_shared<scopeCache>(scp));
+    else if (aData.type() == QVariant::Type::Bool)
+        ret = in(aData.toBool(), aTag, std::make_shared<scopeCache>(scp));
+    else if (aData.type() == QVariant::Type::Double)
+        ret = in(aData.toDouble(), aTag, std::make_shared<scopeCache>(scp));
+    else{
+        std::cout << aData.type() << std::endl;
+        assert(0);
+    }
+    return ret;
+}
+
 void pipelineJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag){
-    auto stm = [&](){
-        std::shared_ptr<stream0> ret = nullptr;
-        if (aData.type() == QVariant::Type::Map)
-            ret = in(aData.toJsonObject(), aTag, std::make_shared<scopeCache>(aScope));
-        else if (aData.type() == QVariant::Type::List)
-            ret = in(aData.toJsonArray(), aTag, std::make_shared<scopeCache>(aScope));
-        else if (aData.type() == QVariant::Type::String)
-            ret = in(aData.toString(), aTag, std::make_shared<scopeCache>(aScope));
-        else if (aData.type() == QVariant::Type::Bool)
-            ret = in(aData.toBool(), aTag, std::make_shared<scopeCache>(aScope));
-        else if (aData.type() == QVariant::Type::Double)
-            ret = in(aData.toDouble(), aTag, std::make_shared<scopeCache>(aScope));
-        else{
-            std::cout << aData.type() << std::endl;
-            assert(0);
-        }
-        return ret;
-    };
     if (aFlag == "any")
-        rea::pipeline::instance()->execute(aName, stm(), aSync, true, name());
+        rea::pipeline::instance()->execute(aName, makeInput(aData, aTag, aScope), aSync, true, name());
     else if (aFlag == "c++")
-        rea::pipeline::instance()->execute(aName, stm(), aSync);
+        rea::pipeline::instance()->execute(aName, makeInput(aData, aTag, aScope), aSync);
 }
 
 void pipelineJS::removeFromJS(const QString& aName){

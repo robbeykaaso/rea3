@@ -83,23 +83,6 @@ void fsStorage::deletePath(const QString& aPath){
         QDir(stgRoot(aPath)).removeRecursively();
 }
 
-std::vector<QString> fsStorage::getFileList(const QString& aPath){
-    std::vector<QString> ret;
-    auto pth = stgRoot(aPath);
-    QDir dir(pth);
-    auto lst = dir.entryList();
-    for (auto i : lst)
-        if (i != "." && i != ".."){
-            if (i.indexOf(".") >= 0)
-                ret.push_back(aPath + "/" + i);
-            else{
-                auto clst = getFileList(aPath + "/" + i);
-                ret.insert(ret.end(), clst.begin(), clst.end());
-            }
-        }
-    return ret;
-}
-
 void fsStorage::initialize(){
 
 #define READSTORAGE(aType) \

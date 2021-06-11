@@ -103,10 +103,13 @@ pipelineQMLJS::pipelineQMLJS() : pipeline("js"){
 }
 
 void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag){
+    QJsonObject scp;
+    for (auto i : aScope.keys())
+        scp.insert(i, aScope.value(i));
     if (aFlag == "any")
-        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(aScope)), aSync, true, name());
+        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync, true, name());
     else if (aFlag == "qml")
-        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(aScope)), aSync);
+        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync);
 }
 
 void pipelineQMLJS::removeFromJS(const QString& aName){

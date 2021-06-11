@@ -365,12 +365,12 @@ void pipeline::removePipeOutside(const QString& aName){
 QThread* pipeline::findThread(int aNo){
     auto thread = m_threads.find(aNo);
     if (thread == m_threads.end()){
-        auto tmp = std::make_shared<QThread>();
+        auto tmp = new QThread();
         tmp->start();
         m_threads.insert(aNo, tmp);
         thread = m_threads.find(aNo);
     }
-    return thread->get();
+    return thread.value();
 }
 
 pipeline* pipeline::instance(const QString& aName){
@@ -420,8 +420,8 @@ pipeline::pipeline(const QString& aName){
 
 pipeline::~pipeline(){
     for (auto i : m_threads)
-        if (i.get()->isRunning()){
-            i.get()->terminate();
+        if (i->isRunning()){
+            i->terminate();
             i->wait();
         }
     for (auto i : m_pipes.values())

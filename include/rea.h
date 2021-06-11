@@ -288,7 +288,7 @@ private:
     QThread* findThread(int aNo);
     void doRemove(const QString& aName);
     QString m_name;
-    QHash<int, std::shared_ptr<QThread>> m_threads;
+    QHash<int, QThread*> m_threads;
     QHash<QString, std::function<QVariant(stream0*)>> m_types;
     QSet<QString> m_outside_pipelines;
     friend pipe0;
