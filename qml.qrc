@@ -51,5 +51,7 @@
         <file>qml/gui/Pipe/TreeNodeView/TreeNodeTag.qml</file>
         <file>qml/gui/Pipe/TreeNodeView/TreeNodeView.qml</file>
         <file>qml/gui/Custom/BoardMenu.qml</file>
+        <file>qml/gui/Style/qmldir</file>
+        <file>qml/gui/Style/SSpin.qml</file>
     </qresource>
 </RCC>

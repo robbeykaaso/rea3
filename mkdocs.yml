@@ -59,7 +59,8 @@ nav:
       - extension: storage/extension.md
       - plugins:
         - awsStorage: storage/plugins/awsStorage.md
-    - qml-ui:
+    - qml-ui: 
+      - abstract: qml-ui/design.md
       - basic: 
         - autosize: qml-ui/basic/autosize.md
         - check: qml-ui/basic/check.md

@@ -1,44 +1,43 @@
 ﻿import QtQuick 2.9
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 1.4
+import "../Style"
 
 Row {
     property alias caption: caption
     property alias background: bak
     property alias spin: val
-    property double ratio: 0.3
-    width: 120
-    height: 30
+    property double ratio: CStyle.spin.ratio
+    property QtObject cstyle: SSpin
+    width: cstyle.width
+    height: cstyle.height
 
-    spacing: width * 0.05
+    spacing: cstyle.spacing(this)
+
     Text {
         id: caption
         text: "hello:"
         //horizontalAlignment: Text.AlignRight
         verticalAlignment: Text.AlignVCenter
         anchors.verticalCenter: parent.verticalCenter
-        font.pixelSize: 12
-        width: parent.width * ratio
-        height: parent.height * 0.8
+        font.pixelSize: cstyle.text.fontSize
+        width: cstyle.text.width(this)
+        height: cstyle.text.height(this)
     }
 
     Rectangle {
         id: bak
         color: "white"
-        width: parent.width * (1 - ratio - 0.1)
-        height: parent.height * 0.8
+        width: cstyle.rect.width(this)
+        height: cstyle.rect.height(this)
         anchors.verticalCenter: parent.verticalCenter
         SpinBox {
             id: val
-            style: SpinBoxStyle {
-                background: Rectangle {
-                    //radius: 6
-                }
-            }
+            style: cstyle.rect.spinBox.style
             anchors.fill: parent
-            font.pixelSize: 12
-            minimumValue: 0
-            maximumValue: 200
+            font.pixelSize: cstyle.rect.spinBox.fontSize
+            minimumValue: cstyle.rect.spinBox.min
+            maximumValue: cstyle.rect.spinBox.max
         }
     }
 }

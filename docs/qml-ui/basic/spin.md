@@ -6,6 +6,7 @@
 * background: Rectangle object: background  
 * spin: Spin object: edit  
 * ratio: double: the ratio between caption and background  
+* cstyle: QtObject: the style singleton  
 _sample_:  
 ```
     Spin{
