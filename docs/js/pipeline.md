@@ -14,9 +14,24 @@ pipelines().add(function(aInput){
     aInput.out()
 }, {
     "name", "pipe0",  //the name of the pipe, if there is no name, it will be regarded as an anonymous pipe
+    "replace", false, //the pipe will reserve the old pipe's next pipes if they are existed
+    "before", "pipe1", //inject this pipe before the target pipe, it will be executed on the same thread of the target pipe
+    "after", "pipe2", //work like "before"
+    "around", "pipe3" //work like "before", replace the function of this pipe
+    "befored", "pipe4",  //inject the target pipe before this pipe, the target pipe will be executed on the same thread of this pipe
+    "aftered", "pipe5"  //work like "befored"
     "external", "c++"  //decide which pipeline controls its next pipes
 })
+
+topo result: pipe0' = pipe4 -> pipe0 -> pipe5
+             pipe... -> pipe0' -> pipe1 -> pipe...
+             pipe... -> pipe2 -> pipe0' -> pipe...
+             pipe... -> pipe3(replaced by pipe0') ->pipe...
 ```  
+* Notice  
+    - <font color="red">aop attributes include `before`, `after`, `around`, `befored`, and `aftered` could only work in the same pipeline</font><br />  
+    - <font color="red">if there is a pipe with the same name, the original pipe will be removed</font><br />  
+    - <font color="red">the `external` pipe's `next` could only be modified by the specific pipeline</font><br />  
 </br>
 
 * **find(aName, aNeedFuture = true)**  

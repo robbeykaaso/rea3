@@ -221,9 +221,22 @@ class pipe {
             this.m_name = generateUUID()
         else
             this.m_name = aName
-        this.m_parent.m_pipes[this.m_name] = this
     }
     
+    inPool(aReplace){
+        let old = this.m_parent.find(this.m_name, false)
+        if (old && aReplace)
+            this.replaceTopo(old)
+        this.m_parent.m_pipes[this.m_name] = this
+    }
+
+    replaceTopo(aOldPipe){
+        this.m_next = aOldPipe.m_next
+        this.m_before = aOldPipe.m_before
+        this.m_around = aOldPipe.m_around
+        this.m_after = aOldPipe.m_after
+    }
+
     resetTopo(){
         this.m_next = {}
     }
@@ -261,6 +274,12 @@ class pipe {
         this.m_func = aFunc
         if (aParam && aParam["external"] != null)
             this.m_external = aParam["external"]
+        let bf = aParam["befored"]
+        if (bf)
+            this.m_before = this.setAspect(this.m_before, bf)
+        let ed = aParam["aftered"]
+        if (ed)
+            this.m_after = this.setAspect(this.m_after, ed)
         return this
     }
 
@@ -274,7 +293,14 @@ class pipe {
     }
 
     doEvent(aStream){
-        this.m_func(aStream)
+        if (this.doAspect(this.m_before, aStream)){
+            if (this.m_around)
+                this.doAspect(this.m_around, aStream)
+            else
+                this.m_func(aStream)
+        }
+        if (aStream.m_outs)
+            this.doAspect(this.m_after, aStream)
     }
 
     tryExecutePipe(aName, aStream){
@@ -302,6 +328,62 @@ class pipe {
                 for (let i in aNexts)
                     this.tryExecutePipe(i, aStream)
     }
+    setAspect(aTarget, aAspect){
+        let ret = aTarget
+        if (!ret)
+            ret = ""
+        if (ret.indexOf(aAspect) < 0){
+            if (ret != "")
+                ret += ";"
+            ret += aAspect
+        }
+        return ret
+    }
+    removeAspect(aType, aAspect){
+
+        function doRemoveAspect(aOriAspect){
+            if (aOriAspect){
+                let idx = aOriAspect.indexOf(aAspect)
+                if (idx > 0)
+                    aOriAspect = aOriAspect.splice(idx - 1, aAspect.length)
+                else if (!idx)
+                    aOriAspect = aOriAspect.splice(idx, aAspect.length)
+            }
+            return aOriAspect
+        }
+
+        if (aType == "before"){
+            if (!aAspect)
+                this.m_before = null
+            else
+                this.m_before = doRemoveAspect(this.m_before)
+        }else if (aType == "around"){
+            if (!aAspect)
+                this.m_around = null
+            else
+                this.m_around = doRemoveAspect(this.m_around)
+        }else if (aType == "after"){
+            if (!aAspect)
+                this.m_after = null
+            else
+                this.m_after = doRemoveAspect(this.m_after)
+        }
+    }
+    doAspect(aName, aStream){
+        if (!aName)
+            return true
+        let ret = false
+        let nms = aName.split(";")
+        for (let i in nms){
+            let pip = this.m_parent.m_pipes[nms[i]]
+            if (pip){
+                pip.doEvent(aStream)
+                if (aStream.m_outs)
+                    ret = true
+            }
+        }
+        return ret
+    }
 }
 
 class pipeFuture0 extends pipe{
@@ -324,10 +406,17 @@ class pipeFuture extends pipe{
         this.m_next2 = []
         if (this.m_parent.find(aName + "_pipe_add", false)){
             const pip = new pipeFuture0(this.m_parent, aName)
+            pip.inPool(false)
             this.m_parent.call(aName + "_pipe_add")
             for (let i in pip.m_next2)
                 this.insertNext(pip.m_next2[i][0], pip.m_next2[i][1])
             this.m_external = pip.m_external
+            if (pip.m_before)
+                this.m_before = this.setAspect(this.m_before, pip.m_before)
+            if (pip.m_around)
+                this.m_around = this.setAspect(this.m_around, pip.m_around)
+            if (pip.m_after)
+                this.m_after = this.setAspect(this.m_after, pip.m_after)
             delete this.m_parent.m_pipes[aName]
         }
 
@@ -336,6 +425,12 @@ class pipeFuture extends pipe{
             for (let i in this.m_next2)
                 pip.insertNext(this.m_next2[i][0], this.m_next2[i][1])
             pip.m_external = this.m_external
+            if (this.m_before)
+                pip.m_before = pip.setAspect(pip.m_before, this.m_before)
+            if (this.m_around)
+                pip.m_around = pip.setAspect(pip.m_around, this.m_around)
+            if (this.m_after)
+                pip.m_after = pip.setAspect(pip.m_after, this.m_after)
             delete this.m_parent.m_pipes[this.m_name]
         }, {name: aName + "_pipe_add"})
     }
@@ -363,6 +458,12 @@ class pipeFuture extends pipe{
         let sync = {}
         if (this.m_next2.length)
             sync["next"] = this.m_next2
+        if (this.m_before)
+            sync["before"] = this.m_before
+        if (this.m_around)
+            sync["around"] = this.m_around
+        if (this.m_after)
+            sync["after"] = this.m_after
         this.m_parent.tryExecutePipeOutside(this.actName(), aStream, sync, "any")
     }
 }
@@ -404,6 +505,7 @@ class pipeline{
             pip = pipelines().call("createJSPipe" + aParam["type"], "", new scopeCache({"parent": this, "name": nm})).data()
         else
             pip = new pipe(this, nm)
+        pip.inPool(aParam["replace"])
         if (nm != ""){
             const ad = pip.actName() + "_pipe_add"
             if (this.m_pipes[ad]){
@@ -412,6 +514,23 @@ class pipeline{
             }
         }
         pip.initialize(aFunc, aParam)
+
+        let bf = aParam["before"]
+        if (bf){
+            let joint = this.find(bf)
+            joint.m_before = joint.setAspect(joint.m_before, pip.actName())
+        }
+        let ar = aParam["around"]
+        if (ar){
+            let joint = this.find(ar)
+            joint.m_around = joint.setAspect(joint.m_around, pip.actName())
+        }
+        let af = aParam["after"]
+        if (af){
+            let joint = this.find(af)
+            joint.m_after = joint.setAspect(joint.m_after, pip.actName())
+        }
+
         return pip
     }
 
@@ -423,6 +542,7 @@ class pipeline{
             pip = this.find(aName + "_pipe_add", false);
             if (pip){
                 pip = new pipeFuture0(this, aName);
+                pip.inPool(false)
                 this.call(aName + "_pipe_add");
                 this.remove(aName + "_pipe_add", false);
                 this.remove(aName, false);
@@ -435,8 +555,10 @@ class pipeline{
 
     find(aName, aNeedFuture = true){
         let pip = this.m_pipes[aName]
-        if (!pip && aNeedFuture)
+        if (!pip && aNeedFuture){
             pip = new pipeFuture(this, aName)
+            pip.inPool(false)
+        }
         return pip
     }
 
@@ -475,6 +597,12 @@ class pipeline{
             if (aSync["next"])
                 for (let i in aSync["next"])
                     pip.insertNext(aSync["next"][i][0], aSync["next"][i][1])
+            if (aSync["before"])
+                pip.m_before = pip.setAspect(pip.m_before, aSync["before"])
+            if (aSync["after"])
+                pip.m_after = pip.setAspect(pip.m_after, aSync["after"])
+            if (aSync["around"])
+                pip.m_around = pip.setAspect(pip.m_around, aSync["around"])
         }
         pip.execute(aStream)
     }
@@ -519,6 +647,11 @@ class pipePartial extends pipe{
             delete this.m_next2[i][aName]
     }
 
+    replaceTopo(aOldPipe){
+        pipe.prototype.replaceTopo.call(this, aOldPipe)
+        this.m_next2 = aOldPipe.m_next2
+    }
+
     resetTopo(){
         this.m_next2 = {}
     }
@@ -544,6 +677,10 @@ class pipeDelegate extends pipe{
     }
     insertNext(aName, aTag){
         this.m_next2.push([aName, aTag])
+    }
+    replaceTopo(aOldPipe){
+        pipe.prototype.replaceTopo.call(this, aOldPipe)
+        this.m_next2 = aOldPipe.m_next2
     }
     resetTopo(){
         this.m_next2 = []
