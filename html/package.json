@@ -1,11 +1,18 @@
 {
   "name": "reajs",
-  "version": "1.1.0",
+  "version": "1.1.4",
   "description": "rea.js",
+  "bin": {
+    "rea-cli": "./bin/cli.js"
+  },
   "main": "rea.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "robbeykaaso",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "help": "^3.0.2",
+    "nopt": "^5.0.0"
+  }
 }
