@@ -35,5 +35,5 @@
 * *delphi* (develop in the future)
 
 # Repositories
-[get demo code](https://www.robbeykaaso.work:3000/test/download/rea.zip)  
-[get demo binary](https://www.robbeykaaso.work:3000/test/download/DeepInspectionV4.1.exe)
+[get demo code](https://www.robbeykaaso.work:3000/test/viewupload/tools/rea.zip)  
+[get demo binary](https://www.robbeykaaso.work:3000/test/viewupload/tools/NWLanV4.1.exe)
