@@ -1,5 +1,6 @@
 #include "storage.h"
 #include "rea.h"
+#include <filesystem>
 #include <QFile>
 #include <QJsonDocument>
 #include <QDir>
@@ -150,11 +151,25 @@ fsStorage::~fsStorage(){
 }
 
 std::vector<QString> fsStorage::listFiles(const QString& aDirectory){
-    QDir dir(stgRoot(aDirectory));
     std::vector<QString> ret;
-    auto lst = dir.entryList();
-    for (auto i : lst)
-        ret.push_back(i);
+    bool isDir = false;
+    try {
+        isDir = std::filesystem::is_directory(aDirectory.toStdString());  //#无标题.png will crash
+    } catch (...) {
+
+    }
+    if (isDir){
+        std::string path = stgRoot(aDirectory).toStdString();
+        for (const auto & entry : std::filesystem::directory_iterator(path)){
+            QString dir = QString::fromLocal8Bit(entry.path().string().data());
+            dir = dir.split(aDirectory + "\\").back();
+            ret.push_back(dir);
+        }
+    }
+    //QDir dir(stgRoot(aDirectory));
+    //auto lst = dir.entryList();
+    //for (auto i : lst)
+    //    ret.push_back(i);
     return ret;
 }
 
