@@ -152,14 +152,8 @@ fsStorage::~fsStorage(){
 
 std::vector<QString> fsStorage::listFiles(const QString& aDirectory){
     std::vector<QString> ret;
-    bool isDir = false;
-    try {
-        isDir = std::filesystem::is_directory(aDirectory.toStdString());  //#无标题.png will crash
-    } catch (...) {
-
-    }
-    if (isDir){
-        std::string path = stgRoot(aDirectory).toStdString();
+    if (std::filesystem::is_directory(std::filesystem::u8path(aDirectory.toStdString()))){
+        auto path = std::filesystem::u8path(stgRoot(aDirectory).toStdString());
         for (const auto & entry : std::filesystem::directory_iterator(path)){
             QString dir = QString::fromLocal8Bit(entry.path().string().data());
             dir = dir.split(aDirectory + "\\").back();
