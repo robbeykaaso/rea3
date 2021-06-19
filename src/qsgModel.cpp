@@ -246,8 +246,11 @@ QImage imageObject::getImage(){
     auto pth = getPath();
     if (m_parent->m_image_cache.contains(pth))
         return m_parent->m_image_cache.value(pth);
-    else
-        return QImage(pth);
+    else{
+        auto ret = QImage(10, 10, QImage::Format_ARGB32);
+        ret.fill(QColor("black"));
+        return ret;
+    }
 }
 
 QImage imageObject::updateImagePath(bool aForce){
@@ -905,8 +908,12 @@ IUpdateQSGAttr qsgModel::updateQSGAttr(const QJsonObject& aModification){
         if (m_objects.contains(obj)){
             auto nd = m_objects.value(obj);
             auto mdy = overwriteAttr(*nd, aModification.value("key").toArray(), aModification.value("val"), aModification.value("force").toBool());
-            if (mdy != "")
+            if (mdy != ""){
+                auto objs = getObjects();
+                objs.insert(obj, *nd);
+                setObjects(objs);
                 return nd->updateQSGAttr(mdy);
+            }
         }
     }else{
         auto kys = aModification.value("key").toArray();

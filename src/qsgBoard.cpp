@@ -228,6 +228,11 @@ void qsgBoard::setName(const QString& aName){
     }, rea::Json("name", "QSGAttrUpdated_" + m_name,
                  "replace", true));
 
+    rea::pipeline::instance()->add<QJsonObject, pipePartial>([this](rea::stream<QJsonObject>* aInput){
+        if (m_models.size())
+            aInput->setData(QJsonObject(*m_models.back()))->out();
+    }, rea::Json("name", "getQSGModel_" + m_name));
+
     rea::pipeline::instance()->add<QJsonArray>([this](rea::stream<QJsonArray>* aInput){
         for (auto i : m_plugins)
             i->beforeDestroy();
