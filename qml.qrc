@@ -53,5 +53,6 @@
         <file>qml/gui/Custom/BoardMenu.qml</file>
         <file>qml/gui/Style/qmldir</file>
         <file>qml/gui/Style/SSpin.qml</file>
+        <file>qml/gui/Basic/KeyPress.qml</file>
     </qresource>
 </RCC>

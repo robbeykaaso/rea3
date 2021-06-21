@@ -1,3 +1,4 @@
 --init, -i: download the the demo project based on rea
+--trans: download the translator based on rea
 --version, -v: the version of current reajs
 --help, -h: the usage of rea-cli

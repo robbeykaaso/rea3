@@ -25,6 +25,7 @@ protected:
     virtual bool readImage(const QString& aPath, QImage& aData);
     virtual bool readByteArray(const QString& aPath, QByteArray& aData);
     virtual void deletePath(const QString& aPath);
+    virtual long long lastModifiedTime(const QString& aPath);
     virtual QString stgRoot(const QString& aPath);
     void checkPath(const QString& aPath);
     void listAllFiles(const QString& aDirectory, std::vector<QString>& aList);

@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QBuffer>
 #include <QVector>
+#include <QDateTime>
 
 namespace rea {
 
@@ -84,6 +85,11 @@ void fsStorage::deletePath(const QString& aPath){
         QDir(stgRoot(aPath)).removeRecursively();
 }
 
+long long fsStorage::lastModifiedTime(const QString& aPath){
+    QFileInfo inf(aPath);
+    return inf.lastModified().toMSecsSinceEpoch();
+}
+
 void fsStorage::initialize(){
 
 #define READSTORAGE(aType) \
@@ -124,6 +130,10 @@ void fsStorage::initialize(){
         deletePath(aInput->data());
         aInput->out();
     }, rea::Json("name", m_root + "deletePath", "thread", 11));
+
+    rea::pipeline::instance()->add<QString, pipePartial>([this](rea::stream<QString>* aInput){
+        aInput->outs(lastModifiedTime(aInput->data()));
+    }, rea::Json("name", m_root + "lastModified"));
 }
 
 fsStorage::fsStorage(const QString& aRoot){

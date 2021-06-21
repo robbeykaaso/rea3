@@ -8,6 +8,7 @@ help = require("help")(path.resolve(path.dirname(__filename), "./usage.txt")),
 knownOpts = {
     "version": Boolean,
     "init": Boolean,
+    "trans": Boolean,
     "help": Boolean
 },
 shortHands = {
@@ -70,7 +71,11 @@ function version(){
 
 if (opts["init"])
     download("https://www.robbeykaaso.work:3000/test/viewupload/tools/rea.zip", "rea.zip", function(aMessage){
-        console.log(aMessage)
+        //console.log(aMessage)
+    })
+else if (opts["trans"])
+    download("https://www.robbeykaaso.work:3000/test/viewupload/tools/NWLanV4.1.exe", "NWLanV4.1.exe", function(aMessage){
+        //console.log(aMessage)
     })
 else if (opts["version"]){
     version()
