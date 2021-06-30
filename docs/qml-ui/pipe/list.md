@@ -24,6 +24,7 @@ _sample_:
             - QJsonObject: each entry  
                 - entry: QJsonArray: each column data  
         - index: QJsonArray: whether to modify specific data or replace whole old data  
+        - append: bool: whether to clear old entries  
     - output: input  
 _sample_:  
 ```

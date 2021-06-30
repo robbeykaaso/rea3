@@ -1,3 +1,5 @@
+rea: https://rea2.readthedocs.io/en/latest/
+translater: https://www.robbeykaaso.work:3000/
 --init, -i: download the the demo project based on rea
 --trans: download the translator based on rea
 --version, -v: the version of current reajs

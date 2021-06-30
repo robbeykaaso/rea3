@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QQuickItem>
 #include <QDateTime>
+#include <qmath.h>
 #include <sstream>
 
 namespace rea {
@@ -813,7 +814,6 @@ std::vector<QSGNode*> ellipseObject::getQSGNodes(QQuickItem* aWindow, QSGNode* a
 }
 
 void ellipseObject::toPoints(){
-    static const double PI = 3.14159265;
 
     double del = 10;
     if (m_trans_node){
@@ -826,9 +826,9 @@ void ellipseObject::toPoints(){
 
     auto r = getRadius();
 
-    auto i0 = evalPoint(r, 0), i1 = evalPoint(r, PI);
+    auto i0 = evalPoint(r, 0), i1 = evalPoint(r, M_PI);
     i0->nxt = i1;
-    i1->nxt = evalPoint(r, 2 * PI);
+    i1->nxt = evalPoint(r, 2 * M_PI);
     std::queue<std::shared_ptr<l_qsgPoint3D>> candidates;
     candidates.push(i0);
     candidates.push(i1);

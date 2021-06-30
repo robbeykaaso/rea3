@@ -263,7 +263,8 @@ Column {
                 mdl.set(idxes[j], mdy)
             }
         } else {
-            mdl.clear()
+            if (!aInput["append"])
+                mdl.clear()
             for (var i in entries) {
                 var ent = entries[i]["entry"]
                 if (ent) {
