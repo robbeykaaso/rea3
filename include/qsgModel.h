@@ -166,6 +166,7 @@ public:
     void show(QSGTransformNode* aTransform, QQuickItem* aWindow);
     IUpdateQSGAttr updateQSGAttr(const QJsonObject& aModification);
     void cacheImage(const QString& aName, const QImage& aImage);
+    QHash<QString, QImage> getImageCache(){return m_image_cache;}
 private:
     QString overwriteAttr(QJsonObject& aObject, const QJsonArray& aKeys, const QJsonValue&& aValue, bool aForce);
     void zoom(int aStep, const QPointF& aCenter, double aRatio = 0);

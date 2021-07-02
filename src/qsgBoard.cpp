@@ -299,7 +299,7 @@ QSGNode* qsgBoard::updatePaintNode(QSGNode* aOldNode, UpdatePaintNodeData*){
     m_updates.clear();
     m_updates_model_index.clear();
 
-    rea::pipeline::instance()->run<QJsonArray>("QSGAttrUpdated_" + m_name, m_updates_modification);
+    rea::pipeline::instance()->run<QJsonArray>("QSGAttrUpdated_" + m_name, m_updates_modification, "", m_models.size() ? std::make_shared<scopeCache>()->cache("image", m_models.last()->getImageCache()) : nullptr);
     m_updates_modification = QJsonArray();
     return ret;
 }
