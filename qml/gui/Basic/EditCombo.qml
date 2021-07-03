@@ -24,7 +24,7 @@ Row {
         height: root.height
         font.pixelSize: 12
         background: Rectangle {
-            implicitWidth: root.width - root.height
+            implicitWidth: root.width - 14
             implicitHeight: root.height - 2
             border.width: 0
             y: 1
@@ -106,7 +106,8 @@ Row {
         }
     }
 
-    Component.onCompleted: {
+    function updateGUI(){
+        listview.model.clear()
         popup.height = modellist.length * root.height - 1
         listview.height = modellist.length * (root.height - 1)
         for (var i = 0; i < modellist.length; ++i) {
@@ -117,5 +118,9 @@ Row {
                 currentIndex = i
             }
         }
+    }
+
+    Component.onCompleted: {
+        updateGUI()
     }
 }

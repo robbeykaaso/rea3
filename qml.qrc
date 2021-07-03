@@ -55,5 +55,6 @@
         <file>qml/gui/Style/SSpin.qml</file>
         <file>qml/gui/Basic/KeyPress.qml</file>
         <file>qml/resource/logo.png</file>
+        <file>qml/resource/triangle-down.png</file>
     </qresource>
 </RCC>
