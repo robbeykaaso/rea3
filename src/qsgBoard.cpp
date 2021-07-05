@@ -118,6 +118,8 @@ void qsgPluginTransform::hoverMoveEvent(QHoverEvent *event){
 }
 
 void qsgPluginTransform::updatePos(const QPoint &aPos){
+    if (!getTransNode())
+        return;
     auto inv = getTransNode()->matrix().inverted();
     m_lastpos = aPos;
     m_wcspos = inv.map(m_lastpos);

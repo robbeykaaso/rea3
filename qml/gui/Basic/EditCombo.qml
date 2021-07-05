@@ -10,7 +10,7 @@ Row {
     property string activeColor: 'Silver'
 
     property int currentIndex: -1
-    property bool popupOpen: false
+    property alias popupOpen: popup.visible
 
     function getCurrentSelect() {
         return currentSelect
@@ -51,8 +51,6 @@ Row {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                popupOpen ? popup.close() : (modellist.length > 0
-                                             && popup.open())
                 popupOpen = !popupOpen
             }
         }
@@ -62,11 +60,7 @@ Row {
         id: popup
         width: root.width
         y: root.height
-        onVisibleChanged: {
-            if (popupOpen) {
-                popupOpen = !popupOpen
-            }
-        }
+        visible: false
 
         ListView {
             id: listview
@@ -95,7 +89,6 @@ Row {
                         onEntered: currentIndex = index
                         onClicked: {
                             currentSelect = result
-                            popup.close()
                             popupOpen = false
                         }
                     }
@@ -103,6 +96,11 @@ Row {
             }
             model: ListModel {
             }
+        }
+    }
+    onVisibleChanged: {
+        if (!visible){
+            popupOpen = false
         }
     }
 
