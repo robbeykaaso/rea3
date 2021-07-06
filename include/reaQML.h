@@ -94,7 +94,7 @@ public:
     Q_INVOKABLE QJSValue nextB(const QString& aName, const QString& aTag = "");
     Q_INVOKABLE QJSValue nextF(QJSValue aFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject());
     Q_INVOKABLE QJSValue nextFB(QJSValue aFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject());
-    Q_INVOKABLE void removeNext(const QString& aName);
+    Q_INVOKABLE void removeNext(const QString& aName, bool aAndDelete = false);
     Q_INVOKABLE void removeAspect(const QString& aType, const QString& aAspect = "");
 private:
     pipeline* m_parent;

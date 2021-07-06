@@ -303,8 +303,10 @@ QJSValue qmlPipe::nextFB(QJSValue aFunc, const QString& aTag, const QJsonObject&
     return qml_engine->toScriptValue(this);
 }
 
-void qmlPipe::removeNext(const QString& aName){
+void qmlPipe::removeNext(const QString& aName, bool aAndDelete){
     m_parent->find(m_name)->removeNext(aName);
+    if (aAndDelete)
+        m_parent->remove(aName, true);
 }
 
 void qmlPipe::removeAspect(const QString& aType, const QString& aAspect){

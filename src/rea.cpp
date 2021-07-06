@@ -124,8 +124,10 @@ pipe0* pipe0::next(const QString& aName, const QString& aTag){
     return nxt;
 }
 
-void pipe0::removeNext(const QString &aName){
+void pipe0::removeNext(const QString &aName, bool aAndDelete){
     m_next.remove(aName);
+    if (aAndDelete)
+        m_parent->remove(aName, true);
 }
 
 void pipe0::removeAspect(pipe0::AspectType aType, const QString& aAspect){
@@ -290,10 +292,12 @@ void pipeline::tryExecutePipeOutside(const QString& aName, std::shared_ptr<strea
         }
 }
 
-void pipeFuture::removeNext(const QString& aName){
+void pipeFuture::removeNext(const QString& aName, bool aAndDelete){
     for (auto i = m_next2.size() - 1; i >= 0; --i)
         if (m_next2[i].first == aName)
             m_next2.remove(i);
+    if (aAndDelete)
+        m_parent->remove(aName);
 }
 
 pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0 (aParent){

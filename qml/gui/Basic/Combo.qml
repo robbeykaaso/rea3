@@ -21,45 +21,41 @@ Row {
         height: parent.height * 0.8
     }
 
-    Rectangle {
-        id: bak
-        color: "white"
+    ComboBox {
+        id: cmb
         width: parent.width * (1 - ratio - 0.1)
         height: parent.height * 0.8
         anchors.verticalCenter: parent.verticalCenter
-        ComboBox {
-            id: cmb
-            anchors.fill: parent
-            model: ["hello", "world"]
-            font.pixelSize: 12
+        model: ["hello", "world"]
+        font.pixelSize: 12
+        background: Rectangle {
+            id: bak
+            border.color: "transparent"
+        }
+        delegate: ItemDelegate {
+            id: itemDlgt
+            width: cmb.width
+            height: cmb.height
+            padding: 0
+
+            contentItem: Text {
+                id: textItem
+                text: modelData
+                color: hovered ? "white" : "gray"
+                font: cmb.font
+                elide: Text.ElideRight
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignLeft
+                leftPadding: 3
+            }
+
             background: Rectangle {
-                border.color: "transparent"
+                color: itemDlgt.hovered ? "gray" : "white"
+                anchors.left: itemDlgt.left
+                anchors.leftMargin: 0
             }
-
-            delegate: ItemDelegate {
-                id: itemDlgt
-                width: cmb.width
-                height: cmb.height
-                padding: 0
-
-                contentItem: Text {
-                    id: textItem
-                    text: modelData
-                    color: hovered ? "white" : "gray"
-                    font: cmb.font
-                    elide: Text.ElideRight
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignLeft
-                    leftPadding: 3
-                }
-
-                background: Rectangle {
-                    color: itemDlgt.hovered ? "gray" : "white"
-                    anchors.left: itemDlgt.left
-                    anchors.leftMargin: 0
-                }
-                //onPressed: console.log("hello")
-            }
+            //onPressed: console.log("hello")
         }
     }
+
 }

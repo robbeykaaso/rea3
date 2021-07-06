@@ -11,6 +11,7 @@ Column {
     property int titfontsize: 14
     property int itmfontsize: 12
     property var tr
+    property alias entries: mdl
     signal selected
 
     property var tableLists: []

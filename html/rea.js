@@ -198,8 +198,7 @@ class stream {
         }
         while(!got_ret)
             await sleep(5)
-        aPipeline.find(aName).removeNext(monitor.actName())
-        aPipeline.remove(monitor.actName(), true)
+        aPipeline.find(aName).removeNext(monitor.actName(), true)
 
         return ret
     }
@@ -266,8 +265,10 @@ class pipe {
         return this
     }
 
-    removeNext(aName){
+    removeNext(aName, aAndDelete = false){
         delete this.m_next[aName]
+        if (aAndDelete)
+            this.m_parent.remove(aName, true)
     }
 
     initialize(aFunc, aParam){
@@ -443,11 +444,13 @@ class pipeFuture extends pipe{
         return this.m_act_name
     }
 
-    removeNext(aName){
+    removeNext(aName, aAndDelete = false){
         for (let i = this.m_next2.length - 1; i >= 0; --i){
             if (this.m_next2[i][0] == aName)
                 delete this.m_next2[i]
         }
+        if (aAndDelete)
+            this.m_parent.remove(aName, true)
     }
 
     insertNext(aName, aTag){
@@ -642,9 +645,11 @@ class pipePartial extends pipe{
         this.m_next2[aTag][aName] = aTag
     }
 
-    removeNext(aName){
+    removeNext(aName, aAndDelete = false){
         for (let i in this.m_next2)
             delete this.m_next2[i][aName]
+        if (aAndDelete)
+            this.m_parent.remove(aName, true)
     }
 
     replaceTopo(aOldPipe){
@@ -672,8 +677,8 @@ class pipeDelegate extends pipe{
     next(aNext, aTag = ""){
         this.m_parent.find(this.m_delegate).next(aNext, aTag)
     }
-    removeNext(aName){
-        this.m_parent.find(this.m_delegate).removeNext(aName)
+    removeNext(aName, aAndDelete = false){
+        this.m_parent.find(this.m_delegate).removeNext(aName, aAndDelete)
     }
     insertNext(aName, aTag){
         this.m_next2.push([aName, aTag])
