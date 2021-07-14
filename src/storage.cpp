@@ -164,10 +164,14 @@ std::vector<QString> fsStorage::listFiles(const QString& aDirectory){
     std::vector<QString> ret;
     if (std::filesystem::is_directory(std::filesystem::u8path(aDirectory.toStdString()))){
         auto path = std::filesystem::u8path(stgRoot(aDirectory).toStdString());
-        for (const auto & entry : std::filesystem::directory_iterator(path)){
-            QString dir = QString::fromLocal8Bit(entry.path().string().data());
-            dir = dir.split(aDirectory + "\\").back();
-            ret.push_back(dir);
+        try{
+            for (const auto & entry : std::filesystem::directory_iterator(path)){
+                QString dir = QString::fromLocal8Bit(entry.path().string().data());
+                dir = dir.split(aDirectory + (aDirectory.endsWith("/") ? "" : "\\")).back();
+                ret.push_back(dir);
+            }
+        }catch(...){
+
         }
     }
     //QDir dir(stgRoot(aDirectory));
