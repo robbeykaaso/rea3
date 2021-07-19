@@ -8,7 +8,7 @@ public:
 public:
     pipelineJS(const QString& aName = "js");
 public:
-    Q_INVOKABLE void executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag);
+    Q_INVOKABLE void executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag);
     Q_INVOKABLE void removeFromJS(const QString& aName);
     void remove(const QString& aName, bool) override;
     void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFutureNeed = false, const QString& aFrom = "") override;
@@ -17,7 +17,7 @@ signals:
     void removeJSPipe(const QString& aName);
 };
 
-class environmentJS : public QObject{
+class DSTDLL environmentJS : public QObject{
 public:
     Q_OBJECT
 public:

@@ -24,7 +24,7 @@ public:
 public:
     pipelineQMLJS();
 public:
-    Q_INVOKABLE void executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag);
+    Q_INVOKABLE void executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag);
     Q_INVOKABLE void removeFromJS(const QString& aName);
     void remove(const QString& aName, bool) override;
     void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFutureNeed = false, const QString& aFrom = "") override;

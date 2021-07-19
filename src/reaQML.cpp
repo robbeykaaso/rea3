@@ -83,7 +83,7 @@ pipelineQML::pipelineQML() : pipeline("qml"){
         return reinterpret_cast<stream<QVariant>*>(aInput)->data();
     });  //qmlEngine can only be used on main thread, so use qvariant instead of qjsvalue
 
-    updateOutsideRanges({"c++", "qml", "qmljs"});
+    updateOutsideRanges({"c++"});
 }
 
 void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
@@ -102,14 +102,11 @@ pipelineQMLJS::pipelineQMLJS() : pipeline("js"){
     }, rea::Json("name", "pipelineQMLObject", "external", "qml"));
 }
 
-void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, const QString& aFlag){
+void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
     QJsonObject scp;
     for (auto i : aScope.keys())
         scp.insert(i, aScope.value(i));
-    if (aFlag == "any")
-        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync, true, name());
-    else if (aFlag == "qml")
-        pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync);
+    rea::pipeline::instance("qml")->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync, aNeedFuture, aFlag);
 }
 
 void pipelineQMLJS::removeFromJS(const QString& aName){
@@ -463,11 +460,5 @@ QString tr0(const QString& aOrigin){
 regQMLPipe(Partial)
 regQMLPipe(Delegate)
 regQMLPipe()
-
-static regPip<QQmlApplicationEngine*> reg_qmljs_linker([](stream<QQmlApplicationEngine*>* aInput){
-    //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype
-    rea::pipeline::instance("qmljs");
-    aInput->out();
-}, rea::Json("name", "install0_qmljs"), "initRea");
 
 }

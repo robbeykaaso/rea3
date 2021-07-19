@@ -418,7 +418,7 @@ pipeline::pipeline(const QString& aName){
             aInput->out();
         }, rea::Json("name", "reportCLeak", "external", "js"));
 
-        m_outside_pipelines = {"c++", "qml", "js"};
+        m_outside_pipelines = {"qml"};
     }
 }
 

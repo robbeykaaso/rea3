@@ -619,9 +619,9 @@ class pipeline{
         for (let i in pipeline_s){
             if (pipeline_s[i] != this){
                 if (aFlag == "any")
-                    pipeline_s[i].execute(aName, aStream, aSync, true, aFlag);
+                    pipeline_s[i].execute(aName, aStream, aSync, true, this.name());
                 else if (aFlag == pipeline_s[i].name())
-                    pipeline_s[i].execute(aName, aStream, aSync, false, aFlag);
+                    pipeline_s[i].execute(aName, aStream, aSync);
             }
         }
     }
@@ -793,10 +793,10 @@ class pipelineOutside extends pipeline{
         }
     }
 
-    execute(aName, aStream, aSync, aFutureNeed = false, aFlag = "any"){
+    execute(aName, aStream, aSync, aFutureNeed = false, aFlag = ""){
         this.init(e=>{
             if (this.Linker)
-                this.Linker.executeFromJS(aName, aStream.data(), aStream.tag(), aStream.scope().m_data, aSync, aFlag)
+                this.Linker.executeFromJS(aName, aStream.data(), aStream.tag(), aStream.scope().m_data, aSync, aFutureNeed, aFlag)
         })
     }
 
