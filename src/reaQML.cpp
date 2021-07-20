@@ -248,14 +248,14 @@ void qmlStream::noOut(){
     m_stream->noOut();
 }
 
-QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel){
-    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, pipeline::instance("qml")));
+QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel, const QString& aPipeline){
+    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, aPipeline));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, bool aEventLevel){
-    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, aEventLevel, pipeline::instance("qml")));
+QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, bool aEventLevel, const QString& aPipeline){
+    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, aEventLevel, aPipeline));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }

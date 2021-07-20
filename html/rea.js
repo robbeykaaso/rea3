@@ -182,30 +182,32 @@ class stream {
         return stm
     }
 
-    async asyncCall(aName, aPipeline = pipelines()){
+    async asyncCall(aName, aPipeline = "js"){
         let ret
         let got_ret = false
 
-        const monitor = aPipeline.find(aName).nextF(aInput => {
+        let line = pipelines(aPipeline)
+        const monitor = line.find(aName).nextF(aInput => {
             ret = new stream(aInput.data(), this.m_tag, aInput.scope())
             got_ret = true
 
         }, this.m_tag)
-        aPipeline.execute(aName, this)
+        line.execute(aName, this)
 
         function sleep(time) {
           return new Promise(resolve => setTimeout(resolve,time))
         }
         while(!got_ret)
             await sleep(5)
-        aPipeline.find(aName).removeNext(monitor.actName(), true)
+        line.find(aName).removeNext(monitor.actName(), true)
 
         return ret
     }
-    async asyncCallF(aFunc, aParam = {}, aPipeline = pipelines()){
-        const pip = aPipeline.add(aFunc, aParam)
+    async asyncCallF(aFunc, aParam = {}, aPipeline = "js"){
+        let line = pipelines(aPipeline)
+        const pip = line.add(aFunc, aParam)
         const ret = await this.asyncCall(pip.actName())
-        aPipeline.remove(pip.actName())
+        line.remove(pip.actName())
         return ret
     }
 }

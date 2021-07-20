@@ -61,8 +61,8 @@ public:
     Q_INVOKABLE QJSValue outs(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
     Q_INVOKABLE QJSValue outsB(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
     Q_INVOKABLE void noOut();
-    Q_INVOKABLE QJSValue asyncCall(const QString& aName, bool aEventLevel = true);
-    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true);
+    Q_INVOKABLE QJSValue asyncCall(const QString& aName, bool aEventLevel = true, const QString& aPipeline = "qml");
+    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true, const QString& aPipeline = "qml");
 private:
     std::shared_ptr<stream<QVariant>> m_stream;
 };

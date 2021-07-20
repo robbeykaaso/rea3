@@ -67,7 +67,7 @@ void pipelineRemote::removeFromRemote(const QString& aName){
 }
 
 static regPip<QQmlApplicationEngine*> reg_recative2_qml([](stream<QQmlApplicationEngine*>* aInput){
-    std::cout << qRegisterMetaType<streamRemote>() << std::endl;
+    qRegisterMetaType<streamRemote>();
     aInput->out();
 }, rea::Json("name", "install0_remote"), "initRea");
 
