@@ -8,6 +8,20 @@
 
 namespace rea {
 
+static QString dflt_nm = "";
+QString getDefaultPipelineName(){
+    if (dflt_nm == ""){
+        QFile fl(".rea");
+        if (fl.open(QFile::ReadOnly)){
+            auto cfg = QJsonDocument::fromJson(fl.readAll()).object();
+            dflt_nm = cfg.value("main").toString("c++");
+            fl.close();
+        }else
+            dflt_nm = "c++";
+    }
+    return dflt_nm;
+}
+
 scopeCache::scopeCache(const QJsonObject& aData){
     for (auto i : aData.keys()){
         auto val = aData.value(i);
@@ -124,10 +138,10 @@ pipe0* pipe0::next(const QString& aName, const QString& aTag){
     return nxt;
 }
 
-void pipe0::removeNext(const QString &aName, bool aAndDelete){
+void pipe0::removeNext(const QString &aName, bool aAndDelete, bool aOutside){
     m_next.remove(aName);
     if (aAndDelete)
-        m_parent->remove(aName, true);
+        m_parent->remove(aName, aOutside);
 }
 
 void pipe0::removeAspect(pipe0::AspectType aType, const QString& aAspect){
@@ -292,12 +306,12 @@ void pipeline::tryExecutePipeOutside(const QString& aName, std::shared_ptr<strea
         }
 }
 
-void pipeFuture::removeNext(const QString& aName, bool aAndDelete){
+void pipeFuture::removeNext(const QString& aName, bool aAndDelete, bool aOutside){
     for (auto i = m_next2.size() - 1; i >= 0; --i)
         if (m_next2[i].first == aName)
             m_next2.remove(i);
     if (aAndDelete)
-        m_parent->remove(aName);
+        m_parent->remove(aName, aOutside);
 }
 
 pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0 (aParent){
@@ -379,7 +393,7 @@ QThread* pipeline::findThread(int aNo){
 
 pipeline* pipeline::instance(const QString& aName){
     if (!pipelines.contains(aName)){
-        if (aName == "c++")
+        if (aName == getDefaultPipelineName())
             pipelines.insert(aName, new pipeline());
         else{
             auto pl = std::make_shared<pipeline*>();
@@ -394,7 +408,7 @@ pipeline* pipeline::instance(const QString& aName){
 
 pipeline::pipeline(const QString& aName){
     m_name = aName;
-    if (aName == "c++"){
+    if (aName == getDefaultPipelineName()){
         QThreadPool::globalInstance()->setMaxThreadCount(8);
         supportType<QString>([](stream0* aInput){
             return QVariant::fromValue(reinterpret_cast<stream<QString>*>(aInput)->data());
@@ -413,8 +427,8 @@ pipeline::pipeline(const QString& aName){
         });
 
         add<double>([](rea::stream<double>* aInput){
-            std::cout << "c++_pipe_counter: " << pipe_counter << std::endl;
-            std::cout << "c++_stream_counter: " << stream_counter << std::endl;
+            std::cout << getDefaultPipelineName().toStdString() + "_pipe_counter: " << pipe_counter << std::endl;
+            std::cout << getDefaultPipelineName().toStdString() + "_stream_counter: " << stream_counter << std::endl;
             aInput->out();
         }, rea::Json("name", "reportCLeak", "external", "js"));
 

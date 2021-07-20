@@ -17,6 +17,8 @@
 
 namespace rea {
 
+DSTDLL inline QString getDefaultPipelineName();
+
 class pipeline;
 
 class stream0;
@@ -121,7 +123,7 @@ public:
     virtual pipe0* nextPB(pipe0* aNext, const QString& aTag = "");
     virtual pipe0* nextB(const QString& aName, const QString& aTag = "");
 
-    virtual void removeNext(const QString& aName, bool aAndDelete = false);
+    virtual void removeNext(const QString& aName, bool aAndDelete = false, bool aOutside = true);
     void removeAspect(pipe0::AspectType aType, const QString& aAspect = "");
 public:
     virtual void execute(std::shared_ptr<stream0> aStream);
@@ -170,7 +172,7 @@ private:
 class pipeFuture : public pipe0 {
 public:
     QString actName() override {return m_act_name;}
-    void removeNext(const QString& aName, bool aAndDelete = false) override;
+    void removeNext(const QString& aName, bool aAndDelete = false, bool aOutside = true) override;
     void resetTopo() override;
     void execute(std::shared_ptr<stream0> aStream) override;
 protected: 
@@ -191,9 +193,9 @@ inline std::shared_ptr<stream<T>> in(T aInput = T(), const QString& aTag = "", s
 
 class DSTDLL pipeline : public QObject{
 public:
-    static pipeline* instance(const QString& aName = "c++");
+    static pipeline* instance(const QString& aName = getDefaultPipelineName());
 public:
-    pipeline(const QString& aName = "c++");
+    pipeline(const QString& aName = getDefaultPipelineName());
     pipeline(pipeline&&) = delete;
     QString name(){return m_name;}
     virtual ~pipeline();
@@ -343,7 +345,7 @@ public:
     }
 
     template<typename S = T>
-    std::shared_ptr<stream<S>> asyncCall(const QString& aName, bool aEventLevel = true, const QString& aPipeline = "c++"){
+    std::shared_ptr<stream<S>> asyncCall(const QString& aName, bool aEventLevel = true, const QString& aPipeline = getDefaultPipelineName()){
         std::shared_ptr<stream<S>> ret = nullptr;
         auto line = pipeline::instance(aPipeline);
         if (aEventLevel){
@@ -363,7 +365,7 @@ public:
                 loop->exec();
                 //std::cout << aName.toStdString() << " finished" << std::endl;
             }
-            line->find(aName)->removeNext(monitor->actName(), true);
+            line->find(aName)->removeNext(monitor->actName(), true, false);
             //freeAsync(aName);
         }else{
             std::promise<std::shared_ptr<stream<S>>> pr;
@@ -377,13 +379,13 @@ public:
                 st = ft.wait_for(std::chrono::microseconds(5));
             }while(st != std::future_status::ready);
             ret = ft.get();
-            line->find(aName)->removeNext(monitor->actName(), true);
+            line->find(aName)->removeNext(monitor->actName(), true, false);
         }
         return ret; //std::dynamic_pointer_cast<stream<T>>(shared_from_this());
     }
 
     template<typename S = T, template<class, typename> class P = pipe, typename F = pipeFunc<T>, typename R = pipeFunc<T>>
-    std::shared_ptr<stream<S>> asyncCallF(F aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true, const QString& aPipeline = "c++"){
+    std::shared_ptr<stream<S>> asyncCallF(F aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true, const QString& aPipeline = getDefaultPipelineName()){
         auto line = pipeline::instance(aPipeline);
         auto pip = line->add<T, P, F, R>(aFunc, aParam);
         auto ret = asyncCall<S>(pip->actName(), aEventLevel, aPipeline);
@@ -505,8 +507,8 @@ public:
     pipe0* next(const QString& aName, const QString& aTag = "") override{
         return pipe0::m_parent->find(m_delegate)->next(aName, aTag);
     }
-    void removeNext(const QString& aName, bool aAndDelete = false) override{
-        pipe0::m_parent->find(m_delegate)->removeNext(aName, aAndDelete);
+    void removeNext(const QString& aName, bool aAndDelete = false, bool aOutside = true) override{
+        pipe0::m_parent->find(m_delegate)->removeNext(aName, aAndDelete, aOutside);
     }
     void resetTopo() override{
         m_next2.clear();
@@ -553,11 +555,11 @@ private:
 template <typename T, typename F>
 class pipePartial : public pipe<T, F> {
 public:
-    void removeNext(const QString& aName, bool aAndDelete = false) override {
+    void removeNext(const QString& aName, bool aAndDelete = false, bool aOutside = true) override {
         for (auto i = m_next2.begin(); i != m_next2.end(); ++i)  //: for will not remove
             i.value().remove(aName);
         if (aAndDelete)
-            pipe0::m_parent->remove(aName, true);
+            pipe0::m_parent->remove(aName, aOutside);
     }
     void resetTopo() override{
         m_next2.clear();

@@ -8,8 +8,6 @@ class pipelineQML : public pipeline{
 public:
     Q_OBJECT
 public:
-    static pipeline* qmlinstance(const QString& aName = "qml");
-public:
     pipelineQML();
     void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFutureNeed = false, const QString& aFrom = "") override;
 protected:
@@ -61,8 +59,8 @@ public:
     Q_INVOKABLE QJSValue outs(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
     Q_INVOKABLE QJSValue outsB(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
     Q_INVOKABLE void noOut();
-    Q_INVOKABLE QJSValue asyncCall(const QString& aName, bool aEventLevel = true, const QString& aPipeline = "qml");
-    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true, const QString& aPipeline = "qml");
+    Q_INVOKABLE QJSValue asyncCall(const QString& aName, bool aEventLevel = true);
+    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true);
 private:
     std::shared_ptr<stream<QVariant>> m_stream;
 };
@@ -94,7 +92,7 @@ public:
     Q_INVOKABLE QJSValue nextB(const QString& aName, const QString& aTag = "");
     Q_INVOKABLE QJSValue nextF(QJSValue aFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject());
     Q_INVOKABLE QJSValue nextFB(QJSValue aFunc, const QString& aTag = "", const QJsonObject& aParam = QJsonObject());
-    Q_INVOKABLE void removeNext(const QString& aName, bool aAndDelete = false);
+    Q_INVOKABLE void removeNext(const QString& aName, bool aAndDelete = false, bool aOutside = true);
     Q_INVOKABLE void removeAspect(const QString& aType, const QString& aAspect = "");
 private:
     pipeline* m_parent;

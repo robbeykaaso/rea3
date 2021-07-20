@@ -199,7 +199,7 @@ class stream {
         }
         while(!got_ret)
             await sleep(5)
-        line.find(aName).removeNext(monitor.actName(), true)
+        line.find(aName).removeNext(monitor.actName(), true, false)
 
         return ret
     }
@@ -267,10 +267,10 @@ class pipe {
         return this
     }
 
-    removeNext(aName, aAndDelete = false){
+    removeNext(aName, aAndDelete = false, aOutside = true){
         delete this.m_next[aName]
         if (aAndDelete)
-            this.m_parent.remove(aName, true)
+            this.m_parent.remove(aName, aOutside)
     }
 
     initialize(aFunc, aParam){
@@ -446,13 +446,13 @@ class pipeFuture extends pipe{
         return this.m_act_name
     }
 
-    removeNext(aName, aAndDelete = false){
+    removeNext(aName, aAndDelete = false, aOutside = true){
         for (let i = this.m_next2.length - 1; i >= 0; --i){
             if (this.m_next2[i][0] == aName)
                 delete this.m_next2[i]
         }
         if (aAndDelete)
-            this.m_parent.remove(aName, true)
+            this.m_parent.remove(aName, aOutside)
     }
 
     insertNext(aName, aTag){
@@ -647,11 +647,11 @@ class pipePartial extends pipe{
         this.m_next2[aTag][aName] = aTag
     }
 
-    removeNext(aName, aAndDelete = false){
+    removeNext(aName, aAndDelete = false, aOutside = true){
         for (let i in this.m_next2)
             delete this.m_next2[i][aName]
         if (aAndDelete)
-            this.m_parent.remove(aName, true)
+            this.m_parent.remove(aName, aOutside)
     }
 
     replaceTopo(aOldPipe){
@@ -679,8 +679,8 @@ class pipeDelegate extends pipe{
     next(aNext, aTag = ""){
         this.m_parent.find(this.m_delegate).next(aNext, aTag)
     }
-    removeNext(aName, aAndDelete = false){
-        this.m_parent.find(this.m_delegate).removeNext(aName, aAndDelete)
+    removeNext(aName, aAndDelete = false, aOutside = true){
+        this.m_parent.find(this.m_delegate).removeNext(aName, aAndDelete, aOutside)
     }
     insertNext(aName, aTag){
         this.m_next2.push([aName, aTag])

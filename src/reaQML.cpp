@@ -62,28 +62,12 @@ public:
     }
 };
 
-static QHash<QString, pipeline*> pipelines;
-
-pipeline* pipelineQML::qmlinstance(const QString& aName){
-    if (!pipelines.contains(aName)){
-        if (aName == "c++" || aName == "qml")
-            pipelines.insert(aName, pipeline::instance());
-        else{
-            auto pl = std::make_shared<pipeline*>();
-            instance()->call<std::shared_ptr<pipeline*>>("createqml" + aName + "pipeline", pl);
-            if (*pl)
-                pipelines.insert(aName, *pl);
-        }
-    }
-    return pipelines.value(aName);
-}
-
 pipelineQML::pipelineQML() : pipeline("qml"){
     pipeline::instance()->supportType<QVariant>([](stream0* aInput){
         return reinterpret_cast<stream<QVariant>*>(aInput)->data();
     });  //qmlEngine can only be used on main thread, so use qvariant instead of qjsvalue
 
-    updateOutsideRanges({"c++"});
+    updateOutsideRanges({getDefaultPipelineName()});
 }
 
 void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
@@ -248,14 +232,14 @@ void qmlStream::noOut(){
     m_stream->noOut();
 }
 
-QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel, const QString& aPipeline){
-    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, aPipeline));
+QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel){
+    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, "qml"));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, bool aEventLevel, const QString& aPipeline){
-    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, aEventLevel, aPipeline));
+QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, bool aEventLevel){
+    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, aEventLevel, "qml"));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
@@ -300,10 +284,10 @@ QJSValue qmlPipe::nextFB(QJSValue aFunc, const QString& aTag, const QJsonObject&
     return qml_engine->toScriptValue(this);
 }
 
-void qmlPipe::removeNext(const QString& aName, bool aAndDelete){
+void qmlPipe::removeNext(const QString& aName, bool aAndDelete, bool aOutside){
     m_parent->find(m_name)->removeNext(aName);
     if (aAndDelete)
-        m_parent->remove(aName, true);
+        m_parent->remove(aName, aOutside);
 }
 
 void qmlPipe::removeAspect(const QString& aType, const QString& aAspect){
