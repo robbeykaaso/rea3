@@ -400,10 +400,10 @@ pipeline::pipeline(const QString& aName){
             return QVariant::fromValue(reinterpret_cast<stream<QString>*>(aInput)->data());
         });
         supportType<QJsonObject>([](stream0* aInput){
-            return QVariant::fromValue(reinterpret_cast<stream<QJsonObject>*>(aInput)->data());
+            return QVariant::fromValue(reinterpret_cast<stream<QJsonObject>*>(aInput)->data().toVariantMap());
         });
         supportType<QJsonArray>([](stream0* aInput){
-            return QVariant::fromValue(reinterpret_cast<stream<QJsonArray>*>(aInput)->data());
+            return QVariant::fromValue(reinterpret_cast<stream<QJsonArray>*>(aInput)->data().toVariantList());
         });
         supportType<double>([](stream0* aInput){
             return QVariant::fromValue(reinterpret_cast<stream<double>*>(aInput)->data());
