@@ -15,7 +15,33 @@
 
 namespace rea {
 
-#define GUID_LEN 64
+static QString dflt_c = "";
+static QString dflt_qml = "";
+
+void initDefaultPipelineName(){
+    QFile fl(".rea");
+    if (fl.open(QFile::ReadOnly)){
+        auto cfg = QJsonDocument::fromJson(fl.readAll()).object();
+        dflt_c = cfg.value("c++").toString("c++");
+        dflt_qml = cfg.value("qml").toString("qml");
+        fl.close();
+    }else{
+        dflt_c = "c++";
+        dflt_qml = "qml";
+    }
+}
+
+QString getDefaultPipelineName(){
+    if (dflt_c == "")
+        initDefaultPipelineName();
+    return dflt_c;
+}
+
+QString getDefaultQMLPipelineName(){
+    if (dflt_qml == "")
+        initDefaultPipelineName();
+    return dflt_qml;
+}
 
 //https://www.cnblogs.com/keepsimple/p/3250245.html
 QJsonObject Json(QJsonObject&& aTarget){

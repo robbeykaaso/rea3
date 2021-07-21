@@ -21,6 +21,9 @@
 
 namespace rea {
 
+DSTDLL inline QString getDefaultPipelineName();
+DSTDLL inline QString getDefaultQMLPipelineName();
+
 DSTDLL QString getCWD(const char* aSuffix);
 DSTDLL QString generateUUID();
 DSTDLL QString GetMachineFingerPrint();

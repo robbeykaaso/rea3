@@ -10,7 +10,7 @@ pipelineJS::pipelineJS(const QString& aName) : pipeline(aName){
     pipeline::instance()->add<double>([this](stream<double>* aInput){
         auto pip_js = reinterpret_cast<pipelineJS*>(pipeline::instance(name()));
         aInput->outs<pipelineJS*>(pip_js)->scope()->cache<pipelineJS*>("pipeline", pip_js);
-    }, rea::Json("name", "pipeline" + name().toUpper() + "Object", "external", "qml"));
+    }, rea::Json("name", "pipeline" + name().toUpper() + "Object", "external", getDefaultQMLPipelineName()));
 };
 
 void pipelineJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){

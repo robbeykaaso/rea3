@@ -17,8 +17,6 @@
 
 namespace rea {
 
-DSTDLL inline QString getDefaultPipelineName();
-
 class pipeline;
 
 class stream0;

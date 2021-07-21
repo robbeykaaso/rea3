@@ -66,6 +66,7 @@ void pipelineRemote::execute(const QString& aName, std::shared_ptr<stream0> aStr
                                   rea::Json(
                                       "cmd", "execute",
                                       "name", aName,
+                                      "remote", name(),
                                       "data", aData.toJsonObject(),
                                       "tag", aStream->tag(),
                                       "scope", scp,
@@ -80,7 +81,8 @@ void pipelineRemote::remove(const QString& aName, bool){
     pipeline::instance()->run(name() + "_sendRemote",
                               rea::Json(
                                   "cmd", "remove",
-                                  "name", aName
+                                  "name", aName,
+                                  "remote", "any"
                               ));
 }
 
@@ -92,12 +94,8 @@ void pipelineRemote::removeFromRemote(const QString& aName){
     rea::pipeline::instance(m_localName)->remove(aName, false);
 }
 
-/*static regPip<QQmlApplicationEngine*> reg_recative2_remote([](stream<QQmlApplicationEngine*>* aInput){
-    auto cfg = aInput->scope()->data<QJsonObject>("rea-qml");
-    if (cfg.value("use").toBool(true)){
-        qmlRegisterType<streamRemote>("StreamRemote", 1, 0, "StreamRemote");
-    }
-    aInput->out();
-}, rea::Json("name", "install2_remote"), "initRea");
-*/
+void pipelineQMLRemote::executeFromRemote(const QString& aName, const QJsonObject& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
+    rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData), aTag, aScope), aSync, aNeedFuture, aFlag);
+}
+
 }

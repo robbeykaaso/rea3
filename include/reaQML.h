@@ -125,7 +125,7 @@ DSTDLL QString tr0(const QString& aOrigin);
 #define regQMLPipe(aType) \
 static regPip<QString> reg_qml_pipe##aType([](stream<QString>* aInput){ \
     auto sp = aInput->scope(); \
-    aInput->setData(pipeline::instance("qml") \
+    aInput->setData(pipeline::instance(getDefaultQMLPipelineName()) \
                     ->add<QVariant, pipe##aType, QJSValue, QJSValue>( \
                         sp->data<QJSValue>("func"), \
                         sp->data<QJsonObject>("param")) \

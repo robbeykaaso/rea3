@@ -8,20 +8,6 @@
 
 namespace rea {
 
-static QString dflt_nm = "";
-QString getDefaultPipelineName(){
-    if (dflt_nm == ""){
-        QFile fl(".rea");
-        if (fl.open(QFile::ReadOnly)){
-            auto cfg = QJsonDocument::fromJson(fl.readAll()).object();
-            dflt_nm = cfg.value("main").toString("c++");
-            fl.close();
-        }else
-            dflt_nm = "c++";
-    }
-    return dflt_nm;
-}
-
 scopeCache::scopeCache(const QJsonObject& aData){
     for (auto i : aData.keys()){
         auto val = aData.value(i);
@@ -431,8 +417,6 @@ pipeline::pipeline(const QString& aName){
             std::cout << getDefaultPipelineName().toStdString() + "_stream_counter: " << stream_counter << std::endl;
             aInput->out();
         }, rea::Json("name", "reportCLeak", "external", "js"));
-
-        m_outside_pipelines = {"qml"};
     }
 }
 
