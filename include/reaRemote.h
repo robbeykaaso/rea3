@@ -9,7 +9,7 @@ class DSTDLL pipelineRemote : public rea::pipeline{
 public:
     pipelineRemote(const QString& aRemoteName, const QString& aLocalName);
 protected:
-    virtual void executeFromRemote(const QString& aName, const QJsonObject& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag);
+    virtual void executeFromRemote(const QString& aName, const QJsonValue& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag);
 private:
     void removeFromRemote(const QString& aName);
 public:
@@ -25,7 +25,7 @@ public:
 
     }
 protected:
-    virtual void executeFromRemote(const QString& aName, const QJsonObject& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag);
+    virtual void executeFromRemote(const QString& aName, const QJsonValue& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag);
 };
 
 }

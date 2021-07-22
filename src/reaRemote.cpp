@@ -26,7 +26,7 @@ pipelineRemote::pipelineRemote(const QString& aRemoteName, const QString& aLocal
                     scp->cache(scp_arr[i].toString(), scp_arr[i + 1].toObject());
             }
             executeFromRemote(dt.value("name").toString(),
-                              dt.value("data").toObject(),
+                              dt.value("data"),
                               dt.value("tag").toString(),
                               scp,
                               dt.value("sync").toObject(),
@@ -40,7 +40,7 @@ pipelineRemote::pipelineRemote(const QString& aRemoteName, const QString& aLocal
 
 void pipelineRemote::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
     auto aData = aStream->QData();
-    if (aStream->scope()->data<bool>("remote") && (aData.type() == QVariant::Type::Map || aData.type() == QMetaType::QJsonObject)){
+    if (aStream->scope()->data<bool>("remote")){
         auto lst = aStream->scope()->toList();
         QJsonArray scp;
         for (auto i = 0; i < lst.size(); i += 2){
@@ -62,12 +62,25 @@ void pipelineRemote::execute(const QString& aName, std::shared_ptr<stream0> aStr
                 scp.push_back(lst[i + 1].toJsonObject());
             }
         }
+        QJsonObject dt;
+        if (aData.type() == QVariant::Type::Map || aData.type() == QMetaType::QJsonObject){
+            dt.insert("data", aData.toJsonObject());
+        }else if (aData.type() == QVariant::Type::List || aData.type() == QMetaType::QJsonArray){
+            dt.insert("data", aData.toJsonArray());
+        }else if (aData.type() == QVariant::Type::String){
+            dt.insert("data", aData.toString());
+        }else if (aData.type() == QVariant::Type::Bool){
+            dt.insert("data", aData.toBool());
+        }else if (aData.type() == QVariant::Type::Double){
+            dt.insert("data", aData.toDouble());
+        }else if (aData.type() == QVariant::Type::Int){
+            dt.insert("data", aData.toInt());
+        }
         pipeline::instance()->run(name() + "_sendRemote",
-                                  rea::Json(
+                                  rea::Json(dt,
                                       "cmd", "execute",
                                       "name", aName,
                                       "remote", name(),
-                                      "data", aData.toJsonObject(),
                                       "tag", aStream->tag(),
                                       "scope", scp,
                                       "sync", aSync,
@@ -86,16 +99,34 @@ void pipelineRemote::remove(const QString& aName, bool){
                               ));
 }
 
-void pipelineRemote::executeFromRemote(const QString& aName, const QJsonObject& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
-    rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData, aTag, aScope), aSync, aNeedFuture, aFlag);
+void pipelineRemote::executeFromRemote(const QString& aName, const QJsonValue& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
+    if (aData.isObject())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toObject(), aTag, aScope), aSync, aNeedFuture, aFlag);
+    else if (aData.isArray())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toArray(), aTag, aScope), aSync, aNeedFuture, aFlag);
+    else if (aData.isString())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toString(), aTag, aScope), aSync, aNeedFuture, aFlag);
+    else if (aData.isBool())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toBool(), aTag, aScope), aSync, aNeedFuture, aFlag);
+    else if (aData.isDouble())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toDouble(), aTag, aScope), aSync, aNeedFuture, aFlag);
 }
 
 void pipelineRemote::removeFromRemote(const QString& aName){
     rea::pipeline::instance(m_localName)->remove(aName, false);
 }
 
-void pipelineQMLRemote::executeFromRemote(const QString& aName, const QJsonObject& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
-    rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData), aTag, aScope), aSync, aNeedFuture, aFlag);
+void pipelineQMLRemote::executeFromRemote(const QString& aName, const QJsonValue& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
+    if (aData.isObject())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toObject()), aTag, aScope), aSync, aNeedFuture, aFlag);
+    else if (aData.isArray())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toArray()), aTag, aScope), aSync, aNeedFuture, aFlag);
+    else if (aData.isString())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toString()), aTag, aScope), aSync, aNeedFuture, aFlag);
+    else if (aData.isBool())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toBool()), aTag, aScope), aSync, aNeedFuture, aFlag);
+    else if (aData.isDouble())
+        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toDouble()), aTag, aScope), aSync, aNeedFuture, aFlag);
 }
 
 }
