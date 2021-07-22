@@ -111,7 +111,7 @@ public:
     static QObject *qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine);
 public:
     static Q_INVOKABLE QJSValue run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJSValue& aScope = QJSValue::NullValue);
-    static Q_INVOKABLE QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject());
+    static Q_INVOKABLE QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject(), bool aAOP = true);
     static Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject(), bool aAutoTag = false);
     static Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);
     static Q_INVOKABLE QJSValue add(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());

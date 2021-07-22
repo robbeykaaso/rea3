@@ -189,6 +189,14 @@ inline std::shared_ptr<stream<T>> in(T aInput = T(), const QString& aTag = "", s
     return std::make_shared<stream<T>>(aInput, tag, aScope);
 }
 
+template<typename T, typename F>
+class funcType{
+public:
+    void doEvent(F aFunc, std::shared_ptr<stream<T>> aStream){
+        aFunc(aStream.get());
+    }
+};
+
 class DSTDLL pipeline : public QObject{
 public:
     static pipeline* instance(const QString& aName = getDefaultPipelineName());
@@ -250,12 +258,15 @@ public:
     }
 
     template<typename T, typename F = pipeFunc<T>>
-    std::shared_ptr<stream<T>> call(const QString& aName, T aInput = T(), std::shared_ptr<scopeCache> aScope = nullptr){
+    std::shared_ptr<stream<T>> call(const QString& aName, T aInput = T(), std::shared_ptr<scopeCache> aScope = nullptr, bool aAOP = true){
         auto pip = m_pipes.value(aName);
         auto stm = in(aInput, "", aScope);
         if (pip){
             auto pip2 = dynamic_cast<pipe<T, F>*>(pip);
-            pip2->doEvent(stm);
+            if (aAOP)
+                pip2->doEvent(stm);
+            else
+                funcType<T, F>().doEvent(pip2->m_func, stm);
         }
         return stm;
     }
@@ -415,14 +426,6 @@ template <typename T>
 pipe0* nextF0(pipeline* aPipeline, pipe0* aPipe, pipeFunc<T> aNextFunc, const QString& aTag, const QJsonObject& aParam){
     return aPipe->next(aPipeline->add<T>(aNextFunc, aParam)->actName(), aTag);
 }
-
-template<typename T, typename F>
-class funcType{
-public:
-    void doEvent(F aFunc, std::shared_ptr<stream<T>> aStream){
-        aFunc(aStream.get());
-    }
-};
 
 template <typename T, typename F>
 class pipe : public pipe0{

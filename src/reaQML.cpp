@@ -320,8 +320,8 @@ QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const Q
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlPipeline::call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope){
-    auto stm = pipeline::instance(getDefaultQMLPipelineName())->call(aName, aInput.toVariant(), std::make_shared<scopeCache>(aScope));
+QJSValue qmlPipeline::call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope, bool aAOP){
+    auto stm = pipeline::instance(getDefaultQMLPipelineName())->call(aName, aInput.toVariant(), std::make_shared<scopeCache>(aScope), aAOP);
     auto ret = new qmlStream(std::dynamic_pointer_cast<stream<QVariant>>(stm));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
