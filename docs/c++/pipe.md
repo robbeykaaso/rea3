@@ -60,4 +60,8 @@ next("doSomething", "tag0;tag1")  //different tags could be split by semicolon
 </br>
 
 # Related pipes
-_pipeFuture, [pipeDelegate](pipes/pipeDelegate.md), [pipePartial](pipes/pipePartial.md), [pipeAsync](pipes/pipeAsync.md), [pipeParallel](pipes/pipeParallel.md)..._
+_pipeFuture, [pipeDelegate](pipes/pipeDelegate.md), [pipePartial](pipes/pipePartial.md), [pipeAsync](pipes/pipeAsync.md), [pipeParallel](pipes/pipeParallel.md)..._  
+
+# Notice  
+- <font color="red">pipe in c++ is not thread safe if you dynamically remove or use pipefuture to trig remove, please use these operations carefully</font><br />  
+</br>
