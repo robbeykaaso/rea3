@@ -42,6 +42,8 @@ add_library(REA SHARED
     "include/qsgBoard.h"
     "include/command.h"
     "include/storage.h"
+    "include/server.h"
+    "include/client.h"
 
     "src/util.cpp"
     "src/rea.cpp"
@@ -53,6 +55,8 @@ add_library(REA SHARED
     "src/qsgBoard.cpp"
     "src/command.cpp"
     "src/storage.cpp"
+    "src/server.cpp"
+    "src/client.cpp"
     )
 
 # 创建动态库别名

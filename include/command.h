@@ -1,5 +1,5 @@
-#ifndef REAL_FRAMEWORK_COMMAND_H_
-#define REAL_FRAMEWORK_COMMAND_H_
+#ifndef REA_COMMAND_H_
+#define REA_COMMAND_H_
 
 #include <functional>
 #include "util.h"

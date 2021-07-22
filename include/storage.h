@@ -1,5 +1,5 @@
-#ifndef REAL_FRAMEWORK_STORAGE0_H_
-#define REAL_FRAMEWORK_STORAGE0_H_
+#ifndef REA_STORAGE_H_
+#define REA_STORAGE_H_
 
 #include "rea.h"
 #include <QImage>

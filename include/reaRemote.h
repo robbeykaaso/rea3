@@ -1,5 +1,5 @@
-#ifndef REAREMOTE_H_
-#define REAREMOTE_H_
+#ifndef REA_REMOTE_H_
+#define REA_REMOTE_H_
 
 #include "rea.h"
 

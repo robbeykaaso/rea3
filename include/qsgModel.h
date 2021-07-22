@@ -1,5 +1,5 @@
-#ifndef REAL_FRAMEWORK_IMAGEMODEL_H_
-#define REAL_FRAMEWORK_IMAGEMODEL_H_
+#ifndef REA_IMAGEMODEL_H_
+#define REA_IMAGEMODEL_H_
 
 #include "rea.h"
 #include <memory>
