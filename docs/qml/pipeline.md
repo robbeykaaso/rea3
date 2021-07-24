@@ -47,11 +47,12 @@ Pipeline.run("pathSelected", {path: ""}, "service1")
 ```  
 </br>
 
-* **QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject())**  
+* **QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject(), bool aAOP = true)**  
     - only execute the specific pipe and its aspects synchronously  
     - `aName` is the pipe name  
     - `aInput` is the input data  
     - `aScope` is the stream additional data  
+    - `aAOP` is to only execute the function self rather than the pipe  
     - `return` the input stream  
 </br>
 

@@ -54,11 +54,12 @@ pipelines().run("pathSelected", {path: ""}, "service1")
 ```  
 </br>
 
-* **call(aName, aInput, aScope = null)**  
+* **call(aName, aInput, aScope = null, bool aAOP = true)**  
     - only execute the specific pipe and its aspects synchronously  
     - `aName` is the pipe name  
     - `aInput` is the input data  
     - `aScope` is the stream additional data  
+    - `aAOP` is to only execute the function self rather than the pipe  
     - `return` the input stream  
 </br>
 

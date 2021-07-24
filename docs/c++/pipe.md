@@ -48,9 +48,11 @@ next("doSomething", "tag0;tag1")  //different tags could be split by semicolon
     - `return` self  
 </br>
 
-* **void removeNext(const QString& aName)**  
+* **void removeNext(const QString& aName, bool aAndDelete = false, bool aOutside = true)**  
     - remove the next pipe  
     - `aName` is the next pipe name  
+    - `aAndDelete` is whether to delete the next pipe  
+    - `aOutside` is whether to remove the same name pipe outside of this pipelines  
 </br>
 
 * **void removeAspect(pipe0::AspectType aType, const QString& aAspect = "")**  

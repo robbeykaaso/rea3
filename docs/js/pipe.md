@@ -42,9 +42,11 @@ _sample_:
     - `return` self  
 </br>
 
-* **removeNext(aName)**  
+* **removeNext(aName, bool aAndDelete = false, bool aOutside = true)**  
     - remove the next pipe  
     - `aName` is the next pipe name  
+    - `aAndDelete` is whether to delete the next pipe  
+    - `aOutside` is whether to remove the same name pipe outside of this pipelines  
 </br>
 
 # Related pipes

@@ -56,11 +56,12 @@ pipeline::instance()->run<int>("pipe0", 0, "service0")
 ```  
 </br>
 
-* **std::shared_ptr<stream<T\>\> call<T, F\>(const QString& aName, T aInput = T(), std::shared_ptr<scopeCache\> aScope = nullptr)**  
+* **std::shared_ptr<stream<T\>\> call<T, F\>(const QString& aName, T aInput = T(), std::shared_ptr<scopeCache\> aScope = nullptr, bool aAOP = true)**  
     - only execute the specific pipe and its aspects synchronously on current thread  
     - `aName` is the pipe name  
     - `aInput` is the input data  
     - `aScope` is the stream additional data  
+    - `aAOP` is to only execute the function self rather than the pipe  
     - `return` the input stream  
 </br>
 

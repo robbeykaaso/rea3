@@ -14,7 +14,7 @@ _sample_:
 ```    
 </br>
 
-#### I. Lazy running
+#### I. Lazy running(reactive program)
 
 **1**: add pipes and build the pipeline graph by connecting pipes  
 _sample_:
@@ -58,7 +58,7 @@ _sample_:
 ```  
 </br>
 
-#### II. Instant running
+#### II. Instant running(functional program)
 
 **1**: write your codes as a stream style or a normal coding style  
 _sample_:  
@@ -109,6 +109,62 @@ _sample_:
     //js
     let stm = await pipelines().input([]).asyncCall("doSomething")
     let dt = stm.data()
+```
+
+#### III. Function extending(aspect oriented program)
+_sample_:  
+```  
+    //c++//other language is like the same
+    pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
+        //do something original version
+    }, Json("name", "pipe0"))  //add pipe0
+    pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
+        //do something before original version
+    }, Json("before", "pipe0"))  //inject logic before 
+    pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
+        //do something after original version
+    }, Json("after", "pipe0"))  //inject logic after
+    pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
+        //do something before original version
+        pipeline::instance()->call("pipe0", aInput->data(), aInput->scope(), true);
+        //do something after original version
+    }, Json("around", "pipe0"))  //inject logic around  
+    pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
+        //do something
+    }, Json("befored", "pipe0"))  //inject "pipe0" before this pipe
+    pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
+        //do something
+    }, Json("aftered", "pipe0"))  //inject "pipe0" after this pipe 
+```
+
+#### IV. Cascade connection(distributed program)
+_sample_:
+```
+    //c++
+    pipeline::instance("c++")->add<QJsonObject>(stream<QJsonObject>* aInput){
+        //do something in c++
+        aInput.out();
+    }, Json("name", "pipe0",
+            "external", "qml"))
+    //js
+    pipelines("js").add(function(aInput){
+        //do something in js
+        aInput.out()
+    }, {name: "pipe1",
+        external: "qml"})
+    //c++ on the another process
+    pipeline::instance("remote")->add<QJsonObject>(stream<QJsonObject>* aInput){
+        //do something in c++
+        aInput.out();
+    }, Json("name", "pipe2",
+            "external", "qml"))
+    //build the service in qml
+    Pipeline.find("pipe0")
+            .next("pipe1")
+            .next("pipe2")
+            .nextF(function(aInput){
+                //do something in qml
+            })
 ```
 
 # Notice  
