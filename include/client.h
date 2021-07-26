@@ -3,6 +3,7 @@
 
 #include "rea.h"
 #include <QTcpSocket>
+#include <QTimer>
 
 class DSTDLL normalClient : public QObject{
     Q_OBJECT

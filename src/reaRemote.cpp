@@ -129,4 +129,11 @@ void pipelineQMLRemote::executeFromRemote(const QString& aName, const QJsonValue
         rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toDouble()), aTag, aScope), aSync, aNeedFuture, aFlag);
 }
 
+void connectRemote(const QString& aLocal, const QString& aRemote, rea::pipeFunc<QJsonObject> aWriteRemote, bool aClient, const QString& aRemoteLocal){
+    rea::pipeline::instance(aRemote);
+    rea::pipeline::instance(aLocal)->updateOutsideRanges({aRemote});
+    rea::pipeline::instance()->find("receiveFrom" + (aClient ? QString("Server") : "Client"))->next(aRemote + "_receiveRemote", (aRemoteLocal == "" ? aLocal : aRemoteLocal) + ";any");
+    rea::pipeline::instance()->add<QJsonObject>(aWriteRemote, rea::Json("name", aRemote + "_sendRemote"));
+}
+
 }

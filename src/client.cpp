@@ -66,12 +66,14 @@ void normalClient::ReceiveState(QAbstractSocket::SocketState aState){
 
 void normalClient::ReceiveMessage()
 {
-    QByteArray qba = m_socket.readAll();
-    QString ss = QVariant(qba).toString();
-    auto strs = rea::parseJsons(ss);
-    for (auto msg : strs){
-        QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
-        auto res = doc.object();
-        rea::pipeline::instance()->run<QJsonObject>("receiveFromServer", res, res.value("remote").toString());
+    while (m_socket.bytesAvailable()){
+        QByteArray qba = m_socket.readAll();
+        QString ss = QVariant(qba).toString();
+        auto strs = rea::parseJsons(ss);
+        for (auto msg : strs){
+            QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
+            auto res = doc.object();
+            rea::pipeline::instance()->run<QJsonObject>("receiveFromServer", res, res.value("remote").toString());
+        }
     }
 }

@@ -28,6 +28,8 @@ protected:
     virtual void executeFromRemote(const QString& aName, const QJsonValue& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag);
 };
 
+DSTDLL void connectRemote(const QString& aLocal, const QString& aRemote, rea::pipeFunc<QJsonObject> aWriteRemote, bool aClient = true, const QString& aRemoteLocal = "");
+
 }
 
 #endif
