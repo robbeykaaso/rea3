@@ -6,6 +6,7 @@ void normalClient::sendServer(rea::stream<QJsonObject>* aInput){
     if (!m_valid)
         return;
     m_socket.write(QJsonDocument(aInput->data()).toJson(QJsonDocument::Compact));
+    //m_socket.waitForBytesWritten();
     m_socket.flush();  //waitForBytesWritten
     while (m_socket.bytesToWrite() > 0)
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -66,13 +67,14 @@ void normalClient::ReceiveState(QAbstractSocket::SocketState aState){
 
 void normalClient::ReceiveMessage()
 {
-    while (m_socket.bytesAvailable()){
+    while (m_socket.bytesAvailable()) {
         QByteArray qba = m_socket.readAll();
         QString ss = QVariant(qba).toString();
         auto strs = rea::parseJsons(ss);
         for (auto msg : strs){
             QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
             auto res = doc.object();
+            //std::cout << "receive:" << res.value("name").toString().toStdString() << "<<" << strs.size() << std::endl;
             rea::pipeline::instance()->run<QJsonObject>("receiveFromServer", res, res.value("remote").toString());
         }
     }

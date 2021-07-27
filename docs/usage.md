@@ -138,6 +138,42 @@ _sample_:
 ```
 
 #### IV. Cascade connection(distributed program)
+**0**: initialize pipeline linker  
+_sample_:
+```
+//c++ server end
+static rea::regPip<std::shared_ptr<rea::pipeline*>> reg_create_c_client_pipeline([](rea::stream<std::shared_ptr<rea::pipeline*>>* aInput){
+    *aInput->data() = new rea::pipelineRemote("qml", "server");
+}, rea::Json("name", "createqmlpipeline"));
+
+static rea::regPip<QQmlApplicationEngine*> reg_tcp_linker([](rea::stream<QQmlApplicationEngine*>* aInput){
+    static normalServer server;
+    auto write_remote = [](rea::stream<QJsonObject>* aInput){
+        server.writeSocket(aInput->scope()->data<QTcpSocket*>("socket"), aInput->data());
+    };
+    rea::connectRemote("server", "qml", write_remote, false, "qml_server");
+    aInput->out();
+}, rea::Json("name", "install0_tcp"), "initRea");
+
+//c++ client end
+static rea::regPip<std::shared_ptr<rea::pipeline*>> reg_create_c_server_pipeline([](rea::stream<std::shared_ptr<rea::pipeline*>>* aInput){
+    *aInput->data() = new rea::pipelineRemote("qml_server", "qml");
+}, rea::Json("name", "createqml_serverpipeline"));
+
+static rea::regPip<QQmlApplicationEngine*> reg_tcp_linker([](rea::stream<QQmlApplicationEngine*>* aInput){
+    static normalClient client;
+    auto write_remote = [](rea::stream<QJsonObject>* aInput){
+        client.sendServer(aInput);
+    };
+    rea::connectRemote("qml", "qml_server", write_remote);
+    aInput->out();
+}, rea::Json("name", "install0_tcp"), "initRea");
+
+//and so on
+```  
+</br>
+
+**1**: code as above  
 _sample_:
 ```
     //c++
@@ -164,6 +200,7 @@ _sample_:
             .next("pipe2")
             .nextF(function(aInput){
                 //do something in qml
+                aInput.out()
             })
 ```
 

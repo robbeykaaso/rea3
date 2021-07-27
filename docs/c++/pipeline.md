@@ -126,3 +126,12 @@ _sample_:
     - `aName` is the pipeline name  
     - `return` the pipeline instance  
 </br>
+
+# Default pipeline name  
+* rea will provide a config file for developers to config it, which is in the current executing working directory named `.rea`, the format is: 
+```
+    {
+        "c++": "c++",
+        "qml": "qml"
+    }
+```

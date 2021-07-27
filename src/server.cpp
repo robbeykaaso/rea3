@@ -5,10 +5,11 @@
 void normalServer::writeSocket(QTcpSocket* aSocket, const QJsonObject& aData){
     if (m_clients.contains(aSocket)){
         aSocket->write(QJsonDocument(aData).toJson(QJsonDocument::Compact));
+        //aSocket->waitForBytesWritten();
         aSocket->flush();
+        //std::cout << "send:" << aData.value("name").toString().toStdString() << "<<" << aSocket->bytesToWrite() << std::endl;
         while (aSocket->bytesToWrite() > 0)
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        std::cout << aData.value("name").toString().toStdString() << ": " << aSocket->bytesToWrite() << std::endl;
     }
 }
 
@@ -59,17 +60,15 @@ void normalServer::NewConnect()
 void normalServer::ReadMessage()	//读取信息
 {
     auto client = static_cast<QTcpSocket*>(QObject::sender());
-    QByteArray qba= client->readAll(); //读取
-    QString ss=QVariant(qba).toString();
-
-    //std::cout << ss.toStdString() << std::endl;
-
-    auto strs = rea::parseJsons(ss);
-    //std::cout << strs.size() << std::endl;
-    for (auto str : strs){
-        auto req = QJsonDocument::fromJson(str.toUtf8()).object();
-        //std::cout << req.value("name").toString().toStdString() << std::endl;
-        rea::pipeline::instance()->run<QJsonObject>("receiveFromClient", req, req.value("remote").toString(), std::make_shared<rea::scopeCache>()->cache("socket", client));
-        //std::cout << "outside: " << req.value("name").toString().toStdString() << std::endl;
+    while (client->bytesAvailable()) {
+        QByteArray qba= client->readAll(); //读取
+        QString ss=QVariant(qba).toString();
+        //std::cout << ss.toStdString() << std::endl;
+        auto strs = rea::parseJsons(ss);
+        for (auto str : strs){
+            auto req = QJsonDocument::fromJson(str.toUtf8()).object();
+            rea::pipeline::instance()->run<QJsonObject>("receiveFromClient", req, req.value("remote").toString(), std::make_shared<rea::scopeCache>()->cache("socket", client));
+            //std::cout << "outside: " << req.value("name").toString().toStdString() << std::endl;
+        }
     }
 }
