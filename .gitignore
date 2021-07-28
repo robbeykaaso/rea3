@@ -1,3 +1,4 @@
 install/
 html/node_modules
 CMakeLists.txt.user
+py/__pycache__
