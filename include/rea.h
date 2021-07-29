@@ -193,7 +193,8 @@ template<typename T, typename F>
 class funcType{
 public:
     void doEvent(F aFunc, std::shared_ptr<stream<T>> aStream){
-        aFunc(aStream.get());
+        if (aFunc)
+            aFunc(aStream.get());
     }
 };
 
@@ -530,6 +531,16 @@ protected:
     void replaceTopo(pipe0* aOldPipe) override{
         pipe0::replaceTopo(aOldPipe);
         m_next2 = reinterpret_cast<pipeDelegate<T, F>*>(aOldPipe)->m_next2;
+    }
+    bool event( QEvent* e) override{
+        if(e->type()== pipe0::streamEvent::type){
+            auto eve = reinterpret_cast<pipe0::streamEvent*>(e);
+            if (eve->getName() == pipe0::m_name){
+                auto stm = std::dynamic_pointer_cast<stream<T>>(eve->getStream());
+                doEvent(stm);
+            }
+        }
+        return true;
     }
 private:
     QString m_delegate;

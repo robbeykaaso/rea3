@@ -188,7 +188,7 @@ class stream {
 
         let line = pipelines(aPipeline)
         const monitor = line.find(aName).nextF(aInput => {
-            ret = new stream(aInput.data(), this.m_tag, aInput.scope())
+            ret = new stream(aInput.data(), aInput.tag(), aInput.scope())
             got_ret = true
 
         }, this.m_tag)
@@ -216,8 +216,11 @@ class pipe {
 
     constructor(aParent, aName){
         this.m_parent = aParent
-        this.m_external = aParent.name()
         this.m_next = {}
+        this.m_external = aParent.name()
+        this.m_before = ""
+        this.m_after = ""
+        this.m_around = ""
         if (aName == null || aName == "")
             this.m_name = generateUUID()
         else
@@ -273,10 +276,9 @@ class pipe {
             this.m_parent.remove(aName, aOutside)
     }
 
-    initialize(aFunc, aParam){
+    initialize(aFunc, aParam = {}){
         this.m_func = aFunc
-        if (aParam && aParam["external"] != null)
-            this.m_external = aParam["external"]
+        this.m_external = aParam["external"] || this.m_parent.name()
         let bf = aParam["befored"]
         if (bf)
             this.m_before = this.setAspect(this.m_before, bf)
@@ -297,7 +299,7 @@ class pipe {
 
     doEvent(aStream){
         if (this.doAspect(this.m_before, aStream)){
-            if (this.m_around)
+            if (this.m_around != "")
                 this.doAspect(this.m_around, aStream)
             else
                 this.m_func(aStream)
@@ -333,8 +335,6 @@ class pipe {
     }
     setAspect(aTarget, aAspect){
         let ret = aTarget
-        if (!ret)
-            ret = ""
         if (ret.indexOf(aAspect) < 0){
             if (ret != "")
                 ret += ";"
@@ -345,35 +345,33 @@ class pipe {
     removeAspect(aType, aAspect){
 
         function doRemoveAspect(aOriAspect){
-            if (aOriAspect){
-                let idx = aOriAspect.indexOf(aAspect)
-                if (idx > 0)
-                    aOriAspect = aOriAspect.splice(idx - 1, aAspect.length)
-                else if (!idx)
-                    aOriAspect = aOriAspect.splice(idx, aAspect.length)
-            }
+            let idx = aOriAspect.indexOf(aAspect)
+            if (idx > 0)
+                aOriAspect = aOriAspect.splice(idx - 1, aAspect.length)
+            else if (!idx)
+                aOriAspect = aOriAspect.splice(idx, aAspect.length)
             return aOriAspect
         }
 
         if (aType == "before"){
             if (!aAspect)
-                this.m_before = null
+                this.m_before = ""
             else
                 this.m_before = doRemoveAspect(this.m_before)
         }else if (aType == "around"){
             if (!aAspect)
-                this.m_around = null
+                this.m_around = ""
             else
                 this.m_around = doRemoveAspect(this.m_around)
         }else if (aType == "after"){
             if (!aAspect)
-                this.m_after = null
+                this.m_after = ""
             else
                 this.m_after = doRemoveAspect(this.m_after)
         }
     }
     doAspect(aName, aStream){
-        if (!aName)
+        if (aName == "")
             return true
         let ret = false
         let nms = aName.split(";")
@@ -414,11 +412,11 @@ class pipeFuture extends pipe{
             for (let i in pip.m_next2)
                 this.insertNext(pip.m_next2[i][0], pip.m_next2[i][1])
             this.m_external = pip.m_external
-            if (pip.m_before)
+            if (pip.m_before != "")
                 this.m_before = this.setAspect(this.m_before, pip.m_before)
-            if (pip.m_around)
+            if (pip.m_around != "")
                 this.m_around = this.setAspect(this.m_around, pip.m_around)
-            if (pip.m_after)
+            if (pip.m_after != "")
                 this.m_after = this.setAspect(this.m_after, pip.m_after)
             delete this.m_parent.m_pipes[aName]
         }
@@ -428,11 +426,11 @@ class pipeFuture extends pipe{
             for (let i in this.m_next2)
                 pip.insertNext(this.m_next2[i][0], this.m_next2[i][1])
             pip.m_external = this.m_external
-            if (this.m_before)
+            if (this.m_before != "")
                 pip.m_before = pip.setAspect(pip.m_before, this.m_before)
-            if (this.m_around)
+            if (this.m_around != "")
                 pip.m_around = pip.setAspect(pip.m_around, this.m_around)
-            if (this.m_after)
+            if (this.m_after != "")
                 pip.m_after = pip.setAspect(pip.m_after, this.m_after)
             delete this.m_parent.m_pipes[this.m_name]
         }, {name: aName + "_pipe_add"})
@@ -463,11 +461,11 @@ class pipeFuture extends pipe{
         let sync = {}
         if (this.m_next2.length)
             sync["next"] = this.m_next2
-        if (this.m_before)
+        if (this.m_before != "")
             sync["before"] = this.m_before
-        if (this.m_around)
+        if (this.m_around != "")
             sync["around"] = this.m_around
-        if (this.m_after)
+        if (this.m_after != "")
             sync["after"] = this.m_after
         this.m_parent.tryExecutePipeOutside(this.actName(), aStream, sync, "any")
     }
@@ -490,6 +488,7 @@ class pipeline{
     constructor(aName){
         this.m_name = aName
         this.m_pipes = {}
+        this.m_outside_pipelines = {}
 
         if (aName == "js"){
             this.add(aInput => {
@@ -621,9 +620,14 @@ class pipeline{
         return new stream(aInput, tag, aScope)
     }
 
+    updateOutsideRanges(aRanges){
+        for (let i in aRanges)
+            this.m_outside_pipelines[i] = true
+    }
+
     tryExecutePipeOutside(aName, aStream, aSync, aFlag){
         for (let i in pipeline_s){
-            if (pipeline_s[i] != this){
+            if (this.m_outside_pipelines[i] && pipeline_s[i] != this){
                 if (aFlag == "any")
                     pipeline_s[i].execute(aName, aStream, aSync, true, this.name());
                 else if (aFlag == pipeline_s[i].name())
@@ -634,7 +638,7 @@ class pipeline{
 
     removePipeOutside(aName){
         for (let i in pipeline_s)
-            if (pipeline_s[i] != this)
+            if (this.m_outside_pipelines[i] && pipeline_s[i] != this)
                 pipeline_s[i].remove(aName);
     }
 }
@@ -839,6 +843,8 @@ pipelines().add(function(aInput){
 }, {name: "createqmlpipeline"})
 
 pipelines("qml").init(function(){})
+
+pipelines().updateOutsideRanges({"c++": true, "qml": true})
 
 if (typeof module == "object")
     module.exports = {
