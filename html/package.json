@@ -1,6 +1,6 @@
 {
   "name": "reajs",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "rea.js",
   "bin": {
     "rea-cli": "./bin/cli.js"

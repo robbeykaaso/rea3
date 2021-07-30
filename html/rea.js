@@ -572,7 +572,7 @@ class pipeline{
         return stm
     }
 
-    call(aName, aInput, aScope = null, aAOP = true){
+    call(aName, aInput = 0, aScope = null, aAOP = true){
         const pip = this.m_pipes[aName]
         const stm = new stream(aInput, "", aScope)
         if (pip){
