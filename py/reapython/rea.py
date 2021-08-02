@@ -57,7 +57,7 @@ class stream:
         self.m_outs.append([aNext, ret])
         return ret
 
-    def outsB(self, aOut: any, aNext: str = "", aTag: str = ""):
+    def outsB(self, aOut: any, aNext: str = "", aTag: str = "") -> 'stream':
         self.outs(aOut, aNext, aTag)
         return self
     
@@ -96,10 +96,10 @@ class stream:
             line.find(aName).removeNext(monitor.actName(), True, True)
         return ret
 
-    def asyncCallF(self, aFunc, aParam: dict = {}, aPipeline: str = "py") -> 'stream':
+    def asyncCallF(self, aFunc, aParam: dict = {}, aEventLevel: bool = True, aPipeline: str = "py") -> 'stream':
         line = pipelines(aPipeline)
         pip = line.add(aFunc, aParam)
-        ret = self.asyncCall(pip.actName())
+        ret = self.asyncCall(pip.actName(), aEventLevel, aPipeline)
         line.remove(pip.actName())
         return ret
 
@@ -531,6 +531,13 @@ class pipeline(QObject):
                 i.terminate()
                 i.wait()
 
+class pipeAsync(pipe):
+    def __init__(self, aParent: 'pipeline', aName: str = "", aThreadNo: int = 0):
+        super().__init__(aParent, aName, aThreadNo)
+
+    def execute(self, aStream):
+        QCoreApplication.postEvent(self, self._streamEvent(self._m_name, aStream))
+
 class pipePartial(pipe):
     def __init__(self, aParent: 'pipeline', aName: str = "", aThreadNo: int = 0):
         super().__init__(aParent, aName, aThreadNo)
@@ -653,3 +660,8 @@ def createParallelPipe(aInput: stream):
     sp = aInput.scope()
     aInput.setData(pipeParallel(sp.data("parent"), sp.data("name")))
 pipelines().add(createParallelPipe, {"name": "createPyPipeParallel"})
+
+def createAsyncPipe(aInput: stream):
+    sp = aInput.scope()
+    aInput.setData(pipeAsync(sp.data("parent"), sp.data("name")))
+pipelines().add(createAsyncPipe, {"name": "createPyPipeAsync"})

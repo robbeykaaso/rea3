@@ -13,6 +13,9 @@ _sample_:
 
     //js end
     npm install reajs
+
+    //python end
+    pip install reapython
 ```    
 </br>
 
@@ -43,6 +46,13 @@ _sample_:
         aInput.setData("").out()  
     }, {name: "pipe0"})
     .next("pipe1")
+
+    //python
+    from reapython.rea import pipelines
+    def p1(aInput: stream):
+        aInput.setData("").out()
+    pipelines().add(p1, {"name": "pipe0"}) \
+    .next("pipe1")
 ```  
 </br>
 
@@ -57,6 +67,9 @@ _sample_:
 
     //js
     rea.pipelines().run("pipe0", {})
+
+    //python
+    pipelines().run("pipe0", {})
 ```  
 </br>
 
@@ -110,6 +123,18 @@ _sample_:
     //js
     let stm = await pipelines().input([]).asyncCall("doSomething")
     let dt = stm.data()
+
+    //python
+    def p2(aInput: stream):
+        assert aInput.data() == "world"
+        aInput.setData("Pass").out()
+
+    pipelines().input(0, "test6") \
+    .asyncCallF(lambda: aInput: 
+        aInput.outs("world")) \
+    .asyncCall("doSomething") \
+    .asyncCallF(p2) \
+    .asyncCall("success")
 ```
 
 #### III. Function extending(aspect oriented program)
@@ -120,27 +145,32 @@ _sample_:
     pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
         //do something original version
     }, Json("name", "pipe0"))  //add pipe0
+
     pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
         //do something before original version
     }, Json("before", "pipe0"))  //inject logic before 
+
     pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
         //do something after original version
     }, Json("after", "pipe0"))  //inject logic after
+
     pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
         //do something before original version
         pipeline::instance()->call("pipe0", aInput->data(), aInput->scope(), true);
         //do something after original version
     }, Json("around", "pipe0"))  //inject logic around  
+
     pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
         //do something
     }, Json("befored", "pipe0"))  //inject "pipe0" before this pipe
+
     pipeline::instance()->add<QJsonObject>(stream<QJsonObject>* aInput){
         //do something
     }, Json("aftered", "pipe0"))  //inject "pipe0" after this pipe 
 ```
 
 #### IV. Cascade connection(service mesh)
-**2**: initialize pipeline linker  
+**2**: initialize pipeline sidecar  
 _sample_:
 ```
 //c++ server end
@@ -184,22 +214,30 @@ _sample_:
         aInput.out();
     }, Json("name", "pipe0",
             "external", "qml"))
+
     //js
     pipelines("js").add(function(aInput){
         //do something in js
         aInput.out()
     }, {name: "pipe1",
         external: "qml"})
+
     //c++ on the another process
     pipeline::instance("remote")->add<QJsonObject>(stream<QJsonObject>* aInput){
         //do something in c++
         aInput.out();
     }, Json("name", "pipe2",
             "external", "qml"))
+
+    //python on the another process
+    pipelines("py").add(lamda: aInput:
+        aInput.out(), {"name": "pipe3", "external": "qml"})
+        
     //build the service in qml
     Pipeline.find("pipe0")
             .next("pipe1")
             .next("pipe2")
+            .next("pipe3")
             .nextF(function(aInput){
                 //do something in qml
                 aInput.out()

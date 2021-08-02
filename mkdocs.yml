@@ -36,6 +36,17 @@ nav:
         - pipePartial: js/pipePartial.md
         - pipeDelegate: js/pipeDelegate.md
         - extension: js/extension.md
+    - rea-python:
+      - pipeline: py/pipeline.md
+      - pipe: py/pipe.md
+      - stream: py/stream.md
+      - scope: py/scope.md
+      - pipes:
+        - pipeAsync: py/pipes/pipeAsync.md
+        - pipePartial: py/pipes/pipePartial.md
+        - pipeDelegate: py/pipes/pipeDelegate.md
+        - pipeParallel: py/pipes/pipeParallel.md
+        - extension: py/pipes/extension.md
     - render2D:
       - qsgModel: render2D/qsgModel.md
       - qsgBoard: render2D/qsgBoard.md
