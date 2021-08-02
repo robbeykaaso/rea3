@@ -17,6 +17,7 @@
 * *ranges(c++20)*  
 * *qtconcurrent(qt6)*  
 * *async/await(es6)*  
+* *service mesh*
 
 # Concept  
 * pipe: a function wrapper which does something with some special logic  
@@ -30,6 +31,6 @@
 * *c++*  
 * *qml*  
 * *js*  
-* *python* (develop in the future)
+* *python*  
 * *java* (develop in the future)
 * *delphi* (develop in the future)

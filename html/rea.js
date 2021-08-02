@@ -199,7 +199,7 @@ class stream {
         }
         while(!got_ret)
             await sleep(5)
-        line.find(aName).removeNext(monitor.actName(), true, false)
+        line.find(aName).removeNext(monitor.actName(), true, true)
 
         return ret
     }

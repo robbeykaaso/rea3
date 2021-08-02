@@ -2,6 +2,8 @@ import uuid
 from time import sleep
 from PyQt5.QtCore import QCoreApplication, QObject, QEvent, QRunnable, QThread, QEventLoop, QThreadPool
 
+pipe_counter = 0
+stream_counter = 0
 class scopeCache:
     def __init__(self, aData: dict = {}):
         self.__m_data = aData
@@ -19,6 +21,12 @@ class stream:
         self.__m_data = aInput
         self.__m_scope = aScope
         self.m_outs = None
+        global stream_counter
+        stream_counter += 1
+
+    def __del__(self):
+        global stream_counter
+        stream_counter -= 1
 
     def setData(self, aData: any) -> 'stream':
         self.__m_data = aData
@@ -74,7 +82,7 @@ class stream:
             line.execute(aName, self)
             if not timeout:
                 loop.exec()
-            line.find(aName).removeNext(monitor.actName(), True, False)
+            line.find(aName).removeNext(monitor.actName(), True, True)
         else:
             got_ret = False
             def mn(aInput: stream):
@@ -85,7 +93,7 @@ class stream:
             line.execute(aName, self)
             while not got_ret:
                 sleep(0.005)
-            line.find(aName).removeNext(monitor.actName(), True, False)
+            line.find(aName).removeNext(monitor.actName(), True, True)
         return ret
 
     def asyncCallF(self, aFunc, aParam: dict = {}, aPipeline: str = "py") -> 'stream':
@@ -114,6 +122,12 @@ class pipe(QObject):
             self.moveToThread(self.__m_thread)
         else:
             self.__m_thread = QThread.currentThread()
+        global pipe_counter
+        pipe_counter += 1
+
+    def __del__(self):
+        global pipe_counter
+        pipe_counter -= 1
 
     def insertNext(self, aName: str, aTag: str):
         self.m_next[aName] = aTag
@@ -373,6 +387,12 @@ class pipeline(QObject):
         if aName == "py":
             QThreadPool.globalInstance().setMaxThreadCount(8)
 
+            def reportPyLeak(aInput: stream):
+                print("py_pipe_counter: " + str(pipe_counter))
+                print("py_stream_counter: " + str(stream_counter))
+                aInput.out()
+            self.add(reportPyLeak, {"name": "reportPyLeak"})
+
     def find(self, aName: str, aNeedFuture: bool = True) -> pipe:
         pip = self.__m_pipes.get(aName, None)
         if pip is None and aNeedFuture:
@@ -410,9 +430,9 @@ class pipeline(QObject):
         return pip
 
     def _removePipeOutside(self, aName: str):
-        for i, j in m_pipelines:
+        for i, j in m_pipelines.items():
             if i in self.__m_outside_pipelines and j != self:
-                self.remove(aName)
+                j.remove(aName)
 
     def remove(self, aName: str, aOutside: bool = False):
         pip = self.__m_pipes.get(aName, None)

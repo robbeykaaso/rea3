@@ -375,7 +375,7 @@ public:
                 loop->exec();
                 //std::cout << aName.toStdString() << " finished" << std::endl;
             }
-            line->find(aName)->removeNext(monitor->actName(), true, false);
+            line->find(aName)->removeNext(monitor->actName(), true, true);
             //freeAsync(aName);
         }else{
             std::promise<std::shared_ptr<stream<S>>> pr;
@@ -389,7 +389,7 @@ public:
                 st = ft.wait_for(std::chrono::microseconds(5));
             }while(st != std::future_status::ready);
             ret = ft.get();
-            line->find(aName)->removeNext(monitor->actName(), true, false);
+            line->find(aName)->removeNext(monitor->actName(), true, true);
         }
         return ret; //std::dynamic_pointer_cast<stream<T>>(shared_from_this());
     }

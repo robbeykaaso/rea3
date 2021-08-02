@@ -2,7 +2,9 @@
 this page describe how to use the framework in your codes  
 
 # Steps
-**0**: import the library and initialize it if necessary    
+**0**: install qt library  
+
+**1**: import rea library and initialize it if necessary    
 _sample_:
 ```
     //c++/qml end; initialize the engine only once for c++/qml
@@ -16,7 +18,7 @@ _sample_:
 
 #### I. Lazy running(reactive program)
 
-**1**: add pipes and build the pipeline graph by connecting pipes  
+**2**: add pipes and build the pipeline graph by connecting pipes  
 _sample_:
 ```
     //c++
@@ -44,7 +46,7 @@ _sample_:
 ```  
 </br>
 
-**2**: run the pipeline  
+**3**: run the pipeline  
 _sample_:  
 ```
     //c++
@@ -59,8 +61,7 @@ _sample_:
 </br>
 
 #### II. Instant running(functional program)
-
-**1**: write your codes as a stream style or a normal coding style  
+**2**: write your codes as a stream style or a normal coding style  
 _sample_:  
 ```
     //c++
@@ -112,6 +113,7 @@ _sample_:
 ```
 
 #### III. Function extending(aspect oriented program)
+**2**: extend your codes by pipe configs  
 _sample_:  
 ```  
     //c++//other language is like the same
@@ -137,8 +139,8 @@ _sample_:
     }, Json("aftered", "pipe0"))  //inject "pipe0" after this pipe 
 ```
 
-#### IV. Cascade connection(distributed program)
-**0**: initialize pipeline linker  
+#### IV. Cascade connection(service mesh)
+**2**: initialize pipeline linker  
 _sample_:
 ```
 //c++ server end
@@ -173,7 +175,7 @@ static rea::regPip<QQmlApplicationEngine*> reg_tcp_linker([](rea::stream<QQmlApp
 ```  
 </br>
 
-**1**: code as above  
+**3**: code as above  
 _sample_:
 ```
     //c++

@@ -1,4 +1,5 @@
 install/
 html/node_modules
 CMakeLists.txt.user
-py/__pycache__
+py/dist
+py/reapython.egg-info
