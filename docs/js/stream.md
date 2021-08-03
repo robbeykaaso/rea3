@@ -44,10 +44,11 @@
     - clear the out streams flowing the next pipes  
 </br>
 
-* **async asyncCall(aName, aPipeline = pipelines())**  
+* **async asyncCall(aName, aPipeline = pipelines(), aOutside = false)**  
     - execute the specific pipe asynchronously  
     - `aName` is the pipe name  
     - `aPipeline` is the specific pipeline  
+    - `aOutside` is whether the pipe is in this pipeline  
     - `return` the result stream  
 * Notice  
     - <font color="red">ensure the function has outstreams</font><br />  
@@ -61,22 +62,6 @@
     - `return` the result stream  
 * Notice  
     - <font color="red">ensure the function has outstreams</font><br />  
-</br>
-
-* **async asyncCallS()**  
-    - execute the pipes and functions sequentially  
-_sample_:
-```
-    pipelines().input(0).asyncCallS([
-        function(){
-
-        },
-        "doSomething",
-        function(){
-
-        }
-    ])
-```
 </br>
 
 * **scope(aNew = false)**  

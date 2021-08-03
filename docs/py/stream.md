@@ -40,11 +40,12 @@
     - forbid the outflow stream  
 </br>
 
-* **asyncCall(self, aName: str, aEventLevel: bool = True, aPipeline: str = "py") -> 'stream'**  
+* **asyncCall(self, aName: str, aEventLevel: bool = True, aPipeline: str = "py", aOutside: bool = false) -> 'stream'**  
     - execute the specific pipe asynchronously  
     - `aName` is the pipe name  
     - `aEventLevel` is whether not to block current thread  
     - `aPipeline` is the specific pipeline  
+    - `aOutside` is whether the pipe is in this pipeline  
     - `return` the result stream  
 * Notice  
     - <font color="red">ensure the function has outstreams</font><br />  

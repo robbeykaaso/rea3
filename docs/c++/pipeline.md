@@ -65,11 +65,12 @@ pipeline::instance()->run<int>("pipe0", 0, "service0")
     - `return` the input stream  
 </br>
 
-* **std::shared_ptr<stream<T\>\> asyncCall(const QString& aName, T aInput = T(), bool aEventLevel = true)**  
+* **std::shared_ptr<stream<T\>\> asyncCall(const QString& aName, T aInput = T(), bool aEventLevel = true, bool aOutside = false)**  
     - only execute the specific pipe and its aspects asynchronously  
     - `aName` is the pipe name  
     - `aInput` is the input data  
     - `aEventLevel` is whether not to block current thread  
+    - `aOutside` is whether the pipe is in this pipeline  
     - `return` the output stream  
 </br>
 

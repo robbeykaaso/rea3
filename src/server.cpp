@@ -16,8 +16,8 @@ void normalServer::writeSocket(QTcpSocket* aSocket, const QJsonObject& aData){
 normalServer::normalServer(const QJsonObject& aConfig) : QObject()
 {
     //QHostAddress add("127.0.0.1");
-    socket_.listen(QHostAddress::LocalHost, 8081);
-    connect(&socket_,SIGNAL(newConnection()),this,SLOT(NewConnect()));
+    connect(&m_socket,SIGNAL(newConnection()),this,SLOT(NewConnect()));
+    m_socket.listen(QHostAddress::LocalHost, 8081);
 
     rea::pipeline::instance()->add<QJsonObject, rea::pipePartial>([](rea::stream<QJsonObject>* aInput){
         aInput->out();
@@ -32,7 +32,7 @@ normalServer::~normalServer(){
     m_clients.clear();
 }
 
-void normalServer::DisConnected(){
+void normalServer::disConnected(){
     QTcpSocket* client = static_cast<QTcpSocket*>(QObject::sender());  //https://stackoverflow.com/questions/25339943/how-to-know-if-a-client-connected-to-a-qtcpserver-has-closed-connection
     rea::pipeline::instance()->run("clientStatusChanged", false, "", std::make_shared<rea::scopeCache>()->cache("socket", client));
     if (m_clients.contains(client)){
@@ -42,9 +42,9 @@ void normalServer::DisConnected(){
     }
 }
 
-void normalServer::NewConnect()
+void normalServer::newConnect()
 {
-    auto client = socket_.nextPendingConnection(); //得到每个连进来的socket
+    auto client = m_socket.nextPendingConnection(); //得到每个连进来的socket
     connect(client,SIGNAL(readyRead()),this,SLOT(ReadMessage())); //有可读的信息，触发读函数槽
     /*connect(client,
             QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
@@ -57,7 +57,7 @@ void normalServer::NewConnect()
     m_clients.insert(client);
 }
 
-void normalServer::ReadMessage()	//读取信息
+void normalServer::readMessage()	//读取信息
 {
     auto client = static_cast<QTcpSocket*>(QObject::sender());
     while (client->bytesAvailable()) {

@@ -39,10 +39,11 @@
     - clear the out streams flowing the next pipes  
 </br>
 
-* **QJSValue asyncCall(const QString& aName, bool aEventLevel = true)**  
+* **QJSValue asyncCall(const QString& aName, bool aEventLevel = true, bool aOutside = false)**  
     - execute the specific pipe asynchronously  
     - `aName` is the pipe name  
     - `aEventLevel` is whether not to block current thread  
+    - `aOutside` is whether the pipe is in this pipeline  
     - `return` the result stream  
 * Notice  
     - <font color="red">ensure the function has outstreams</font><br />  

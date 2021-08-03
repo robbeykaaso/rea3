@@ -10,12 +10,12 @@ public:
     normalServer(const QJsonObject& aConfig = QJsonObject());
     ~normalServer();
 public slots:
-    void NewConnect();
-    void DisConnected();
-    void ReadMessage();
+    void newConnect();
+    void disConnected();
+    void readMessage();
     void writeSocket(QTcpSocket* aSocket, const QJsonObject& aData);
 private:
-    QTcpServer socket_;
+    QTcpServer m_socket;
     QSet<QTcpSocket*> m_clients;
 };
 

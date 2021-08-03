@@ -10,8 +10,6 @@ pipelineRemote::pipelineRemote(const QString& aRemoteName, const QString& aLocal
         auto dt = aInput->data();
         if (dt.value("cmd") == "execute"){
             auto scp = aInput->scope();
-            if (!scp)
-                scp = std::make_shared<scopeCache>();
             auto scp_arr = dt.value("scope").toArray();
             for (int i = 0; i < scp_arr.size(); i += 2){
                 if (scp_arr[i + 1].isString())
@@ -39,7 +37,6 @@ pipelineRemote::pipelineRemote(const QString& aRemoteName, const QString& aLocal
 };
 
 void pipelineRemote::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
-    auto aData = aStream->QData();
     if (aStream->scope()->data<bool>("remote")){
         auto lst = aStream->scope()->toList();
         QJsonArray scp;
@@ -63,6 +60,7 @@ void pipelineRemote::execute(const QString& aName, std::shared_ptr<stream0> aStr
             }
         }
         QJsonObject dt;
+        auto aData = aStream->QData();
         if (aData.type() == QVariant::Type::Map || aData.type() == QMetaType::QJsonObject){
             dt.insert("data", aData.toJsonObject());
         }else if (aData.type() == QVariant::Type::List || aData.type() == QMetaType::QJsonArray){

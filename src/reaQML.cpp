@@ -232,8 +232,8 @@ void qmlStream::noOut(){
     m_stream->noOut();
 }
 
-QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel){
-    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, getDefaultQMLPipelineName()));
+QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel, bool aOutside){
+    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, getDefaultQMLPipelineName(), aOutside));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
@@ -351,8 +351,8 @@ QJSValue qmlPipeline::find(const QString& aName){
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlPipeline::asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel){
-    auto ret = new qmlStream(pipeline::instance(getDefaultQMLPipelineName())->asyncCall(aName, aInput.toVariant(), aEventLevel));
+QJSValue qmlPipeline::asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel, bool aOutside){
+    auto ret = new qmlStream(pipeline::instance(getDefaultQMLPipelineName())->asyncCall(aName, aInput.toVariant(), aEventLevel, aOutside));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }

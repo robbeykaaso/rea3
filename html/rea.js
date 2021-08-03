@@ -172,17 +172,7 @@ class stream {
         this.m_outs = null
     }
 
-    async asyncCallS(){
-        let stm = this
-        for (const i in arguments)
-            if (typeof arguments[i] == "string")
-                stm = await stm.asyncCall(arguments[i])
-            else
-                stm = await stm.asyncCallF(arguments[i][0], arguments[i][1])
-        return stm
-    }
-
-    async asyncCall(aName, aPipeline = "js"){
+    async asyncCall(aName, aPipeline = "js", aOutside = false){
         let ret
         let got_ret = false
 
@@ -199,14 +189,14 @@ class stream {
         }
         while(!got_ret)
             await sleep(5)
-        line.find(aName).removeNext(monitor.actName(), true, true)
+        line.find(aName).removeNext(monitor.actName(), true, aOutside)
 
         return ret
     }
     async asyncCallF(aFunc, aParam = {}, aPipeline = "js"){
         let line = pipelines(aPipeline)
         const pip = line.add(aFunc, aParam)
-        const ret = await this.asyncCall(pip.actName())
+        const ret = await this.asyncCall(pip.actName(), aPipeline)
         line.remove(pip.actName())
         return ret
     }

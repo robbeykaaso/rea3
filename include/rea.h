@@ -273,8 +273,8 @@ public:
     }
 
     template<typename T>
-    std::shared_ptr<stream<T>> asyncCall(const QString& aName, T aInput = T(), bool aEventLevel = true){
-        return in<T>(aInput)->asyncCall(aName, aEventLevel, this->name());
+    std::shared_ptr<stream<T>> asyncCall(const QString& aName, T aInput = T(), bool aEventLevel = true, bool aOutside = false){
+        return in<T>(aInput)->asyncCall(aName, aEventLevel, this->name(), aOutside);
     }
 
     template<typename T>
@@ -355,7 +355,7 @@ public:
     }
 
     template<typename S = T>
-    std::shared_ptr<stream<S>> asyncCall(const QString& aName, bool aEventLevel = true, const QString& aPipeline = getDefaultPipelineName()){
+    std::shared_ptr<stream<S>> asyncCall(const QString& aName, bool aEventLevel = true, const QString& aPipeline = getDefaultPipelineName(), bool aOutside = false){
         std::shared_ptr<stream<S>> ret = nullptr;
         auto line = pipeline::instance(aPipeline);
         if (aEventLevel){
@@ -375,7 +375,7 @@ public:
                 loop->exec();
                 //std::cout << aName.toStdString() << " finished" << std::endl;
             }
-            line->find(aName)->removeNext(monitor->actName(), true, true);
+            line->find(aName)->removeNext(monitor->actName(), true, aOutside);
             //freeAsync(aName);
         }else{
             std::promise<std::shared_ptr<stream<S>>> pr;
@@ -389,7 +389,7 @@ public:
                 st = ft.wait_for(std::chrono::microseconds(5));
             }while(st != std::future_status::ready);
             ret = ft.get();
-            line->find(aName)->removeNext(monitor->actName(), true, true);
+            line->find(aName)->removeNext(monitor->actName(), true, aOutside);
         }
         return ret; //std::dynamic_pointer_cast<stream<T>>(shared_from_this());
     }
