@@ -44,7 +44,7 @@
     - clear the out streams flowing the next pipes  
 </br>
 
-* **async asyncCall(aName, aPipeline = pipelines(), aOutside = false)**  
+* **async asyncCall(aName, aPipeline = "js", aOutside = false)**  
     - execute the specific pipe asynchronously  
     - `aName` is the pipe name  
     - `aPipeline` is the specific pipeline  
@@ -54,7 +54,7 @@
     - <font color="red">ensure the function has outstreams</font><br />  
 </br>
 
-* **async asyncCallF(aFunc, aParam = {}, aPipeline = pipelines())**  
+* **async asyncCallF(aFunc, aParam = {}, aPipeline = "js")**  
     - execute the function asynchronously  
     - `aFunc` is the function  
     - `aParam` is the pipe param  

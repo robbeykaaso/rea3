@@ -2,6 +2,8 @@
 #include <QJsonDocument>
 #include <QNetworkProxy>
 
+namespace rea {
+
 void normalClient::sendServer(rea::stream<QJsonObject>* aInput){
     if (!m_valid)
         return;
@@ -14,13 +16,14 @@ void normalClient::sendServer(rea::stream<QJsonObject>* aInput){
 
 normalClient::normalClient(const QJsonObject& aConfig) : QObject()
 {
+    m_pipeline = aConfig.value("pipeline").toString(getDefaultPipelineName());
     connect(&m_socket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(ReceiveState(QAbstractSocket::SocketState)));
 
-    rea::pipeline::instance()->add<QJsonObject, rea::pipePartial>([](rea::stream<QJsonObject>* aInput){
+    rea::pipeline::instance(m_pipeline)->add<QJsonObject, rea::pipePartial>([](rea::stream<QJsonObject>* aInput){
         aInput->out();
     }, rea::Json("name", "receiveFromServer"));
 
-    rea::pipeline::instance()->add<QJsonObject>([this](rea::stream<QJsonObject>* aInput){
+    rea::pipeline::instance(m_pipeline)->add<QJsonObject>([this](rea::stream<QJsonObject>* aInput){
         m_socket.abort();
         auto dt = aInput->data();
         if (dt.contains("ip") && dt.contains("port") && dt.contains("id"))
@@ -28,7 +31,7 @@ normalClient::normalClient(const QJsonObject& aConfig) : QObject()
         aInput->out();
     }, rea::Json("name", "tryLinkServer"));
 
-    rea::pipeline::instance()->add<QJsonObject>([](rea::stream<QJsonObject>* aInput){
+    rea::pipeline::instance(m_pipeline)->add<QJsonObject>([](rea::stream<QJsonObject>* aInput){
         aInput->out();
     }, rea::Json("name", "clientBoardcast"));
 }
@@ -45,7 +48,7 @@ void normalClient::RegistOnStateChanged(std::function<void(QAbstractSocket::Sock
 void normalClient::ServerFound(QString aIP, QString aPort, QString aID)
 {
     m_detail = aIP + ":" + aPort + ":" + aID;
-    rea::pipeline::instance()->run<QJsonObject>("clientBoardcast", rea::Json("value", "connect socket", "detail", m_detail));
+    rea::pipeline::instance(m_pipeline)->run<QJsonObject>("clientBoardcast", rea::Json("value", "connect socket", "detail", m_detail));
     m_socket.abort();
     m_socket.setProxy(QNetworkProxy::NoProxy);
     //m_socket.setSocketOption()
@@ -56,11 +59,11 @@ void normalClient::ServerFound(QString aIP, QString aPort, QString aID)
 void normalClient::ReceiveState(QAbstractSocket::SocketState aState){
     if (aState == QAbstractSocket::SocketState::ConnectedState){
         m_valid = true;
-        rea::pipeline::instance()->run<QJsonObject>("clientBoardcast", rea::Json("value", "socket connected", "detail", m_detail, "host", m_socket.localAddress().toString()));
+        rea::pipeline::instance(m_pipeline)->run<QJsonObject>("clientBoardcast", rea::Json("value", "socket connected", "detail", m_detail, "host", m_socket.localAddress().toString()));
         connected();
     }else if (aState == QAbstractSocket::SocketState::UnconnectedState){
         m_valid = false;
-        rea::pipeline::instance()->run<QJsonObject>("clientBoardcast", rea::Json("value", "socket unconnected"));
+        rea::pipeline::instance(m_pipeline)->run<QJsonObject>("clientBoardcast", rea::Json("value", "socket unconnected"));
         disconnect(&m_socket, SIGNAL(readyRead()), this, SLOT(ReceiveMessage()));
     }
 }
@@ -75,7 +78,9 @@ void normalClient::ReceiveMessage()
             QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
             auto res = doc.object();
             //std::cout << "receive:" << res.value("name").toString().toStdString() << "<<" << strs.size() << std::endl;
-            rea::pipeline::instance()->run<QJsonObject>("receiveFromServer", res, res.value("remote").toString());
+            rea::pipeline::instance(m_pipeline)->run<QJsonObject>("receiveFromServer", res, res.value("remote").toString());
         }
     }
+}
+
 }

@@ -5,6 +5,8 @@
 #include <QTcpSocket>
 #include <QTimer>
 
+namespace rea {
+
 class DSTDLL normalClient : public QObject{
     Q_OBJECT
 public:
@@ -22,6 +24,9 @@ private:
     QTcpSocket m_socket;
     bool m_valid = false;
     QString m_detail;
+    QString m_pipeline;
 };
+
+}
 
 #endif

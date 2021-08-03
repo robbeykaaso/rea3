@@ -40,7 +40,7 @@
     - forbid the outflow stream  
 </br>
 
-* **std::shared_ptr<stream<S\>\> asyncCall<S\>(const QString& aName, bool aEventLevel = true, pipeline* aPipeline = pipeline::instance(), bool aOutside = false)**  
+* **std::shared_ptr<stream<S\>\> asyncCall<S\>(const QString& aName, bool aEventLevel = true, const QString& aPipeline = getDefaultPipelineName(), bool aOutside = false)**  
     - execute the specific pipe asynchronously  
     - `aName` is the pipe name  
     - `aEventLevel` is whether not to block current thread  
@@ -51,7 +51,7 @@
     - <font color="red">ensure the function has outstreams</font><br />  
 </br>
 
-* **std::shared_ptr<stream<S\>\> asyncCallF<S, P\>(pipeFunc<T> aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true, pipeline* aPipeline = pipeline::instance())**  
+* **std::shared_ptr<stream<S\>\> asyncCallF<S, P\>(pipeFunc<T> aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true, const QString& aPipeline = getDefaultPipelineName())**  
     - execute the function asynchronously  
     - `aFunc` is the function  
     - `aParam` is the pipe param  

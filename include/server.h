@@ -4,6 +4,8 @@
 #include "reaRemote.h"
 #include <QTcpServer>
 
+namespace rea {
+
 class DSTDLL normalServer : public QObject{
     Q_OBJECT
 public:
@@ -17,6 +19,11 @@ public slots:
 private:
     QTcpServer m_socket;
     QSet<QTcpSocket*> m_clients;
+    QString m_pipeline;
 };
+
+}
+
+
 
 #endif

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='reapython',
-    version='1.0.2',
+    version='1.0.3',
     author='robbeykaaso',
     author_email='robbey_kaaso@sina.com',
     url='https://rea2.readthedocs.io/en/latest/',
