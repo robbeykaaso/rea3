@@ -32,7 +32,7 @@ class pipelineRemote(pipeline):
                 scp = aInput.scope()
                 scp_arr = dt.get("scope", [])
                 len_scp = len(scp_arr)
-                for i in range(0, len_scp - 1, 2):
+                for i in range(0, len_scp, 2):
                     scp.cache(scp_arr[i], scp_arr[i + 1])
                 self.executeFromRemote(dt.get("name", ""), dt.get("data", None), dt.get("tag", ""), scp, dt.get("sync", dict({})), dt.get("needFuture", False), dt.get("from", ""))
             elif cmd == "remove":
@@ -54,7 +54,7 @@ class pipelineRemote(pipeline):
             lst = aStream.scope().toList()
             scp = []
             len_lst = len(lst)
-            for i in range(0, len_lst - 1, 2):
+            for i in range(0, len_lst, 2):
                 tp = type(lst[i + 1])
                 if tp is str or tp is bool or tp is float or tp is int or tp is dict or tp is list:
                     scp.append(lst[i])
