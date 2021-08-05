@@ -1,6 +1,5 @@
 import QtQuick 2.12
 import "../Basic"
-import Pipeline 1.0
 
 Log0{
     property var type: ["system", "train"]
@@ -30,7 +29,7 @@ Log0{
     }
 
     Component.onCompleted: {
-        Pipeline.add(function(aInput){
+        Pipelines().add(function(aInput){
             var mdl = aInput.data()
             var tp = mdl["type"], lev = mdl["level"]
             if (type.indexOf(tp) >= 0 && level.indexOf(lev) >= 0){
@@ -41,7 +40,7 @@ Log0{
             aInput.out()
         }, {name: "addLogRecord"})
 
-        Pipeline.add(function(aInput){
+        Pipelines().add(function(aInput){
             visible = true
             aInput.out()
         }, {name: "showLogPanel"})

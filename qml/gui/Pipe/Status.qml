@@ -1,6 +1,5 @@
 import QtQuick 2.12
 import "../Basic"
-import Pipeline 1.0
 
 Status0{
     property string name
@@ -12,7 +11,7 @@ Status0{
     }
 
     Component.onCompleted: {
-        Pipeline.add(function(aInput){
+        Pipelines().add(function(aInput){
             updateStatus(aInput.data())
             aInput.out()
         }, {name: name + "_updateStatus"})

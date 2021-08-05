@@ -1,13 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import "../Basic"
-import Pipeline 1.0
 
 TWindow{
     id: root
     width: 300
     height: 100
-    caption: Pipeline.tr("progress")
+    caption: Pipelines().tr("progress")
     content: Column{
         leftPadding: parent.width * 0.1
         width: parent.width * 0.8
@@ -58,7 +57,7 @@ TWindow{
                 }
             }
             Component.onCompleted: {
-                Pipeline.add(function(aInput){
+                Pipelines().add(function(aInput){
                     updateProgress(aInput.data())
                     aInput.outs(value)
                 }, {name: "updateProgress", type: "Partial"})

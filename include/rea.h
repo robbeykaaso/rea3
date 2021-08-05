@@ -641,6 +641,8 @@ private:
     friend pipeline;
 };
 
+DSTDLL void connectPipelines(const QJsonArray& aPipelines);
+
 template <typename T, template<class, typename> class P = pipe>
 class regPip
 {

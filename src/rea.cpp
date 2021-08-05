@@ -431,4 +431,9 @@ pipeline::~pipeline(){
     m_pipes.clear();
 }
 
+void connectPipelines(const QJsonArray& aPipelines){
+    for (int i = 0; i < aPipelines.size(); i += 2)
+        rea::pipeline::instance(aPipelines[i].toString())->updateOutsideRanges({aPipelines[i + 1].toString()});
+}
+
 }

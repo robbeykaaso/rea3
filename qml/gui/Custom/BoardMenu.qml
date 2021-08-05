@@ -1,6 +1,5 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import Pipeline 1.0
 
 Menu{
     id: boardmenu
@@ -10,12 +9,12 @@ Menu{
     z: 9
 
     function executeCommand(aCaption){
-        Pipeline.run("qml_" + cmenu[aCaption]["cmd"], cmenu[aCaption]["param"])
+        Pipelines().run("qml_" + cmenu[aCaption]["cmd"], cmenu[aCaption]["param"])
     }
 
     Component.onCompleted: {
         cmenu = {}
-        Pipeline.find("qml_updateQSGMenu_" + parent.name).nextF(function(aInput){
+        Pipelines().find("qml_updateQSGMenu_" + parent.name).nextF(function(aInput){
             var dt = aInput.data()
             visible = dt["x"] !== undefined && dt["y"] !== undefined
             for (var i = count - 1; i >= 0; --i)
@@ -26,7 +25,7 @@ Menu{
                     cmenu[mn[j]["cap"]] = mn[j]
                     var src = "import QtQuick 2.12; import QtQuick.Controls 2.5;"
                     src += "MenuItem{"
-                    src += "text: '" + Pipeline.tr(mn[j]["cap"]) + "';"
+                    src += "text: '" + Pipelines().tr(mn[j]["cap"]) + "';"
                     //src += "font.pixelSize: " + fontsize + ";"
                     src += "onClicked: {"
                     src += "boardmenu.executeCommand('" + mn[j]["cap"] + "');"

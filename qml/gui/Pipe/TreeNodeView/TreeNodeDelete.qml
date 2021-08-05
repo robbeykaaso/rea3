@@ -1,6 +1,5 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
-import Pipeline 1.0
 
 Button{
     text: "x"
@@ -32,7 +31,7 @@ Button{
     function deleteTreeNode(aNotNotify){
         parent.parent.deleted[parent] = true
         if (!aNotNotify)
-            Pipeline.run(parent.parent.parent.scr_root.contentChildren[0].key + "treeViewGUIModified", {key: parent.parent.parent.extractKeyChain() + ";" + parent.children[1].key, type: "del"})
+            Pipelines().run(parent.parent.parent.scr_root.contentChildren[0].key + "treeViewGUIModified", {key: parent.parent.parent.extractKeyChain() + ";" + parent.children[1].key, type: "del"})
         parent.parent.parent.scr_root.contentHeight -= enumChildHeight(parent.children[1])
         parent.destroy()
     }

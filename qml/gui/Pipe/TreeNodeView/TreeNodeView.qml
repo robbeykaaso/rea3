@@ -1,6 +1,5 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
-import Pipeline 1.0
 
 ScrollView{
     id: scrrange
@@ -109,7 +108,7 @@ ScrollView{
         }
 
         Component.onCompleted: {
-            Pipeline.add(function(aInput){
+            Pipelines().add(function(aInput){
                 var dt = aInput.data()
                 clearChildren()
                 contentHeight = 0
@@ -117,22 +116,22 @@ ScrollView{
                 aInput.out()
             }, {name: key + "loadTreeView", type: "Partial"})
 
-            Pipeline.add(function(aInput){
+            Pipelines().add(function(aInput){
                 var dt = aInput.data()
                 modifyGUI(dt["key"], dt["type"], dt["val"], dt["style"])
                 aInput.out()
             }, {name: key + "modifyTreeViewGUI", type: "Partial"})
 
-            Pipeline.add(function(aInput){
+            Pipelines().add(function(aInput){
                 //console.log(aInput["key"] + ";" + aInput["val"] + ";" + aInput["type"])
                 aInput.out()
             }, {name: key + "treeViewGUIModified"})
 
-            Pipeline.add(function(aInput){
+            Pipelines().add(function(aInput){
                 aInput.setData(buildObject()).out()
             }, {name: key + "saveTreeView", type: "Partial"})
 
-            Pipeline.add(function(aInput){
+            Pipelines().add(function(aInput){
                 var dt = aInput.data()
                 var stl = generateJSST(dt)
                 aInput.setData({data: dt, style: stl}).out()

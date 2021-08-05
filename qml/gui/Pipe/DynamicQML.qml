@@ -1,5 +1,4 @@
 import QtQuick 2.12
-import Pipeline 1.0
 
 Item{
     property string name
@@ -15,7 +14,7 @@ Item{
     }
 
     Component.onCompleted: {
-        Pipeline.find("loadDynamicQMLs")
+        Pipelines().find("loadDynamicQMLs")
         .nextF(function(aInput){
             var pths = aInput.data()
             for (var i in pths){
@@ -30,6 +29,6 @@ Item{
                 ld.source = pths[i]
             }
         }, name)
-        Pipeline.run("loadDynamicQMLs", name, name)
+        Pipelines().run("loadDynamicQMLs", name, name)
     }
 }

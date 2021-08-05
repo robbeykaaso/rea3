@@ -1,13 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Dialogs 1.2
-import Pipeline 1.0
 
 FileDialog {
     property string name
     property string service_tag
     property var service_scope
 
-    title: Pipeline.tr("Please choose files")
+    title: Pipelines().tr("Please choose files")
     selectMultiple: true
     selectFolder: false
    // nameFilters: ["Image files (*.jpg *.png *.jpeg *.bmp)"] //"All files(*)"
@@ -19,25 +18,25 @@ FileDialog {
             // unescape html codes like '%23' for '#'
             //pths += fileUrls[i].substring(8, fileUrls[i].length) + ";"
         }
-        Pipeline.run(name + "_fileSelected", pths, service_tag, service_scope)
+        Pipelines().run(name + "_fileSelected", pths, service_tag, service_scope)
     }
     onRejected: {
-        Pipeline.run(name + "_fileSelected", [], service_tag, service_scope)
+        Pipelines().run(name + "_fileSelected", [], service_tag, service_scope)
     }
 
     Component.onCompleted: {
-        Pipeline.add(function(aInput){
+        Pipelines().add(function(aInput){
             aInput.out()
         }, {name: name + "_fileSelected", type: "Partial"})
 
-        Pipeline.add(function(aInput){
+        Pipelines().add(function(aInput){
             var mdl = aInput.data()
             selectFolder = mdl["folder"]
             if (selectFolder){
-                title = mdl["title"] || Pipeline.tr("Please choose folder")
+                title = mdl["title"] || Pipelines().tr("Please choose folder")
                 nameFilters = ""
             }else{
-                title = mdl["title"] || Pipeline.tr("Please choose files")
+                title = mdl["title"] || Pipelines().tr("Please choose files")
                 nameFilters = mdl["filter"]
                 selectMultiple = true
             }

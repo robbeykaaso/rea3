@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.5
 import "../../Basic"
-import Pipeline 1.0
 
 Column{
     id: root
@@ -140,7 +139,7 @@ Column{
                 else{
                     for (var j = 0; j < cld.children.length; ++j)
                         if (ky === cld.getChildValue(j)){
-                            Pipeline.run("popMessage", {title: "warning", text: "Duplicated key!"})
+                            Pipelines().run("popMessage", {title: "warning", text: "Duplicated key!"})
                             return
                         }
 
@@ -277,7 +276,7 @@ Column{
 
     function addJsonChild(aType, aKey, aValue, aStyle, aInitialize){
         var ret
-        var src = "import QtQuick 2.12; import '../../Basic'; import Pipeline 1.0; import TextFieldDoubleValidator 1.0;"
+        var src = "import QtQuick 2.12; import '../../Basic'; import TextFieldDoubleValidator 1.0;"
         src += "Row{"
         if (aStyle && aStyle["jsst"] && aStyle["jsst"]["invisible"])
             src += "visible: false;"
@@ -303,7 +302,7 @@ Column{
             if (aStyle && aStyle["jsst"] && aStyle["jsst"]["val_script"])
                 src += aStyle["jsst"]["val_script"]
             else
-                src += "check.onCheckedChanged: {Pipeline.run(scr_root.contentChildren[0].key + 'treeViewGUIModified', {key: parent.parent.parent.extractKeyChain() + ';' + key, val: check.checked});}"
+                src += "check.onCheckedChanged: {Pipelines().run(scr_root.contentChildren[0].key + 'treeViewGUIModified', {key: parent.parent.parent.extractKeyChain() + ';' + key, val: check.checked});}"
             src += "}"
             if (aStyle && aStyle["jsst"] && aStyle["jsst"]["comment"] && aStyle["jsst"]["comment"] !== ""){
                 src += "TreeNodeTag{anchors.verticalCenter: parent ? parent.children[1].verticalCenter : undefined;"
@@ -343,7 +342,7 @@ Column{
                 else{
                     src += "combo.onCurrentTextChanged: {"
                     src += "if (mdytick++){"
-                    src += "Pipeline.run(scr_root.contentChildren[0].key + 'treeViewGUIModified', {key: parent.parent.parent.extractKeyChain() + ';' + key, val: combo.currentText});"
+                    src += "Pipelines().run(scr_root.contentChildren[0].key + 'treeViewGUIModified', {key: parent.parent.parent.extractKeyChain() + ';' + key, val: combo.currentText});"
                     //src += "console.log('hi2');"
                     src += "}}"
                 }
@@ -375,9 +374,9 @@ Column{
                     //src += "}"
 
                     if (aType === "string")
-                        src += "input.onTextEdited: {Pipeline.run(scr_root.contentChildren[0].key + 'treeViewGUIModified', {key: parent.parent.parent.extractKeyChain() + ';' + key, val: input.text});}"
+                        src += "input.onTextEdited: {Pipelines().run(scr_root.contentChildren[0].key + 'treeViewGUIModified', {key: parent.parent.parent.extractKeyChain() + ';' + key, val: input.text});}"
                     else
-                        src += "input.onTextEdited: {Pipeline.run(scr_root.contentChildren[0].key + 'treeViewGUIModified', {key: parent.parent.parent.extractKeyChain() + ';' + key, val: parseFloat(input.text)});}"
+                        src += "input.onTextEdited: {Pipelines().run(scr_root.contentChildren[0].key + 'treeViewGUIModified', {key: parent.parent.parent.extractKeyChain() + ';' + key, val: parseFloat(input.text)});}"
                 }
             }
             src += "}"
@@ -415,7 +414,7 @@ Column{
         }
         scr_root.contentWidth = Math.max(scr_root.contentWidth, (treelayer + 1) * 10 + treelayer * 17 + ret.children[1].x + ret.children[1].width + 30)
         if (!aInitialize)
-            Pipeline.run(scr_root.contentChildren[0].key + "treeViewGUIModified", {key: extractKeyChain() + ";" + aKey, val: aValue, type: "add"})
+            Pipelines().run(scr_root.contentChildren[0].key + "treeViewGUIModified", {key: extractKeyChain() + ";" + aKey, val: aValue, type: "add"})
 //        console.log(ret.children[1].x + ";" + ret.children[1].width)
 //        if (cld.children.length - Object.keys(cld.deleted).length > 1)
 //            scr_root.contentHeight += 5

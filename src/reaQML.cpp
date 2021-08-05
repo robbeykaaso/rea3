@@ -62,12 +62,10 @@ public:
     }
 };
 
-pipelineQML::pipelineQML() : pipeline(getDefaultQMLPipelineName()){
+pipelineQML::pipelineQML(const QString& aName) : pipeline(aName){
     pipeline::instance()->supportType<QVariant>([](stream0* aInput){
         return reinterpret_cast<stream<QVariant>*>(aInput)->data();
     });  //qmlEngine can only be used on main thread, so use qvariant instead of qjsvalue
-
-    updateOutsideRanges({getDefaultPipelineName()});
 }
 
 void pipelineQML::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
@@ -232,14 +230,14 @@ void qmlStream::noOut(){
     m_stream->noOut();
 }
 
-QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel, bool aOutside){
-    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, getDefaultQMLPipelineName(), aOutside));
+QJSValue qmlStream::asyncCall(const QString& aName, bool aEventLevel, const QString& aPipeline, bool aOutside){
+    auto ret = new qmlStream(m_stream->asyncCall<QVariant>(aName, aEventLevel, aPipeline, aOutside));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, bool aEventLevel){
-    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, aEventLevel, getDefaultQMLPipelineName()));
+QJSValue qmlStream::asyncCallF(QJSValue aFunc, const QJsonObject& aParam, bool aEventLevel, const QString& aPipeline){
+    auto ret = new qmlStream(m_stream->asyncCallF<QVariant, pipe, QJSValue, QJSValue>(aFunc, aParam, aEventLevel, aPipeline));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
@@ -309,7 +307,7 @@ QJSValue qmlPipeline::run(const QString& aName, const QJSValue& aInput, const QS
         sp_data = sp->m_scope;
     }else if (aScope.isObject())
         sp_data = std::make_shared<scopeCache>(valType<QJsonObject>::data(aScope));
-    auto ret = new qmlStream(pipeline::instance(getDefaultQMLPipelineName())->run(aName, aInput.toVariant(), aTag, sp_data));
+    auto ret = new qmlStream(pipeline::instance(m_name)->run(aName, aInput.toVariant(), aTag, sp_data));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
@@ -321,38 +319,30 @@ QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const Q
 }
 
 QJSValue qmlPipeline::call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope, bool aAOP){
-    auto stm = pipeline::instance(getDefaultQMLPipelineName())->call(aName, aInput.toVariant(), std::make_shared<scopeCache>(aScope), aAOP);
+    auto stm = pipeline::instance(m_name)->call(aName, aInput.toVariant(), std::make_shared<scopeCache>(aScope), aAOP);
     auto ret = new qmlStream(std::dynamic_pointer_cast<stream<QVariant>>(stm));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
 void qmlPipeline::remove(const QString& aName, bool aOutside){
-    pipeline::instance(getDefaultQMLPipelineName())->remove(aName, aOutside);
-}
-
-QObject* qmlPipeline::qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine)
-{
-    Q_UNUSED(engine)
-    Q_UNUSED(scriptEngine)
-
-    return new qmlPipeline();
+    pipeline::instance(m_name)->remove(aName, aOutside);
 }
 
 QJSValue qmlPipeline::add(QJSValue aFunc, const QJsonObject& aParam){
-    auto ret = new qmlPipe(pipeline::instance(getDefaultQMLPipelineName()), doAdd(aFunc, aParam));
+    auto ret = new qmlPipe(pipeline::instance(m_name), doAdd(aFunc, aParam));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
 QJSValue qmlPipeline::find(const QString& aName){
-    qmlPipe* ret = new qmlPipe(pipeline::instance(getDefaultQMLPipelineName()), aName);
+    qmlPipe* ret = new qmlPipe(pipeline::instance(m_name), aName);
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
 QJSValue qmlPipeline::asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel, bool aOutside){
-    auto ret = new qmlStream(pipeline::instance(getDefaultQMLPipelineName())->asyncCall(aName, aInput.toVariant(), aEventLevel, aOutside));
+    auto ret = new qmlStream(pipeline::instance(m_name)->asyncCall(aName, aInput.toVariant(), aEventLevel, aOutside));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
@@ -361,7 +351,12 @@ static bool m_language_updated;
 static QJsonObject translates;
 
 qmlPipeline::qmlPipeline(){
+
+}
+
+qmlPipeline::qmlPipeline(const QString& aName){
     m_language_updated = false;
+    m_name = aName;
     QFile fl(".language");
     if (fl.open(QFile::ReadOnly)){
         translates = QJsonDocument::fromJson(fl.readAll()).object();
@@ -416,15 +411,20 @@ public:
 
 };
 
+QJSValue globalFuncs::Pipelines(const QString& aName){
+    if (!m_pipelines.contains(aName))
+        m_pipelines.insert(aName, std::make_shared<qmlPipeline>(aName));
+    return qml_engine->toScriptValue(m_pipelines.value(aName).get());
+}
+
 static regPip<QQmlApplicationEngine*> reg_recative2_qml([](stream<QQmlApplicationEngine*>* aInput){
     auto cfg = aInput->scope()->data<QJsonObject>("rea-qml");
     //qInstallMessageHandler
     if (cfg.value("use").toBool(true)){
         qml_engine = aInput->data();
-        pipeline::instance()->updateOutsideRanges({getDefaultQMLPipelineName()});
         //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype
-        qmlRegisterSingletonType<qmlPipeline>("Pipeline", 1, 0, "Pipeline", &qmlPipeline::qmlInstance);
         qmlRegisterType<TextFieldDoubleValidator>("TextFieldDoubleValidator", 1, 0, "TextFieldDoubleValidator");
+        qml_engine->rootContext()->setContextObject(new globalFuncs());
     }
     aInput->out();
 }, rea::Json("name", "install2_qml"), "initRea");

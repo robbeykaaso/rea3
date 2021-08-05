@@ -1,6 +1,5 @@
 import QtQuick 2.12
 import QtQuick.Dialogs 1.2
-import Pipeline 1.0
 
 MessageDialog {
     property string service_tag
@@ -12,16 +11,16 @@ MessageDialog {
     onAccepted: {
         if (!selected){
             selected = true
-            Pipeline.run("messagePoped", true, service_tag, service_scope)
+            Pipelines().run("messagePoped", true, service_tag, service_scope)
         }
     }
 
     onRejected: {
-        Pipeline.run("messagePoped", false, service_tag, service_scope)
+        Pipelines().run("messagePoped", false, service_tag, service_scope)
     }
 
     Component.onCompleted: {
-        Pipeline.add(function(aInput){
+        Pipelines().add(function(aInput){
             var dt = aInput.data()
             selected = false
             title = dt["title"]
@@ -31,7 +30,7 @@ MessageDialog {
             open()
         }, {name: "popMessage", type: "Delegate", delegate: "messagePoped"})
 
-        Pipeline.add(function(aInput){
+        Pipelines().add(function(aInput){
             aInput.out()
         }, {name: "messagePoped", type: "Partial"})
     }

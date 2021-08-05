@@ -8,7 +8,7 @@ class pipelineQML : public pipeline{
 public:
     Q_OBJECT
 public:
-    pipelineQML();
+    pipelineQML(const QString& aName = getDefaultQMLPipelineName());
     void execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync = QJsonObject(), bool aFutureNeed = false, const QString& aFrom = "") override;
 protected:
     void removePipeOutside(const QString& aName) override;
@@ -59,8 +59,8 @@ public:
     Q_INVOKABLE QJSValue outs(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
     Q_INVOKABLE QJSValue outsB(QJSValue aOut, const QString& aNext = "", const QString& aTag = "");
     Q_INVOKABLE void noOut();
-    Q_INVOKABLE QJSValue asyncCall(const QString& aName, bool aEventLevel = true, bool aOutside = false);
-    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true);
+    Q_INVOKABLE QJSValue asyncCall(const QString& aName, bool aEventLevel = true, const QString& aPipeline = getDefaultQMLPipelineName(), bool aOutside = false);
+    Q_INVOKABLE QJSValue asyncCallF(QJSValue aFunc, const QJsonObject& aParam = QJsonObject(), bool aEventLevel = true, const QString& aPipeline = getDefaultQMLPipelineName());
 private:
     std::shared_ptr<stream<QVariant>> m_stream;
 };
@@ -103,21 +103,29 @@ private:
 class qmlPipeline : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(qmlPipeline)
 public:
     qmlPipeline();
+    qmlPipeline(const QString& aName);
     ~qmlPipeline();
 public:
-    static QObject *qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine);
+    Q_INVOKABLE QJSValue run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJSValue& aScope = QJSValue::NullValue);
+    Q_INVOKABLE QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject(), bool aAOP = true);
+    Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject(), bool aAutoTag = false);
+    Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);
+    Q_INVOKABLE QJSValue add(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());
+    Q_INVOKABLE QJSValue find(const QString& aName);
+    Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel = true, bool aOutside = false);
+    Q_INVOKABLE QString tr(const QString& aOrigin);
+private:
+    QString m_name;
+};
+
+class globalFuncs : public QObject{
+    Q_OBJECT
 public:
-    static Q_INVOKABLE QJSValue run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJSValue& aScope = QJSValue::NullValue);
-    static Q_INVOKABLE QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject(), bool aAOP = true);
-    static Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject(), bool aAutoTag = false);
-    static Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);
-    static Q_INVOKABLE QJSValue add(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());
-    static Q_INVOKABLE QJSValue find(const QString& aName);
-    static Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel = true, bool aOutside = false);
-    static Q_INVOKABLE QString tr(const QString& aOrigin);
+    Q_INVOKABLE QJSValue Pipelines(const QString& aName = getDefaultQMLPipelineName());
+private:
+    QHash<QString, std::shared_ptr<qmlPipeline>> m_pipelines;
 };
 
 DSTDLL QString tr0(const QString& aOrigin);
