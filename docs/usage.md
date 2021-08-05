@@ -33,8 +33,7 @@ _sample_:
     .next("pipe1")  //connect pipe1 after pipe0
 
     //qml
-    import Pipeline 1.0
-    Pipeline.add(function(aInput){  
+    Pipelines().add(function(aInput){  
         aInput.setData("").out()  
     }, {name: "pipe0"})
     .next("pipe1")
@@ -63,7 +62,7 @@ _sample_:
     pipeline::instance()->run<QJsonObject>("pipe0", QJsonObject())  //run the pipeline: pipe0 -> pipe1
 
     //qml
-    Pipeline.run("pipe0", {})
+    Pipelines().run("pipe0", {})
 
     //js
     rea.pipelines().run("pipe0", {})
@@ -92,7 +91,7 @@ _sample_:
     auto dt = rea::pipeline::instance()->asyncCall<QJsonArray>("doSomething", QJsonArray())->data()
 
     //qml
-    Pipeline.input(0, "test")
+    Pipelines().input(0, "test")
     .asyncCallF(function(aInput){
         aInput.outs("world")
     })
@@ -103,7 +102,7 @@ _sample_:
     })
     .asyncCall("success")
     //qml
-    var dt = Pipeline.asyncCall("doSomething", []).data()
+    var dt = Pipelines().asyncCall("doSomething", []).data()
     //qml
     gc()
     
@@ -234,7 +233,7 @@ _sample_:
         aInput.out(), {"name": "pipe3", "external": "qml"})
         
     //build the service in qml
-    Pipeline.find("pipe0")
+    Pipelines().find("pipe0")
             .next("pipe1")
             .next("pipe2")
             .next("pipe3")
