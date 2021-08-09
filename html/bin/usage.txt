@@ -1,5 +1,5 @@
 rea: https://rea2.readthedocs.io/en/latest/
---init, -i: download the the demo project based on rea
+--init, -i: download the rea-c++ binary library
 --trans: download the translator based on rea
 --version, -v: the version of current reajs
 --help, -h: the usage of rea-cli

@@ -7,12 +7,14 @@ this page describe how to use the framework in your codes
 **1**: import rea library and initialize it if necessary    
 _sample_:
 ```
-    //c++/qml end; initialize the engine only once for c++/qml
-    QQmlApplicationEngine engine;
-    rea::pipeline::instance()->run<QQmlApplicationEngine*>("initRea", &engine);
-
     //js end
     npm install reajs
+
+    //c++/qml end; 
+    rea-cli -i
+    //initialize the engine only once for c++/qml in codes
+    QQmlApplicationEngine engine;
+    rea::pipeline::instance()->run<QQmlApplicationEngine*>("initRea", &engine);
 
     //python end
     pip install reapython
