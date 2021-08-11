@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QFile, QDir
-from reapython.rea import pipelines, stream
+from .rea import pipelines, stream
 import json
 
 class fsStorage:
@@ -38,7 +38,6 @@ class fsStorage:
         pipelines().add(writeJsonObject, {"name": "writeJsonObject", "thread": 11})
 
     def writeByteArray(self, aPath: str, aData: bytearray) -> bool:
-        print(aData)
         pth = self.stgRoot(aPath)
         self.checkPath(pth)
         fl = QFile(pth)
@@ -49,9 +48,12 @@ class fsStorage:
         return False
 
     def readJsonObject(self, aPath: str) -> tuple:
-        with open(aPath) as json_file:
-            ret = json.load(json_file)
-            return True, ret
+        try:
+            with open(aPath) as json_file:
+                ret = json.load(json_file)
+                return True, ret
+        except:
+            return False, None
 
     def writeJsonObject(self, aPath, aData: dict) -> bool:
         self.writeByteArray(aPath, bytearray(json.dumps(aData).encode("utf-8")))

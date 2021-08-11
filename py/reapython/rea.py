@@ -538,6 +538,13 @@ class pipeline(QObject):
                 i.terminate()
                 i.wait()
 
+class pipeAsync(pipe):
+    def __init__(self, aParent: 'pipeline', aName: str, aThreadNo: int = 0):
+        super().__init__(aParent, aName, aThreadNo)
+
+    def execute(self, aStream):
+        QCoreApplication.postEvent(self, self._streamEvent(self._m_name, aStream))
+
 class pipePartial(pipe):
     def __init__(self, aParent: 'pipeline', aName: str = "", aThreadNo: int = 0):
         super().__init__(aParent, aName, aThreadNo)
@@ -616,7 +623,7 @@ class pipeParallel(pipePartial):
 
         def run(self):
             self.__m_pipe.doEvent(self.__m_source)
-            self.__m_pipe._doNextEvent(self.__m_pipe.m_next2[self.__m_source.tag()], self.__m_source)
+            self.__m_pipe._doNextEvent(self.__m_pipe.m_next2.get(self.__m_source.tag(), {}), self.__m_source)
 
     def __init__(self, aParent: 'pipeline', aName: str = "", aThreadNo: int = 0):
         super().__init__(aParent, aName, aThreadNo)
@@ -645,6 +652,11 @@ def pipelines(aName: str = "py") -> pipeline:
         else:
             m_pipelines[aName] = pipelines().call("create" + aName + "pipeline").data()
     return m_pipelines[aName]
+
+def createAsyncPipe(aInput: stream):
+    sp = aInput.scope()
+    aInput.setData(pipeAsync(sp.data("parent"), sp.data("name")))
+pipelines().add(createAsyncPipe, {"name": "createPyPipeAsync"})
 
 def createDelegatePipe(aInput: stream):
     sp = aInput.scope()

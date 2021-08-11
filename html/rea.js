@@ -738,10 +738,10 @@ function initLinker(aFunc){
                 return
             }
             new webc(qt.webChannelTransport, channel=>{
+                web_channel = channel
                 for (let i in candidates_functions0)
                     candidates_functions0[i](channel)
                 candidates_functions0 = []
-                web_channel = channel
             })
         }
         candidates_functions0.push(aFunc)

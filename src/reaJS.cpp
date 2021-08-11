@@ -45,8 +45,8 @@ std::shared_ptr<stream0> makeInput(const QVariant& aData, const QString& aTag, c
     return ret;
 }
 
-void pipelineJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
-    rea::pipeline::instance()->execute(aName, makeInput(aData, aTag, aScope), aSync, aNeedFuture, aFlag);
+void pipelineJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonValue& aScope, const QJsonValue& aSync, bool aNeedFuture, const QString& aFlag){
+    rea::pipeline::instance()->execute(aName, makeInput(aData, aTag, aScope.toObject()), aSync.toObject(), aNeedFuture, aFlag);
 }
 
 void pipelineJS::removeFromJS(const QString& aName){

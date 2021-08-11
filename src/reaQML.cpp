@@ -84,11 +84,12 @@ pipelineQMLJS::pipelineQMLJS() : pipeline("js"){
     }, rea::Json("name", "pipelineQMLObject", "external", getDefaultQMLPipelineName()));
 }
 
-void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonObject& aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
-    QJsonObject scp;
-    for (auto i : aScope.keys())
-        scp.insert(i, aScope.value(i));
-    rea::pipeline::instance(getDefaultQMLPipelineName())->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync, aNeedFuture, aFlag);
+void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonValue& aScope, const QJsonValue& aSync, bool aNeedFuture, const QString& aFlag){
+    //QJsonObject scp;
+    //for (auto i : aScope.keys())
+    //    scp.insert(i, aScope.value(i));
+    auto scp = aScope.toObject();
+    rea::pipeline::instance(getDefaultQMLPipelineName())->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync.toObject(), aNeedFuture, aFlag);
 }
 
 void pipelineQMLJS::removeFromJS(const QString& aName){
