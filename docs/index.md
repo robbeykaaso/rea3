@@ -18,6 +18,7 @@
 * *qtconcurrent(qt6)*  
 * *async/await(es6)*  
 * *service mesh*
+* *concurrency runtime(microsoft)*
 
 # Concept  
 * pipe: a function wrapper which does something with some special logic  
