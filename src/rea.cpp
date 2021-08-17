@@ -196,9 +196,13 @@ void pipe0::execute(std::shared_ptr<stream0> aStream){
     if (QThread::currentThread() == m_thread){
         streamEvent nxt_eve(m_name, aStream);
         QCoreApplication::sendEvent(this, &nxt_eve);
+       // if (actName() == "logTrain")
+        //    std::cout << "send: " << aStream->scope()->data<QString>("job").toStdString() << std::endl;
     }else{
         auto nxt_eve = std::make_unique<streamEvent>(m_name, aStream);
         QCoreApplication::postEvent(this, nxt_eve.release());  //https://stackoverflow.com/questions/32583078/does-postevent-free-the-event-after-posting-double-free-or-corruption // still memory leak, reason is unknown
+      //  if (actName() == "logTrain")
+      //      std::cout << "post: " << aStream->scope()->data<QString>("job").toStdString() << std::endl;
     }
 }
 
@@ -222,6 +226,9 @@ bool pipeFuture::event( QEvent* e) {
                 sync.insert("around", m_around);
             if (m_after != "")
                 sync.insert("after", m_after);
+            auto stm = eve->getStream();
+        //    if (actName() == "logTrain")
+        //        std::cout << ": " << stm->scope()->data<QString>("job").toStdString() << std::endl;
             m_parent->tryExecutePipeOutside(actName(), eve->getStream(), sync, "any");
         }
     }
@@ -235,19 +242,6 @@ void pipeFuture::execute(std::shared_ptr<stream0> aStream){
 void pipeFuture::insertNext(const QString& aName, const QString& aTag){
     m_next2.push_back(QPair<QString, QString>(aName, aTag));
 }
-
-class pipeFuture0 : public pipe0 {  //the next of pipePartial may be the same name but not the same previous
-public:
-    pipeFuture0(pipeline* aParent, const QString& aName) : pipe0(aParent, aName){
-    }
-protected:
-    void insertNext(const QString& aName, const QString& aTag) override{
-        m_next2.push_back(QPair<QString, QString>(aName, aTag));
-    }
-private:
-    QVector<QPair<QString, QString>> m_next2;
-    friend pipeFuture;
-};
 
 static QHash<QString, pipeline*> pipelines;
 
@@ -300,21 +294,11 @@ void pipeFuture::removeNext(const QString& aName, bool aAndDelete, bool aOutside
         m_parent->remove(aName, aOutside);
 }
 
-pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0 (aParent){
+pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0(aParent, aName + "_pipe_add"){
+    m_thread = m_parent->findThread(- 1);
+    moveToThread(m_thread);
     m_act_name = aName;
 
-    if (m_parent->find(aName + "_pipe_add", false)){  //there will be another pipeFuture before, this future should inherit its records before it is removed
-        auto pip = new pipeFuture0(m_parent, aName);
-        pip->inPool(false);
-        m_parent->call<int>(aName + "_pipe_add", 0);
-        for (auto i : pip->m_next2)
-            insertNext(i.first, i.second);
-        m_external = pip->m_external;
-        setAspect(m_before, pip->m_before);
-        setAspect(m_around, pip->m_around);
-        setAspect(m_after, pip->m_after);
-        m_parent->doRemove(aName);
-    }
     m_parent->add<int>([this, aName](const stream<int>*){
         auto this_event = m_parent->find(aName, false);
         for (auto i : m_next2)
@@ -323,8 +307,11 @@ pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0 (aParent
         setAspect(this_event->m_before, m_before);
         setAspect(this_event->m_around, m_around);
         setAspect(this_event->m_after, m_after);
-        m_parent->doRemove(m_name);
-    }, rea::Json("name", aName + "_pipe_add"));
+    }, rea::Json("name", aName + "_pipe_add0"));
+}
+
+pipeFuture::~pipeFuture(){
+    m_parent->remove(m_name + "0");
 }
 
 void pipeline::doRemove(const QString& aName){
@@ -339,14 +326,9 @@ void pipeline::remove(const QString& aName, bool aOutside){
         m_pipes.remove(aName);
         delete pip;
     }else {
-        pip = find(aName + "_pipe_add", false);
-        if (pip){
-            pip = new pipeFuture0(this, aName);
-            pip->inPool(false);
-            call<int>(aName + "_pipe_add", 0);
-            remove(aName + "_pipe_add", false);
-            remove(aName, false);
-        }
+        auto f = aName + "_pipe_add";
+        if (m_pipes.contains(f))
+            doRemove(f);
     }
     if (aOutside)
         removePipeOutside(aName);
@@ -394,6 +376,7 @@ pipeline* pipeline::instance(const QString& aName){
 
 pipeline::pipeline(const QString& aName){
     m_name = aName;
+     m_threads.insert(- 1, QThread::currentThread());
     if (aName == getDefaultPipelineName()){
         QThreadPool::globalInstance()->setMaxThreadCount(8);
         supportType<QString>([](stream0* aInput){

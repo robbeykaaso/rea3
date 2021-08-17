@@ -94,8 +94,8 @@ void qsgPluginTransform::mouseReleaseEvent(QMouseEvent *event){
 }
 
 void qsgPluginTransform::mouseMoveEvent(QMouseEvent *event){
-    if (!tryMoveWCS(event, Qt::MiddleButton))
-        tryMoveWCS(event, Qt::LeftButton);
+    tryMoveWCS(event, Qt::MiddleButton);
+        //tryMoveWCS(event, Qt::LeftButton);
     updatePos(event->pos());
 }
 

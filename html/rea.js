@@ -377,39 +377,12 @@ class pipe {
     }
 }
 
-class pipeFuture0 extends pipe{
-    
-    constructor(aParent, aName){
-        super(aParent, aName)
-        this.m_next2 = []
-    }
-
-    insertNext(aName, aTag){
-        this.m_next2.push([aName, aTag])
-    }
-}
-
 class pipeFuture extends pipe{
 
     constructor(aParent, aName){
-        super(aParent)
+        super(aParent, aName + "_pipe_add")
         this.m_act_name = aName
         this.m_next2 = []
-        if (this.m_parent.find(aName + "_pipe_add", false)){
-            const pip = new pipeFuture0(this.m_parent, aName)
-            pip.inPool(false)
-            this.m_parent.call(aName + "_pipe_add")
-            for (let i in pip.m_next2)
-                this.insertNext(pip.m_next2[i][0], pip.m_next2[i][1])
-            this.m_external = pip.m_external
-            if (pip.m_before != "")
-                this.m_before = this.setAspect(this.m_before, pip.m_before)
-            if (pip.m_around != "")
-                this.m_around = this.setAspect(this.m_around, pip.m_around)
-            if (pip.m_after != "")
-                this.m_after = this.setAspect(this.m_after, pip.m_after)
-            delete this.m_parent.m_pipes[aName]
-        }
 
         this.m_parent.add(e => {
             const pip = this.m_parent.find(aName, false)
@@ -422,8 +395,7 @@ class pipeFuture extends pipe{
                 pip.m_around = pip.setAspect(pip.m_around, this.m_around)
             if (this.m_after != "")
                 pip.m_after = pip.setAspect(pip.m_after, this.m_after)
-            delete this.m_parent.m_pipes[this.m_name]
-        }, {name: aName + "_pipe_add"})
+        }, {name: aName + "_pipe_add0"})
     }
 
     resetTopo(){
@@ -437,7 +409,7 @@ class pipeFuture extends pipe{
     removeNext(aName, aAndDelete = false, aOutside = true){
         for (let i = this.m_next2.length - 1; i >= 0; --i){
             if (this.m_next2[i][0] == aName)
-                delete this.m_next2[i]
+                this.m_next2.splice(i, 1)
         }
         if (aAndDelete)
             this.m_parent.remove(aName, aOutside)
@@ -503,8 +475,9 @@ class pipeline{
         if (nm != ""){
             const ad = pip.actName() + "_pipe_add"
             if (this.m_pipes[ad]){
-                this.call(ad)
+                this.call(ad + "0")
                 delete this.m_pipes[ad]
+                delete this.m_pipes[ad + "0"]
             }
         }
         pip.initialize(aFunc, aParam)
@@ -533,13 +506,10 @@ class pipeline{
         if (pip)
             delete this.m_pipes[aName]
         else{
-            pip = this.find(aName + "_pipe_add", false);
-            if (pip){
-                pip = new pipeFuture0(this, aName);
-                pip.inPool(false)
-                this.call(aName + "_pipe_add");
-                this.remove(aName + "_pipe_add", false);
-                this.remove(aName, false);
+            let f = aName + "_pipe_add";
+            if (this.m_pipes[f]){
+                delete this.m_pipes[f]
+                delete this.m_pipes[f + "0"]
             }
         }
 
@@ -550,8 +520,13 @@ class pipeline{
     find(aName, aNeedFuture = true){
         let pip = this.m_pipes[aName]
         if (!pip && aNeedFuture){
-            pip = new pipeFuture(this, aName)
-            pip.inPool(false)
+            let f = aName + "_pipe_add";
+            if (this.m_pipes[f])
+                pip = this.m_pipes[f];
+            else{
+                pip = new pipeFuture(this, aName)
+                pip.inPool(false)
+            }
         }
         return pip
     }

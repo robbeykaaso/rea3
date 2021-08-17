@@ -175,6 +175,7 @@ public:
     void execute(std::shared_ptr<stream0> aStream) override;
 protected: 
     pipeFuture(pipeline* aParent, const QString& aName);
+    ~pipeFuture() override;
     bool event( QEvent* e) override;
     void insertNext(const QString& aName, const QString& aTag) override;
 private:
@@ -217,7 +218,7 @@ public:
         if (nm != ""){
             auto ad = tmp->actName() + "_pipe_add";
             if (m_pipes.contains(ad)){
-                call<int>(ad, 0);
+                call<int>(ad + "0", 0);
                 doRemove(ad);
             }
         }
@@ -245,8 +246,13 @@ public:
     pipe0* find(const QString& aName, bool aNeedFuture = true) {
         auto ret = m_pipes.value(aName);
         if (!ret && aNeedFuture){
-            ret = new pipeFuture(this, aName);
-            ret->inPool(false);
+            auto f = aName + "_pipe_add";
+            if (m_pipes.contains(f))
+                ret = m_pipes.value(f);
+            else{
+                ret = new pipeFuture(this, aName);
+                ret->inPool(false);
+            }
         }
         return ret;
     }
