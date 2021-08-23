@@ -376,7 +376,7 @@ pipeline* pipeline::instance(const QString& aName){
 
 pipeline::pipeline(const QString& aName){
     m_name = aName;
-     m_threads.insert(- 1, QThread::currentThread());
+    m_threads.insert(- 1, QThread::currentThread());
     if (aName == getDefaultPipelineName()){
         QThreadPool::globalInstance()->setMaxThreadCount(8);
         supportType<QString>([](stream0* aInput){

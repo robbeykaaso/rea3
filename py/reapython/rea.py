@@ -313,33 +313,13 @@ class pipe(QObject):
         else:
             QCoreApplication.postEvent(self, self._streamEvent(self._m_name, aStream))
 
-class pipeFuture0(pipe):
-    def __init__(self, aParent, aName: str = ""):
-        super().__init__(aParent, aName)
-        self.m_next2 = []
-    
-    def insertNext(self, aName: str, aTag: str):
-        self.m_next2.append([aName, aTag])
-
 class pipeFuture(pipe):
     def __init__(self, aParent, aName: str = ""):
-        super().__init__(aParent)
+        super().__init__(aParent, aName + "_pipe_add")
         self.__m_act_name = aName
         self.__m_next2 = []
-        if self._m_parent.find(aName + "_pipe_add", False) is not None:
-            pip = pipeFuture0(self._m_parent, aName)
-            pip.inPool(False)
-            self._m_parent.call(aName + "_pipe_add")
-            for i in pip.m_next2:
-                self.insertNext(i[0], i[1])
-            self.m_external = pip.m_external
-            if pip.m_before != "":
-                self.m_before = self.setAspect(self.m_before, pip.m_before)
-            if pip.m_around != "":
-                self.m_around = self.setAspect(self.m_around, pip.m_around)
-            if pip.m_after != "":
-                self.m_after = self.setAspect(self.m_after, pip.m_after)
-            self._m_parent.remove(aName)
+        thd = self._m_parent.findThread(- 1)
+        self.moveToThread(thd)
         
         def cb(aInput):
             pip = self._m_parent.find(aName, False)
@@ -352,9 +332,11 @@ class pipeFuture(pipe):
                 pip.m_around = pip.setAspect(pip.m_around, self.m_around)
             if self.m_after != "":
                 pip.m_after = pip.setAspect(pip.m_after, self.m_after)
-            self._m_parent.remove(self._m_name)
-            
-        self._m_parent.add(cb, {"name": aName + "_pipe_add"})
+        self._m_parent.add(cb, {"name": aName + "_pipe_add0"})
+
+    def __del__(self):
+        self._m_parent.remove(self._m_name + "0")
+        return super().__del__()
 
     def resetTopo(self):
         self.__m_next2 = []
@@ -366,7 +348,7 @@ class pipeFuture(pipe):
         self.__m_next2.append([aName, aTag])
     
     def removeNext(self, aName: str, aAndDelete: bool = False, aOutside: bool = True):
-        self.__m_next2 = filter(lambda i: i[0] != aName, self.__m_next2)
+        self.__m_next2 = list(filter(lambda i: i[0] != aName, self.__m_next2))
         if aAndDelete:
             self._m_parent.remove(aName, aOutside)
 
@@ -388,7 +370,7 @@ class pipeline(QObject):
     def __init__(self, aName: str = "py"):
         super().__init__()
         self.__m_name = aName
-        self.__m_threads = dict({})
+        self.__m_threads = dict({- 1: QThread.currentThread()})
         self.__m_pipes = dict({})
         self.__m_outside_pipelines = set({})
         if aName == "py":
@@ -403,8 +385,12 @@ class pipeline(QObject):
     def find(self, aName: str, aNeedFuture: bool = True) -> pipe:
         pip = self.__m_pipes.get(aName, None)
         if pip is None and aNeedFuture:
-            pip = pipeFuture(self, aName)
-            pip.inPool(False)
+            f = aName + "_pipe_add"
+            if f in self.__m_pipes:
+                pip = self.__m_pipes[f]
+            else:
+                pip = pipeFuture(self, aName)
+                pip.inPool(False)
         return pip
 
     def add(self, aFunc, aParam: dict = {}) -> pipe:
@@ -418,8 +404,8 @@ class pipeline(QObject):
         if nm != "":
             ad = pip.actName() + "_pipe_add"
             if ad in self.__m_pipes:
-                self.call(ad, 0)
-                self.remove(ad)
+                self.call(ad + "0", 0)
+                del self.__m_pipes[ad]
         pip.initialize(aFunc, aParam)
 
         bf = aParam.get("before", "")
@@ -444,13 +430,9 @@ class pipeline(QObject):
     def remove(self, aName: str, aOutside: bool = False):
         pip = self.__m_pipes.get(aName, None)
         if pip is None:
-            pip = self.find(aName + "_pipe_add", False)
-            if (pip is not None):
-                pip = pipeFuture0(self, aName)
-                pip.inPool(False)
-                self.call(aName + "_pipe_add", 0)
-                self.remove(aName + "_pipe_add")
-                self.remove(aName)
+            f = aName + "_pipe_add"
+            if (f in self.__m_pipes):
+                del self.__m_pipes[f]
         else:
             del self.__m_pipes[aName]
         if aOutside:
@@ -574,7 +556,7 @@ class pipePartial(pipe):
             if e.getName() == self._m_name:
                 stm = e.getStream()
                 self.doEvent(stm)
-                self._doNextEvent(self.m_next2[stm.tag()], stm)
+                self._doNextEvent(self.m_next2.get(stm.tag(), {}), stm)
         return True
 
 class pipeDelegate(pipe):

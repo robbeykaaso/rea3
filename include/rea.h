@@ -265,17 +265,22 @@ public:
     }
 
     template<typename T, typename F = pipeFunc<T>>
-    std::shared_ptr<stream<T>> call(const QString& aName, T aInput = T(), std::shared_ptr<scopeCache> aScope = nullptr, bool aAOP = true){
+    std::shared_ptr<stream<T>> call(const QString& aName, std::shared_ptr<stream<T>> aInput, bool aAOP = true){
         auto pip = m_pipes.value(aName);
-        auto stm = in(aInput, "", aScope);
         if (pip){
             auto pip2 = dynamic_cast<pipe<T, F>*>(pip);
             if (aAOP)
-                pip2->doEvent(stm);
+                pip2->doEvent(aInput);
             else
-                funcType<T, F>().doEvent(pip2->m_func, stm);
+                funcType<T, F>().doEvent(pip2->m_func, aInput);
         }
-        return stm;
+        return aInput;
+    }
+
+    template<typename T, typename F = pipeFunc<T>>
+    std::shared_ptr<stream<T>> call(const QString& aName, T aInput = T(), std::shared_ptr<scopeCache> aScope = nullptr, bool aAOP = true){
+        auto stm = in(aInput, "", aScope);
+        return call(aName, stm, aAOP);
     }
 
     template<typename T>
