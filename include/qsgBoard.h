@@ -93,7 +93,7 @@ protected:
     qsgBoard* m_parent = nullptr;
     QString m_name;
 protected:
-    QString newShapeID();
+    QString newShapeID(const QString& aSuffix = "shp_");
     std::shared_ptr<shapeObject> createEllipseHandle(QSGNode* aTransformNode, int aRadius, int aFace = - 1,
                                                      const QJsonArray& aCenter = rea::JArray(0, 0), const QString& aColor = "red");
     void updateHandlePos(size_t aIndex, const QPoint& aPos);

@@ -50,7 +50,7 @@ void qsgObject::checkTextVisible(){
             m_text->setOwnsTexture(true);
             updateTextValue(txt_cfg);
             updateTextLocation(txt_cfg);
-            getRootQSGNode()->parent()->parent()->parent()->appendChildNode(m_text);
+            m_parent->m_trans_node->parent()->appendChildNode(m_text);
         }
     }else
         if (m_text){
@@ -124,7 +124,7 @@ void qsgObject::updateTextLocation(const QJsonObject& aTextConfig){
     auto bnd = getBoundBox();
     auto top_lft = bnd.topLeft(), btm_rt = bnd.bottomRight();
 
-    auto trans = reinterpret_cast<QSGTransformNode*>(getRootQSGNode()->parent()->parent())->matrix();
+    auto trans = reinterpret_cast<QSGTransformNode*>(m_parent->m_trans_node)->matrix();
     top_lft = trans.map(top_lft);
     btm_rt = trans.map(btm_rt);
 
@@ -224,11 +224,7 @@ std::vector<QSGNode*> imageObject::getQSGNodes(QQuickItem* aWindow, QSGNode* aPa
         m_node = new QSGSimpleTextureNode();
         m_node->setOwnsTexture(true);
         updateImagePath(true);
-
-        auto tr = new QSGTransformNode();
-        tr->setFlag(QSGNode::OwnedByParent);
-        aParent->appendChildNode(tr);
-        tr->appendChildNode(m_node);
+        appendToParent(aParent);
         updateTransform();
     }
     ret.push_back(m_node);
@@ -252,6 +248,13 @@ QImage imageObject::getImage(){
         ret.fill(QColor("black"));
         return ret;
     }
+}
+
+void imageObject::appendToParent(QSGNode* aTransformNode){
+    auto tr = new QSGTransformNode();
+    tr->setFlag(QSGNode::OwnedByParent);
+    aTransformNode->appendChildNode(tr);
+    tr->appendChildNode(m_node);
 }
 
 QImage imageObject::updateImagePath(bool aForce){

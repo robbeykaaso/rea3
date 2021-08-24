@@ -6,8 +6,8 @@
 
 namespace rea{
 
-QString qsgBoardPlugin::newShapeID(){
-    return "shp_" + generateUUID();
+QString qsgBoardPlugin::newShapeID(const QString& aSuffix){
+    return aSuffix + generateUUID();
 }
 
 std::shared_ptr<shapeObject> qsgBoardPlugin::createEllipseHandle(QSGNode* aTransformNode, int aRadius, int aFace, const QJsonArray& aCenter, const QString& aColor){

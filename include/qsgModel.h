@@ -64,6 +64,7 @@ public:
     IUpdateQSGAttr updateQSGAttr(const QString& aModification) override;
     QImage getImage();
 protected:
+    virtual void appendToParent(QSGNode* aTransformNode);
     virtual QImage updateImagePath(bool aForce = false);
     QSGNode* getRootQSGNode() override {return m_node;}
     QSGSimpleTextureNode* m_node = nullptr;
