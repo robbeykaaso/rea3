@@ -50,6 +50,7 @@ protected:
     void checkCaption();
     virtual void checkTransform();
     virtual void updateTransform();
+    QRectF calcTransformedBoundBox(const pointList& aPoints, const QMatrix4x4& aTransform);
     QQuickItem* m_window;
     qsgModel* m_parent;
     QSGSimpleTextureNode* m_text = nullptr;
@@ -69,9 +70,9 @@ protected:
     QSGNode* getRootQSGNode() override {return m_node;}
     QSGSimpleTextureNode* m_node = nullptr;
     void updateTransform() override;
+    QRectF getRange(const QImage& aImage);
 private:
     QString getPath();
-    QRectF getRange(const QImage& aImage);
 };
 
 class DSTDLL shapeObject : public qsgObject{

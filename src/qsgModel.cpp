@@ -35,7 +35,7 @@ QRectF calcBoundBox(const pointList &aPoints){
     return ret;
 }
 
-QRectF calcTransformedBoundBox(const pointList& aPoints, const QMatrix4x4& aTransform){
+QRectF qsgObject::calcTransformedBoundBox(const pointList& aPoints, const QMatrix4x4& aTransform){
     pointList pts;
     for (auto i : aPoints)
         pts.push_back(aTransform.map(i));
