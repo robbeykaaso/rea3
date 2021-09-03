@@ -110,13 +110,14 @@ public:
 public:
     Q_INVOKABLE QJSValue run(const QString& aName, const QJSValue& aInput, const QString& aTag = "", const QJSValue& aScope = QJSValue::NullValue);
     Q_INVOKABLE QJSValue call(const QString& aName, const QJSValue& aInput, const QJsonObject& aScope = QJsonObject(), bool aAOP = true);
-    Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJsonObject& aScopeCache = QJsonObject(), bool aAutoTag = false);
+    Q_INVOKABLE QJSValue input(const QJSValue& aInput, const QString& aTag = "", const QJSValue& aScope = QJSValue::NullValue, bool aAutoTag = false);
     Q_INVOKABLE void remove(const QString& aName, bool aOutside = false);
     Q_INVOKABLE QJSValue add(QJSValue aFunc, const QJsonObject& aParam = QJsonObject());
     Q_INVOKABLE QJSValue find(const QString& aName);
     Q_INVOKABLE QJSValue asyncCall(const QString& aName, const QJSValue& aInput, bool aEventLevel = true, bool aOutside = false);
     Q_INVOKABLE QString tr(const QString& aOrigin);
 private:
+    std::shared_ptr<scopeCache> parseScope(const QJSValue& aScope);
     QString m_name;
 };
 

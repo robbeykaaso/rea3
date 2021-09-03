@@ -301,20 +301,24 @@ void qmlPipe::removeAspect(const QString& aType, const QString& aAspect){
         throw "no this kind of aspect";
 }
 
-QJSValue qmlPipeline::run(const QString& aName, const QJSValue& aInput, const QString& aTag, const QJSValue& aScope){
+std::shared_ptr<scopeCache> qmlPipeline::parseScope(const QJSValue& aScope){
     std::shared_ptr<scopeCache> sp_data = nullptr;
     if (aScope.isQObject()){
         auto sp = reinterpret_cast<qmlScopeCache*>(aScope.toQObject());
         sp_data = sp->m_scope;
     }else if (aScope.isObject())
         sp_data = std::make_shared<scopeCache>(valType<QJsonObject>::data(aScope));
-    auto ret = new qmlStream(pipeline::instance(m_name)->run(aName, aInput.toVariant(), aTag, sp_data));
+    return sp_data;
+}
+
+QJSValue qmlPipeline::run(const QString& aName, const QJSValue& aInput, const QString& aTag, const QJSValue& aScope){    
+    auto ret = new qmlStream(pipeline::instance(m_name)->run(aName, aInput.toVariant(), aTag, parseScope(aScope)));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }
 
-QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const QJsonObject& aScopeCache, bool aAutoTag){
-    auto ret = new qmlStream(in(aInput.toVariant(), aTag, std::make_shared<scopeCache>(aScopeCache), aAutoTag));
+QJSValue qmlPipeline::input(const QJSValue& aInput, const QString& aTag, const QJSValue& aScope, bool aAutoTag){
+    auto ret = new qmlStream(in(aInput.toVariant(), aTag, parseScope(aScope), aAutoTag));
     QQmlEngine::setObjectOwnership(ret, QQmlEngine::JavaScriptOwnership);
     return qml_engine->toScriptValue(ret);
 }

@@ -231,9 +231,9 @@ void qsgBoard::setName(const QString& aName){
     }, rea::Json("name", "QSGAttrUpdated_" + m_name,
                  "replace", true));
 
-    rea::pipeline::instance()->add<QJsonObject, pipePartial>([this](rea::stream<QJsonObject>* aInput){
+    rea::pipeline::instance()->add<qsgModel*, pipePartial>([this](rea::stream<qsgModel*>* aInput){
         if (m_models.size())
-            aInput->setData(QJsonObject(*m_models.back()))->out();
+            aInput->setData(m_models.back().get())->out();
     }, rea::Json("name", "getQSGModel_" + m_name));
 
     rea::pipeline::instance()->add<QJsonArray>([this](rea::stream<QJsonArray>* aInput){

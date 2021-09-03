@@ -55,6 +55,9 @@ protected:
     qsgModel* m_parent;
     QSGSimpleTextureNode* m_text = nullptr;
     QRectF m_bound = QRectF(0, 0, 0, 0); //leftbottomrighttop
+private:
+    bool getTextBackground(const QJsonObject& aTextConfig);
+    double getFontSize(const QJsonObject& aTextConfig);
 };
 
 class DSTDLL imageObject : public qsgObject{

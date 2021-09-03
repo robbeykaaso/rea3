@@ -98,26 +98,67 @@ QJsonObject qsgObject::getTextConfig(){
         return m_parent->getTextConfig();
 }
 
+bool qsgObject::getTextBackground(const QJsonObject& aTextConfig){
+    return aTextConfig.value("background").toBool(true);
+}
+
+double qsgObject::getFontSize(const QJsonObject& aTextConfig){
+    return aTextConfig.value("fontsize").toDouble();
+}
+
 void qsgObject::updateTextValue(const QJsonObject& aTextConfig){
     auto sz = m_parent->getTextSize(aTextConfig);
     auto img = QImage(sz.x(), sz.y(), QImage::Format_ARGB32);
     auto clr = getColor();
-    img.fill(QColor(clr.red(), clr.green(), clr.blue(), 64));
-
-    auto txt = getText();
     QPainter p(&img);
-    auto bnd = p.fontMetrics().boundingRect(txt);
-    auto factor = std::min(sz.x() * 0.8 / bnd.width(), sz.y() * 0.8 / bnd.height()); // https://stackoverflow.com/questions/2202717/for-qt-4-6-x-how-to-auto-size-text-to-fit-in-a-specified-width
-    if (factor < 1 || factor > 1.25){
-        auto font = p.font();
-        font.setPointSizeF(font.pointSizeF() * factor);
-        p.setFont(font);
-    }
     p.setPen(QPen(clr));
-    //p.setFont(QFont("TimesNewRoman", std::min(22, int(std::round(img2.width() * 1.0 / wdh * 8))), QFont::Normal));
-    p.drawText(img.rect(), Qt::AlignCenter, txt);
-    m_text->setTexture(m_window->window()->createTextureFromImage(img));
-    m_text->markDirty(QSGNode::DirtyMaterial);
+    do{
+        auto ftsz = getFontSize(aTextConfig);
+        auto txt = getText();
+        if (ftsz){
+            auto font = p.font();
+            font.setPointSizeF(ftsz);
+            p.setFont(font);
+            auto bnd = p.fontMetrics().boundingRect(txt);
+            if (bnd.width() && bnd.height()){
+                p.end();
+                img = QImage(bnd.width() + 4, bnd.height() + 4, QImage::Format_ARGB32);
+                QPainter p2(&img);
+                p2.setPen(QPen(clr));
+                auto font = p2.font();
+                font.setPointSizeF(ftsz);
+                p2.setFont(font);
+                if (getTextBackground(aTextConfig))
+                    img.fill(QColor(clr.red(), clr.green(), clr.blue(), 64));
+                else
+                    img.fill(QColor("transparent"));
+                //p.setFont(QFont("TimesNewRoman", std::min(22, int(std::round(img2.width() * 1.0 / wdh * 8))), QFont::Normal));
+                p2.drawText(img.rect(), Qt::AlignCenter, txt);
+                m_text->setTexture(m_window->window()->createTextureFromImage(img));
+                m_text->markDirty(QSGNode::DirtyMaterial);
+                break;
+            }
+        }
+        else{
+            auto bnd = p.fontMetrics().boundingRect(txt);
+            if (bnd.width() && bnd.height()){
+                auto factor = std::min(sz.x() * 0.8 / bnd.width(), sz.y() * 0.8 / bnd.height()); // https://stackoverflow.com/questions/2202717/for-qt-4-6-x-how-to-auto-size-text-to-fit-in-a-specified-width
+                if (factor < 1 || factor > 1.25){
+                    auto font = p.font();
+                    font.setPointSizeF(font.pointSizeF() * factor);
+                    p.setFont(font);
+                }
+            }
+        }
+        if (getTextBackground(aTextConfig))
+            img.fill(QColor(clr.red(), clr.green(), clr.blue(), 64));
+        else
+            img.fill(QColor("transparent"));
+        //p.setFont(QFont("TimesNewRoman", std::min(22, int(std::round(img2.width() * 1.0 / wdh * 8))), QFont::Normal));
+        p.drawText(img.rect(), Qt::AlignCenter, txt);
+        m_text->setTexture(m_window->window()->createTextureFromImage(img));
+        m_text->markDirty(QSGNode::DirtyMaterial);
+    }while(0);
 }
 
 void qsgObject::updateTextLocation(const QJsonObject& aTextConfig){
@@ -128,14 +169,15 @@ void qsgObject::updateTextLocation(const QJsonObject& aTextConfig){
     top_lft = trans.map(top_lft);
     btm_rt = trans.map(btm_rt);
 
-    auto sz = m_parent->getTextSize(aTextConfig);
+    auto src = m_text->texture()->textureSize();
+    auto sz = QPointF(src.width(), src.height());//m_parent->getTextSize(aTextConfig);
     auto del = 0.5 * (btm_rt.x() - top_lft.x() - sz.x());
     auto loc = m_parent->getTextLocation(aTextConfig);
     if (loc == "bottom")
         m_text->setRect(top_lft.x() + del, btm_rt.y() + 5, sz.x(), sz.y());
     else if (loc == "middle"){
         auto del2 = 0.5 * (btm_rt.y() - top_lft.y() - sz.y());
-        m_text->setRect(top_lft.x() + del, top_lft.y() + del2, sz.x(), sz.y());
+        m_text->setRect(top_lft.x() + del, top_lft.y() + del2 - 5, sz.x(), sz.y());
     }else if (loc == "cornerLT"){
         m_text->setRect(top_lft.x(), top_lft.y(), sz.x(), sz.y());
     }else
