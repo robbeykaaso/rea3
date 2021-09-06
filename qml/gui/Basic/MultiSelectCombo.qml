@@ -6,7 +6,6 @@ Row {
     property alias background: bak
     property alias combo: cmb
     property double ratio: 0.3
-    property var sels: ({})
     width: 120
     height: 30
 
@@ -30,6 +29,9 @@ Row {
           background: Rectangle {
               id: bak
               border.color: "transparent"
+          }
+          model: ListModel{
+
           }
           delegate: Rectangle {
               width: parent.width
@@ -65,13 +67,21 @@ Row {
                           }
                       }
                       onCheckedChanged: {
-                          sels[name] = checked
+                          var sels = cmb.displayText.split("、")
+                          var nm = name.toString()
+                          var idx = sels.indexOf(nm)
+                          if (checked){
+                              if (idx < 0)
+                                  sels.push(nm)
+                          }else if (idx >= 0)
+                              sels.splice(idx, 1)
+
                           var ret = ""
                           for (var i in sels)
                               if (sels[i]){
                                   if (ret !== "")
                                       ret += "、"
-                                  ret += i
+                                  ret += sels[i]
                               }
                           cmb.displayText = ret
                       }
