@@ -56,5 +56,6 @@
         <file>qml/gui/Basic/KeyPress.qml</file>
         <file>qml/resource/logo.png</file>
         <file>qml/resource/triangle-down.png</file>
+        <file>qml/gui/Basic/MultiSelectCombo.qml</file>
     </qresource>
 </RCC>
