@@ -90,6 +90,7 @@ Row {
                       text: name
                       width: parent.width - chk.width
                       height: parent.height
+                      elide: Text.ElideRight
                       verticalAlignment: Qt.AlignVCenter
                       horizontalAlignment: Qt.AlignHCenter
                   }
