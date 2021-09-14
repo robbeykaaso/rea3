@@ -487,6 +487,64 @@ QString shapeObject::getLineStyle(){
     return value("style").toString();
 }
 
+class customShader : public QSGMaterialShader
+{
+public:
+    const char *vertexShader() const override {
+        return
+        "attribute highp vec4 vertex;          \n"
+        "uniform highp mat4 matrix;            \n"
+        "void main() {                         \n"
+        "    gl_Position = matrix * vertex;    \n"
+        "}";
+    }
+
+    const char *fragmentShader() const override {
+        return
+        "uniform lowp float opacity;                            \n"
+        "void main() {                                          \n"
+                "    gl_FragColor = vec4(1, 0, 0, 1) * opacity; \n"
+        "}";
+    }
+
+    char const *const *attributeNames() const override
+    {
+        static char const *const names[] = { "vertex", 0 };
+        return names;
+    }
+
+    void initialize() override
+    {
+        QSGMaterialShader::initialize();
+        m_id_matrix = program()->uniformLocation("matrix");
+        m_id_opacity = program()->uniformLocation("opacity");
+    }
+
+    void updateState(const RenderState &state, QSGMaterial *newMaterial, QSGMaterial *oldMaterial) override
+    {
+        Q_ASSERT(program()->isLinked());
+        if (state.isMatrixDirty())
+            program()->setUniformValue(m_id_matrix, state.combinedMatrix());
+        if (state.isOpacityDirty())
+            program()->setUniformValue(m_id_opacity, state.opacity());
+    }
+
+private:
+    int m_id_matrix;
+    int m_id_opacity;
+};
+
+class customQSGOpaqueTextureMaterial : public QSGOpaqueTextureMaterial
+{
+public:
+    customQSGOpaqueTextureMaterial() : QSGOpaqueTextureMaterial(){
+
+    }
+    QSGMaterialShader *createShader() const override{
+        return new customShader();
+    }
+};
+
 void shapeObject::setQSGColor(QSGGeometryNode& aNode, const QColor& aColor){
     //QSGFlatColorMaterial *material = new QSGFlatColorMaterial();
     QSGOpaqueTextureMaterial *material = new QSGOpaqueTextureMaterial();
