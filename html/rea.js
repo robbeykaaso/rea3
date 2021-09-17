@@ -650,7 +650,7 @@ class pipeDelegate extends pipe{
     }
 
     next(aNext, aTag = ""){
-        this.m_parent.find(this.m_delegate).next(aNext, aTag)
+        return this.m_parent.find(this.m_delegate).next(aNext, aTag)
     }
     removeNext(aName, aAndDelete = false, aOutside = true){
         this.m_parent.find(this.m_delegate).removeNext(aName, aAndDelete, aOutside)
