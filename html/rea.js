@@ -813,6 +813,7 @@ pipelines().updateOutsideRanges({"c++": true, "qml": true})
 
 if (typeof module == "object")
     module.exports = {
+        pipeline: pipeline,
         pipelines: pipelines,
         scopeCache: scopeCache,
         env: getEnv

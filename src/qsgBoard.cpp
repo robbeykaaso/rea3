@@ -213,6 +213,13 @@ void qsgBoard::setName(const QString& aName){
             auto imgs_data = scp->data<QJsonObject>("image_data");
             for (auto i : imgs_data.keys())
                 m_models.back()->cacheImage(i, QImage::fromData(QByteArray::fromBase64(imgs_data.value(i).toString().toLocal8Bit())));
+            auto imgs_config = scp->data<QJsonArray>("image_path");
+            auto stg_config = scp->data<QJsonObject>("storage_config");
+            for (auto i : imgs_config){
+                auto stm = pipeline::instance()->input(false, "", std::make_shared<scopeCache>(rea::Json("path", i, "config", stg_config.value("config"))), true)->asyncCall(stg_config.value("root").toString() + "readImage");
+                if (stm->data())
+                    m_models.back()->cacheImage(i.toString(), stm->scope()->data<QImage>("data"));
+            }
             for (auto i : dt)
                 addUpdate(m_models.back()->updateQSGAttr(i.toObject()));
             update();

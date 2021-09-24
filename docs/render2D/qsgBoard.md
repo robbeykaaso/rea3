@@ -20,6 +20,11 @@ _sample_:
     //scope image_data
     QJsonObject img_data;
     img_data.insert("image_1.xxx", rea::QImage2Base64(QImage("yyyyy")));
+    //scope image_path
+    QJsonArray img_path;
+    img_path.push_back("image_2.xxx");
+    //scope storage_config
+    QJsonObject cfg = rea::Json("config", rea::Json("root", "", "access", "", "secret", "", "ip", ""), "root", "aws0")    
     //scope model
     auto mdl = rea::Json("width", 600,
                          "height", 600,
@@ -53,7 +58,9 @@ _sample_:
     auto scp = std::make_shared<rea::scopeCache>();
     scp->cache<QJsonObject>("model", mdl)
        ->cache<QHash<QString, QImage>>("image", imgs)
-       ->cache<QJsonObject>("image_data", img_data);
+       ->cache<QJsonObject>("image_data", img_data)
+       ->cache<QJsonArray>("image_path", img_path)
+       ->cache<QJsonObject>("storage_config", cfg);
     //run
     rea::pipeline::instance()->run<QJsonArray>("updateQSGAttr_testbrd", rea::JArray(mdy), "", scp); 
 
