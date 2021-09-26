@@ -1,5 +1,9 @@
 #include "reaRemote.h"
+#include "server.h"
+#include "client.h"
 #include <QQmlApplicationEngine>
+#include <QFile>
+#include <QJsonDocument>
 
 namespace rea {
 
@@ -133,5 +137,47 @@ void connectRemote(const QString& aLocal, const QString& aRemote, rea::pipeFunc<
     rea::pipeline::instance()->find("receiveFrom" + (aClient ? QString("Server") : "Client"))->next(aRemote + "_receiveRemote", (aRemoteLocal == "" ? aLocal : aRemoteLocal) + ";any");
     rea::pipeline::instance()->add<QJsonObject>(aWriteRemote, rea::Json("name", aRemote + "_sendRemote"));
 }
+
+QJsonObject connectRemoteConfig(const QString& aRole, const QJsonObject& aConfig, std::function<void(rea::stream<QJsonObject>*)> aWriteRemote){
+    auto clt = aConfig.value(aRole).toObject();
+    auto cnts = clt.value("connects").toArray();
+    for (auto i : cnts){
+        auto cnt = i.toObject();
+        auto local = cnt.value("local").toString();
+        auto remote = cnt.value("remote").toString();
+        auto qml = cnt.value("qml").toBool();
+        rea::pipeline::instance()->add<std::shared_ptr<rea::pipeline*>>([local, remote, qml](rea::stream<std::shared_ptr<rea::pipeline*>>* aInput){
+            *aInput->data() = qml ? new rea::pipelineQMLRemote(remote, local) : new rea::pipelineRemote(remote, local);
+        }, rea::Json("name", "create" + remote + "pipeline"));
+        connectRemote(local, remote, aWriteRemote, aRole == "client", cnt.value("remoteLocal").toString());
+    }
+    return clt;
+}
+
+static rea::regPip<QQmlApplicationEngine*> init_tcp_linker([](rea::stream<QQmlApplicationEngine*>* aInput){
+    QFile fl(".rea");
+    if (fl.open(QFile::ReadOnly)){
+        auto cfg = QJsonDocument::fromJson(fl.readAll()).object();
+        if (cfg.contains("client")){
+            static rea::normalClient client;
+            aInput->scope()->cache("client", &client);
+            auto clt = connectRemoteConfig("client", cfg, [](rea::stream<QJsonObject>* aInput){
+                client.sendServer(aInput);
+            });
+            if (clt.contains("ip") && clt.contains("port") && clt.contains("id"))
+                rea::pipeline::instance()->run("tryLinkServer", rea::Json("ip", clt.value("ip"),
+                                                                          "port", clt.value("port"),
+                                                                          "id", clt.value("id")));
+        }
+        if (cfg.contains("server")){
+            static rea::normalServer server(cfg.value("server").toObject());
+            aInput->scope()->cache("server", &server);
+            connectRemoteConfig("server", cfg, [](rea::stream<QJsonObject>* aInput){
+                server.writeSocket(aInput->scope()->data<QTcpSocket*>("socket"), aInput->data());
+            });
+        }
+    }
+    aInput->out();
+}, rea::Json("name", "install0_tcp"), "initRea");
 
 }

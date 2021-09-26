@@ -20,7 +20,7 @@ normalServer::normalServer(const QJsonObject& aConfig) : QObject()
     m_pipeline = aConfig.value("pipeline").toString(getDefaultPipelineName());
     //QHostAddress add("127.0.0.1");
     connect(&m_socket,SIGNAL(newConnection()),this, SLOT(newConnect()));
-    m_socket.listen(QHostAddress::LocalHost, 8081);
+    m_socket.listen(QHostAddress(aConfig.value("ip").toString("127.0.0.1")), aConfig.value("port").toInt(8081));
 
     rea::pipeline::instance(m_pipeline)->add<QJsonObject, rea::pipePartial>([](rea::stream<QJsonObject>* aInput){
         aInput->out();
