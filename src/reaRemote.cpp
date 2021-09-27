@@ -3,7 +3,9 @@
 #include "client.h"
 #include <QQmlApplicationEngine>
 #include <QFile>
+#include <QDir>
 #include <QJsonDocument>
+#include <QProcess>
 
 namespace rea {
 
@@ -154,8 +156,28 @@ QJsonObject connectRemoteConfig(const QString& aRole, const QJsonObject& aConfig
     return clt;
 }
 
+class processMan{
+public:
+    processMan(const QJsonArray& aList){
+        for (auto i : aList){
+            auto p = std::make_shared<QProcess>();
+            p->start(i.toString());
+            m_processes.push_back(p);
+        }
+    }
+    ~processMan(){
+        for (auto i : m_processes){
+            if (i->state() == QProcess::Running)
+                i->kill();
+            }
+    }
+private:
+    std::vector<std::shared_ptr<QProcess>> m_processes;
+};
+
+static rea::normalServer* server;
 static rea::regPip<QQmlApplicationEngine*> init_tcp_linker([](rea::stream<QQmlApplicationEngine*>* aInput){
-    QFile fl(".rea");
+    QFile fl(QCoreApplication::applicationDirPath() + "/.rea");
     if (fl.open(QFile::ReadOnly)){
         auto cfg = QJsonDocument::fromJson(fl.readAll()).object();
         if (cfg.contains("client")){
@@ -170,11 +192,14 @@ static rea::regPip<QQmlApplicationEngine*> init_tcp_linker([](rea::stream<QQmlAp
                                                                           "id", clt.value("id")));
         }
         if (cfg.contains("server")){
-            static rea::normalServer server(cfg.value("server").toObject());
-            aInput->scope()->cache("server", &server);
+            server = new rea::normalServer(cfg.value("server").toObject());
+            aInput->scope()->cache("server", server);
             connectRemoteConfig("server", cfg, [](rea::stream<QJsonObject>* aInput){
-                server.writeSocket(aInput->scope()->data<QTcpSocket*>("socket"), aInput->data());
+                server->writeSocket(aInput->scope()->data<QTcpSocket*>("socket"), aInput->data());
             });
+        }
+        if (cfg.contains("process")){
+            static processMan mn(cfg.value("process").toArray());
         }
     }
     aInput->out();

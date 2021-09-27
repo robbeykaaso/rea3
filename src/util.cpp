@@ -18,8 +18,29 @@ namespace rea {
 static QString dflt_c = "";
 static QString dflt_qml = "";
 
+#ifdef _WIN32
+#include <Windows.h>
+std::string GetProgramDir(){
+    char exeFullPath[255]; // Full path
+    std::string strPath = "";
+
+    GetModuleFileName(NULL,exeFullPath,255); //获取带有可执行文件名路径
+    strPath=(std::string)exeFullPath;
+    int pos = strPath.find_last_of('\\', strPath.length());
+    return strPath.substr(0, pos);  // 返回不带有可执行文件名的路径
+}
+#endif
+#ifdef __linux
+#include <unistd.h>
+std::string GetProgramDir(){
+  char result[ PATH_MAX ];
+  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+  return std::string( result, (count > 0) ? count : 0 );
+}
+#endif
+
 void initDefaultPipelineName(){
-    QFile fl(".rea");
+    QFile fl(QString::fromStdString(GetProgramDir() + "/.rea"));
     if (fl.open(QFile::ReadOnly)){
         auto cfg = QJsonDocument::fromJson(fl.readAll()).object();
         dflt_c = cfg.value("c++").toString("c++");
