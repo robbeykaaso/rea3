@@ -3,15 +3,17 @@ nav:
   - Home: index.md
   - Usage: usage.md
   - API:
-    - util:
-      - json: util/json.md
-      - command: util/command.md
     - rea-c++:
       - pipeline: c++/pipeline.md
       - pipe: c++/pipe.md
       - stream: c++/stream.md
       - scope: c++/scope.md
       - extension: c++/extension.md
+      - gizmos:
+        - json: c++/gizmos/json.md
+        - command: c++/gizmos/command.md
+        - dllloader: c++/gizmos/dllloader.md
+        - reaRemote: c++/gizmos/reaRemote.md
       - pipes:
         - pipeAsync: c++/pipes/pipeAsync.md
         - pipePartial: c++/pipes/pipePartial.md
