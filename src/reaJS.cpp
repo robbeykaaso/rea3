@@ -46,7 +46,8 @@ std::shared_ptr<stream0> makeInput(const QVariant& aData, const QString& aTag, c
 }
 
 void pipelineJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonValue& aScope, const QJsonValue& aSync, bool aNeedFuture, const QString& aFlag){
-    rea::pipeline::instance()->execute(aName, makeInput(aData, aTag, aScope.toObject()), aSync.toObject(), aNeedFuture, aFlag);
+    auto scp = copyJsonObject(aScope.toObject());  //js multi-object will be released if aftered reference is in multithread of c++
+    rea::pipeline::instance()->execute(aName, makeInput(aData, aTag, scp), aSync.toObject(), aNeedFuture, aFlag);
 }
 
 void pipelineJS::removeFromJS(const QString& aName){

@@ -88,7 +88,7 @@ void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, c
     //QJsonObject scp;
     //for (auto i : aScope.keys())
     //    scp.insert(i, aScope.value(i));
-    auto scp = aScope.toObject();
+    auto scp = copyJsonObject(aScope.toObject());  //js multi-object will be released if aftered reference is in multithread of c++
     rea::pipeline::instance(getDefaultQMLPipelineName())->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync.toObject(), aNeedFuture, aFlag);
 }
 

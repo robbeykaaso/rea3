@@ -15,6 +15,30 @@
 
 namespace rea {
 
+QJsonArray copyJsonArray(const QJsonArray& aSrc){
+    QJsonArray ret;
+    for (auto i : aSrc)
+        if (i.isObject())
+            ret.push_back(i.toObject());
+        else if (i.isArray())
+            ret.push_back(i.toArray());
+        else
+            ret.push_back(i);
+    return ret;
+}
+
+QJsonObject copyJsonObject(const QJsonObject& aSrc){
+    QJsonObject ret;
+    for (auto i : aSrc.keys())
+        if (aSrc.value(i).isObject())
+            ret.insert(i, copyJsonObject(aSrc.value(i).toObject()));
+        else if (aSrc.value(i).isArray())
+            ret.insert(i, copyJsonArray(aSrc.value(i).toArray()));
+        else
+            ret.insert(i, aSrc.value(i));
+    return ret;
+}
+
 static QString dflt_c = "";
 static QString dflt_qml = "";
 

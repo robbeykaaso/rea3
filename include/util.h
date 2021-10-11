@@ -36,6 +36,8 @@ DSTDLL QStringList parseJsons(const QString& aContent);
 DSTDLL QByteArray QImage2Base64(const QImage& aImage);
 DSTDLL std::string base64_encode(const std::string &in);
 DSTDLL std::string base64_decode(const std::string &in);
+DSTDLL QJsonObject copyJsonObject(const QJsonObject& aSrc);
+DSTDLL QJsonArray copyJsonArray(const QJsonArray& aSrc);
 
 template <typename T>
 int indexOfArray(const QJsonArray& aArray, const T& aValue){

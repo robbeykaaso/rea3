@@ -270,6 +270,7 @@ void pipeline::execute(const QString& aName, std::shared_ptr<stream0> aStream, c
         pip->setAspect(pip->m_after, aSync.value("after").toString());
         pip->setAspect(pip->m_around, aSync.value("around").toString());
     }
+    //qDebug() << aName;
     pip->execute(aStream);
 }
 

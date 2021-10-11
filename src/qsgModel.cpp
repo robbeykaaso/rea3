@@ -283,7 +283,7 @@ void imageObject::removeQSGNodes(){
 
 QImage imageObject::getImage(){
     auto pth = getPath();
-    if (m_parent->m_image_cache.contains(pth))
+    if (m_parent->m_image_cache.contains(pth) && !m_parent->m_image_cache.value(pth).isNull())
         return m_parent->m_image_cache.value(pth);
     else{
         auto ret = QImage(10, 10, QImage::Format_ARGB32);
