@@ -161,7 +161,9 @@ public:
     processMan(const QJsonArray& aList){
         for (auto i : aList){
             auto p = std::make_shared<QProcess>();
-            p->start(i.toString());
+            auto nm = i.toString();
+            std::cout << "start child process: " << nm.toStdString() << std::endl;
+            p->start(nm);
             m_processes.push_back(p);
         }
     }

@@ -14,6 +14,7 @@ nav:
         - command: c++/gizmos/command.md
         - dllloader: c++/gizmos/dllloader.md
         - reaRemote: c++/gizmos/reaRemote.md
+        - optGraph: c++/gizmos/optGraph.md
       - pipes:
         - pipeAsync: c++/pipes/pipeAsync.md
         - pipePartial: c++/pipes/pipePartial.md
