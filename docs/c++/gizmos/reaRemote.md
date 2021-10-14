@@ -23,7 +23,7 @@
         {
             "local": "qml",
             "remote": "qml_server",
-            "remotelocal": "qml",
+            "remoteLocal": "qml",
             "qml": true  //whether to use pipelineQMLRemote
         }]
     },
