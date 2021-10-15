@@ -79,10 +79,15 @@ bool fsStorage::readByteArray(const QString& aPath, QByteArray& aData){
 }
 
 void fsStorage::deletePath(const QString& aPath){
+    auto pth = stgRoot(aPath);
     if (aPath.indexOf(".") >= 0)
-        QDir().remove(stgRoot(aPath));
-    else
-        QDir(stgRoot(aPath)).removeRecursively();
+        QDir().remove(pth);
+    else{
+        if (std::filesystem::is_directory(std::filesystem::u8path(pth.toStdString())))
+            QDir(pth).removeRecursively();
+        else
+            QDir().remove(pth);
+    }
 }
 
 long long fsStorage::lastModifiedTime(const QString& aPath){
