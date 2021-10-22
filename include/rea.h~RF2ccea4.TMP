@@ -15,7 +15,7 @@
 #include <QEventLoop>
 #include <QCoreApplication>
 
-namespace rea2 {
+namespace rea {
 
 class pipeline;
 
@@ -186,7 +186,7 @@ private:
 
 template<typename T>
 inline std::shared_ptr<stream<T>> in(T aInput = T(), const QString& aTag = "", std::shared_ptr<scopeCache> aScope = nullptr, bool aAutoTag = false){
-    auto tag = (aAutoTag && aTag == "") ? rea2::generateUUID() : aTag;
+    auto tag = (aAutoTag && aTag == "") ? rea::generateUUID() : aTag;
     return std::make_shared<stream<T>>(aInput, tag, aScope);
 }
 
@@ -392,7 +392,7 @@ public:
             std::promise<std::shared_ptr<stream<S>>> pr;
             auto monitor = line->find(aName)->nextF<S>([this, &pr, aName](stream<S>* aInput){
                 pr.set_value(in(aInput->data(), aInput->tag(), aInput->scope()));
-            }, m_tag, rea2::Json("thread", 1));
+            }, m_tag, rea::Json("thread", 1));
             line->execute(aName, shared_from_this());
             auto ft = pr.get_future();
             std::future_status st;
@@ -592,7 +592,7 @@ protected:
 
     }
     void insertNext(const QString& aName, const QString& aTag) override {
-        rea2::tryFind(&m_next2, aTag)->insert(aName, aTag);
+        rea::tryFind(&m_next2, aTag)->insert(aName, aTag);
     }
     void replaceTopo(pipe0* aOldPipe) override{
         pipe0::replaceTopo(aOldPipe);
@@ -661,22 +661,22 @@ public:
     regPip(pipeFunc<T> aFunc, const QJsonObject& aParam = QJsonObject(), const QString& aPrevious = ""){
         auto pip = pipeline::instance()->add<T, P>(aFunc, aParam);
         if (aPrevious != "")
-            rea2::pipeline::instance()->find(aPrevious)->next(pip->actName());
+            rea::pipeline::instance()->find(aPrevious)->next(pip->actName());
     }
 };
 
 #define extendTrigger(aType, aPipe, aPipeline) \
-    rea2::pipeline::instance()->add<aType>([](rea2::stream<aType>* aInput){ \
+    rea::pipeline::instance()->add<aType>([](rea::stream<aType>* aInput){ \
         aInput->out(); \
-    }, rea2::Json("name", STR(aPipeline##_##aPipe), \
+    }, rea::Json("name", STR(aPipeline##_##aPipe), \
                  "befored", #aPipe, \
                  "external", #aPipeline))
 
 #define extendListener(aType, aPipe, aPipeline) \
-    rea2::pipeline::instance()->find(#aPipe) \
-    ->nextF<aType>([](rea2::stream<aType>* aInput){ \
+    rea::pipeline::instance()->find(#aPipe) \
+    ->nextF<aType>([](rea::stream<aType>* aInput){ \
         aInput->out(); \
-    }, "", rea2::Json("name", STR(aPipeline##_##aPipe), \
+    }, "", rea::Json("name", STR(aPipeline##_##aPipe), \
                      "external", #aPipeline))
 
 }

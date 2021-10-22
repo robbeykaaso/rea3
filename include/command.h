@@ -4,7 +4,7 @@
 #include <functional>
 #include "util.h"
 
-namespace rea {
+namespace rea2 {
 
 class DSTDLL ICommand{
 public:

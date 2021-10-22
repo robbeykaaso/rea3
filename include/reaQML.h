@@ -2,7 +2,7 @@
 #include <QJSValue>
 #include <QQmlEngine>
 
-namespace rea {
+namespace rea2 {
 
 class pipelineQML : public pipeline{
 public:
@@ -139,6 +139,6 @@ static regPip<QString> reg_qml_pipe##aType([](stream<QString>* aInput){ \
                         sp->data<QJSValue>("func"), \
                         sp->data<QJsonObject>("param")) \
                     ->actName()); \
-}, rea::Json("name", STR(createQMLPipe##aType)));
+}, rea2::Json("name", STR(createQMLPipe##aType)));
 
 }

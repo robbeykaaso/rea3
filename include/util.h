@@ -19,7 +19,7 @@
 
 #define STR(S) #S
 
-namespace rea {
+namespace rea2 {
 
 DSTDLL inline QString getDefaultPipelineName();
 DSTDLL inline QString getDefaultQMLPipelineName();

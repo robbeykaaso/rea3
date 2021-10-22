@@ -2,7 +2,7 @@
 #include <QTcpSocket>
 #include <QJsonDocument>
 
-namespace rea {
+namespace rea2 {
 
 void normalServer::writeSocket(QTcpSocket* aSocket, const QJsonObject& aData){
     if (m_clients.contains(aSocket)){
@@ -22,13 +22,13 @@ normalServer::normalServer(const QJsonObject& aConfig) : QObject()
     connect(&m_socket,SIGNAL(newConnection()),this, SLOT(newConnect()));
     m_socket.listen(QHostAddress(aConfig.value("ip").toString("127.0.0.1")), aConfig.value("port").toInt(8081));
 
-    rea::pipeline::instance(m_pipeline)->add<QJsonObject, rea::pipePartial>([](rea::stream<QJsonObject>* aInput){
+    rea2::pipeline::instance(m_pipeline)->add<QJsonObject, rea2::pipePartial>([](rea2::stream<QJsonObject>* aInput){
         aInput->out();
-    }, rea::Json("name", "receiveFromClient"));
+    }, rea2::Json("name", "receiveFromClient"));
 
-    rea::pipeline::instance(m_pipeline)->add<bool>([](rea::stream<bool>* aInput){
+    rea2::pipeline::instance(m_pipeline)->add<bool>([](rea2::stream<bool>* aInput){
         aInput->out();
-    }, rea::Json("name", "clientStatusChanged"));
+    }, rea2::Json("name", "clientStatusChanged"));
 }
 
 normalServer::~normalServer(){
@@ -37,7 +37,7 @@ normalServer::~normalServer(){
 
 void normalServer::disConnected(){
     QTcpSocket* client = static_cast<QTcpSocket*>(QObject::sender());  //https://stackoverflow.com/questions/25339943/how-to-know-if-a-client-connected-to-a-qtcpserver-has-closed-connection
-    rea::pipeline::instance(m_pipeline)->run("clientStatusChanged", false, "", std::make_shared<rea::scopeCache>()->cache("socket", client));
+    rea2::pipeline::instance(m_pipeline)->run("clientStatusChanged", false, "", std::make_shared<rea2::scopeCache>()->cache("socket", client));
     if (m_clients.contains(client)){
         m_clients.remove(client);
         disconnect(client,SIGNAL(readyRead()),this,SLOT(readMessage())); //有可读的信息，触发读函数槽
@@ -56,7 +56,7 @@ void normalServer::newConnect()
                            << client->errorString().toStdString();
             });*/
     connect(client, SIGNAL(disconnected()), this, SLOT(disConnected()));
-    rea::pipeline::instance(m_pipeline)->run("clientStatusChanged", true, "", std::make_shared<rea::scopeCache>()->cache("socket", client));
+    rea2::pipeline::instance(m_pipeline)->run("clientStatusChanged", true, "", std::make_shared<rea2::scopeCache>()->cache("socket", client));
     m_clients.insert(client);
 }
 
@@ -67,10 +67,10 @@ void normalServer::readMessage()	//读取信息
         QByteArray qba= client->readAll(); //读取
         QString ss=QVariant(qba).toString();
         //std::cout << ss.toStdString() << std::endl;
-        auto strs = rea::parseJsons(ss);
+        auto strs = rea2::parseJsons(ss);
         for (auto str : strs){
             auto req = QJsonDocument::fromJson(str.toUtf8()).object();
-            rea::pipeline::instance(m_pipeline)->run<QJsonObject>("receiveFromClient", req, req.value("remote").toString(), std::make_shared<rea::scopeCache>()->cache("socket", client));
+            rea2::pipeline::instance(m_pipeline)->run<QJsonObject>("receiveFromClient", req, req.value("remote").toString(), std::make_shared<rea2::scopeCache>()->cache("socket", client));
             //std::cout << "outside: " << req.value("name").toString().toStdString() << std::endl;
         }
     }

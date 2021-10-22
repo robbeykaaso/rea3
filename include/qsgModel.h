@@ -8,7 +8,7 @@
 #include <QQuickWindow>
 #include <QSGSimpleTextureNode>
 
-namespace rea {
+namespace rea2 {
 
 using pointList = std::vector<QPointF>;
 using IUpdateQSGAttr = std::function<void(QSGNode*)>;
@@ -195,9 +195,9 @@ private:
     QMap<QString, std::shared_ptr<qsgObject>> m_objects;
     QTransform m_trans;
 private:
-    rea::pipe0* m_add_object;
+    rea2::pipe0* m_add_object;
     double m_max_ratio, m_min_ratio;
-    QHash<QString, rea::pipe0*> m_creators;
+    QHash<QString, rea2::pipe0*> m_creators;
     QHash<QString, QImage> m_image_cache;
     QQuickItem* m_window = nullptr;
     QSGTransformNode* m_trans_node = nullptr;

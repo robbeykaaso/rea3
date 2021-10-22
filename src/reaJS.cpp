@@ -1,7 +1,7 @@
 #include "reaJS.h"
 #include <QQmlApplicationEngine>
 
-namespace rea {
+namespace rea2 {
 
 pipelineJS::pipelineJS(const QString& aName) : pipeline(aName){
     pipeline::instance()->supportType<pipelineJS*>([](stream0* aInput){
@@ -10,7 +10,7 @@ pipelineJS::pipelineJS(const QString& aName) : pipeline(aName){
     pipeline::instance()->add<double>([this](stream<double>* aInput){
         auto pip_js = reinterpret_cast<pipelineJS*>(pipeline::instance(name()));
         aInput->outs<pipelineJS*>(pip_js)->scope()->cache<pipelineJS*>("pipeline", pip_js);
-    }, rea::Json("name", "pipeline" + name().toUpper() + "Object", "external", getDefaultQMLPipelineName()));
+    }, rea2::Json("name", "pipeline" + name().toUpper() + "Object", "external", getDefaultQMLPipelineName()));
 };
 
 void pipelineJS::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
@@ -47,11 +47,11 @@ std::shared_ptr<stream0> makeInput(const QVariant& aData, const QString& aTag, c
 
 void pipelineJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonValue& aScope, const QJsonValue& aSync, bool aNeedFuture, const QString& aFlag){
     auto scp = copyJsonObject(aScope.toObject());  //js multi-object will be released if aftered reference is in multithread of c++
-    rea::pipeline::instance()->execute(aName, makeInput(aData, aTag, scp), aSync.toObject(), aNeedFuture, aFlag);
+    rea2::pipeline::instance()->execute(aName, makeInput(aData, aTag, scp), aSync.toObject(), aNeedFuture, aFlag);
 }
 
 void pipelineJS::removeFromJS(const QString& aName){
-    rea::pipeline::instance()->remove(aName, false);
+    rea2::pipeline::instance()->remove(aName, false);
 }
 
 void environmentJS::setEnv(const QJsonObject& aEnvs){
@@ -64,7 +64,7 @@ QJsonObject environmentJS::getEnv(){
 
 static regPip<std::shared_ptr<pipeline*>> reg_create_jspipeline([](stream<std::shared_ptr<pipeline*>>* aInput){
     *aInput->data() = new pipelineJS();
-}, rea::Json("name", "createjspipeline"));
+}, rea2::Json("name", "createjspipeline"));
 
 }
 

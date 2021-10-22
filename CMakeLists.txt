@@ -21,7 +21,7 @@ else()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/install/bin)
 endif()
 
-project(REA)
+project(REA2)
 
 #message(":${CMAKE_BUILD_TYPE}")
 
@@ -30,7 +30,7 @@ add_definitions(-DEXPORTDLL)
 find_package(Qt5 COMPONENTS Core Widgets Quick REQUIRED)
 
 # 根据库文件代码生成动态库
-add_library(REA SHARED
+add_library(REA2 SHARED
     "qml.qrc"
     "include/util.h"
     "include/rea.h"
@@ -65,9 +65,9 @@ add_library(REA SHARED
 
 #add_library(hello::library ALIAS REA)
 
-target_link_libraries(REA PRIVATE Qt5::Core Qt5::Widgets Qt5::Quick)
+target_link_libraries(REA2 PRIVATE Qt5::Core Qt5::Widgets Qt5::Quick)
 # 包含指定头文件所在的目录
-target_include_directories(REA PUBLIC  ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(REA2 PUBLIC  ${PROJECT_SOURCE_DIR}/include)
 #target_include_directories(REA PUBLIC  ${PROJECT_SOURCE_DIR}/imageboardplugins)
 
 # 创建可执行程序

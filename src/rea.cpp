@@ -6,7 +6,7 @@
 #include <QQueue>
 #include "reaJS.h"
 
-namespace rea {
+namespace rea2 {
 
 scopeCache::scopeCache(const QJsonObject& aData){
     for (auto i : aData.keys()){
@@ -96,7 +96,7 @@ pipe0::pipe0(pipeline* aParent, const QString& aName, int aThreadNo){
     m_parent = aParent;
     m_external = aParent->name();
     if (aName == "")
-        m_name = rea::generateUUID();
+        m_name = rea2::generateUUID();
     else
         m_name = aName;
     if (aThreadNo != 0){
@@ -217,7 +217,7 @@ bool pipeFuture::event( QEvent* e) {
             QJsonObject sync;
             QJsonArray nxts;
             for (auto i : m_next2)
-                nxts.push_back(rea::JArray(i.first, i.second));
+                nxts.push_back(rea2::JArray(i.first, i.second));
             if (nxts.size() > 0)
                 sync.insert("next", nxts);
             if (m_before != "")
@@ -308,7 +308,7 @@ pipeFuture::pipeFuture(pipeline* aParent, const QString& aName) : pipe0(aParent,
         setAspect(this_event->m_before, m_before);
         setAspect(this_event->m_around, m_around);
         setAspect(this_event->m_after, m_after);
-    }, rea::Json("name", aName + "_pipe_add0"));
+    }, rea2::Json("name", aName + "_pipe_add0"));
 }
 
 pipeFuture::~pipeFuture(){
@@ -396,11 +396,11 @@ pipeline::pipeline(const QString& aName){
             return QVariant::fromValue(reinterpret_cast<stream<bool>*>(aInput)->data());
         });
 
-        add<double>([](rea::stream<double>* aInput){
+        add<double>([](rea2::stream<double>* aInput){
             std::cout << getDefaultPipelineName().toStdString() + "_pipe_counter: " << pipe_counter << std::endl;
             std::cout << getDefaultPipelineName().toStdString() + "_stream_counter: " << stream_counter << std::endl;
             aInput->out();
-        }, rea::Json("name", "reportCLeak", "external", "js"));
+        }, rea2::Json("name", "reportCLeak", "external", "js"));
     }
 }
 
@@ -417,7 +417,7 @@ pipeline::~pipeline(){
 
 void connectPipelines(const QJsonArray& aPipelines){
     for (int i = 0; i < aPipelines.size(); i += 2)
-        rea::pipeline::instance(aPipelines[i].toString())->updateOutsideRanges({aPipelines[i + 1].toString()});
+        rea2::pipeline::instance(aPipelines[i].toString())->updateOutsideRanges({aPipelines[i + 1].toString()});
 }
 
 }

@@ -4,17 +4,17 @@
 #include <QTransform>
 #include <QQmlApplicationEngine>
 
-namespace rea{
+namespace rea2{
 
 QString qsgBoardPlugin::newShapeID(const QString& aSuffix){
     return aSuffix + generateUUID();
 }
 
 std::shared_ptr<shapeObject> qsgBoardPlugin::createEllipseHandle(QSGNode* aTransformNode, int aRadius, int aFace, const QJsonArray& aCenter, const QString& aColor){
-    m_handles.push_back(std::make_shared<rea::ellipseObject>(rea::Json(
+    m_handles.push_back(std::make_shared<rea2::ellipseObject>(rea2::Json(
         "type", "ellipse",
         "center", aCenter,
-        "radius", rea::JArray(aRadius, aRadius),
+        "radius", rea2::JArray(aRadius, aRadius),
         "width", 0,
         "color", aColor,
         "face", aFace)));
@@ -26,7 +26,7 @@ std::shared_ptr<shapeObject> qsgBoardPlugin::createEllipseHandle(QSGNode* aTrans
 void qsgBoardPlugin::updateHandlePos(size_t aIndex, const QPoint& aPos){
     if (aIndex < m_handles.size()){
         auto hdl = m_handles[aIndex];
-        hdl->insert("center", rea::JArray(aPos.x(), aPos.y()));
+        hdl->insert("center", rea2::JArray(aPos.x(), aPos.y()));
         updateParent(hdl->updateQSGAttr("center_"));
     }
 }
@@ -34,7 +34,7 @@ void qsgBoardPlugin::updateHandlePos(size_t aIndex, const QPoint& aPos){
 void qsgBoardPlugin::updateHandleRadius(size_t aIndex, int aRadius){
     if (aIndex < m_handles.size()){
         auto hdl = m_handles[aIndex];
-        hdl->insert("radius", rea::JArray(aRadius, aRadius));
+        hdl->insert("radius", rea2::JArray(aRadius, aRadius));
         updateParent(hdl->updateQSGAttr("radius_"));
     }
 }
@@ -48,19 +48,19 @@ QString qsgPluginTransform::getName(qsgBoard* aParent) {
     auto ret = qsgBoardPlugin::getName(aParent);
     pipeline::instance()->add<QJsonObject>([](stream<QJsonObject>* aInput){  //install new plugin may happen before old one is destroyed, so the format mode is used here
         aInput->out();
-    }, rea::Json("name", "updateQSGPos_" + getParentName(), "replace", true));
+    }, rea2::Json("name", "updateQSGPos_" + getParentName(), "replace", true));
     pipeline::instance()->add<QJsonObject>([](stream<QJsonObject>* aInput){
         aInput->out();
-    }, rea::Json("name", "updateQSGMenu_" + getParentName(), "replace", true));
-    rea::pipeline::instance()->find("QSGAttrUpdated_" + getParentName())
-        ->nextF<QJsonArray>([this](rea::stream<QJsonArray>* aInput){
+    }, rea2::Json("name", "updateQSGMenu_" + getParentName(), "replace", true));
+    rea2::pipeline::instance()->find("QSGAttrUpdated_" + getParentName())
+        ->nextF<QJsonArray>([this](rea2::stream<QJsonArray>* aInput){
             auto dt = aInput->data();
             for (auto i : dt){
                 if (i.toObject().value("type") == "zoom"){
                     auto mdl = getQSGModel();
                     if (mdl){
                         auto inv = getTransNode()->matrix().inverted();
-                        aInput->outs<QJsonObject>(rea::Json("x", m_wcspos.x(),
+                        aInput->outs<QJsonObject>(rea2::Json("x", m_wcspos.x(),
                                                            "y", m_wcspos.y(),
                                                            "ratio", 100 / inv.data()[0],
                                                            "transform", mdl ? mdl->value("transform") : QJsonArray()), "updateQSGPos_" + getParentName());
@@ -69,28 +69,28 @@ QString qsgPluginTransform::getName(qsgBoard* aParent) {
                 }
             }
         aInput->out();
-    }, "", rea::Json("name", "QSGTransformUpdated_" + getParentName()));  //the name is used to overwrite the same pipe of the old transform plugin
+    }, "", rea2::Json("name", "QSGTransformUpdated_" + getParentName()));  //the name is used to overwrite the same pipe of the old transform plugin
     return ret;
 }
 
 void qsgPluginTransform::wheelEvent(QWheelEvent *event){
-    rea::pipeline::instance()->run<QJsonArray>("updateQSGAttr_" + getParentName(),
+    rea2::pipeline::instance()->run<QJsonArray>("updateQSGAttr_" + getParentName(),
                                                {
-                                                   rea::Json("key", rea::JArray("transform"),
+                                                   rea2::Json("key", rea2::JArray("transform"),
                                                              "type", "zoom",
                                                              "dir", event->delta() < 0 ? - 1 : 1,
-                                                             "center", rea::JArray(m_lastpos.x(), m_lastpos.y()))
+                                                             "center", rea2::JArray(m_lastpos.x(), m_lastpos.y()))
                                                },
                                                "zoomWCS");
 }
 
 void qsgPluginTransform::mousePressEvent(QMouseEvent*){
-    rea::pipeline::instance()->run<QJsonObject>("updateQSGMenu_" + getParentName(), QJsonObject());
+    rea2::pipeline::instance()->run<QJsonObject>("updateQSGMenu_" + getParentName(), QJsonObject());
 }
 
 void qsgPluginTransform::mouseReleaseEvent(QMouseEvent *event){
-    auto mn = event->button() == Qt::RightButton ? rea::Json(getMenu(), "x", event->x(), "y", event->y()) : QJsonObject();
-    rea::pipeline::instance()->run<QJsonObject>("updateQSGMenu_" + getParentName(), mn);
+    auto mn = event->button() == Qt::RightButton ? rea2::Json(getMenu(), "x", event->x(), "y", event->y()) : QJsonObject();
+    rea2::pipeline::instance()->run<QJsonObject>("updateQSGMenu_" + getParentName(), mn);
 }
 
 void qsgPluginTransform::mouseMoveEvent(QMouseEvent *event){
@@ -103,11 +103,11 @@ bool qsgPluginTransform::tryMoveWCS(QMouseEvent *event, Qt::MouseButton aFlag){
     auto ret = event->buttons().testFlag(aFlag);
     if (ret){
         auto cur = event->pos();
-        rea::pipeline::instance()->run<QJsonArray>("updateQSGAttr_" + getParentName(),
+        rea2::pipeline::instance()->run<QJsonArray>("updateQSGAttr_" + getParentName(),
                                                    {
-                                                       rea::Json("key", rea::JArray("transform"),
+                                                       rea2::Json("key", rea2::JArray("transform"),
                                                                  "type", "move",
-                                                                 "del", rea::JArray(cur.x() - m_lastpos.x(), cur.y() - m_lastpos.y()))
+                                                                 "del", rea2::JArray(cur.x() - m_lastpos.x(), cur.y() - m_lastpos.y()))
                                                    },
                                                    "moveWCS");
     }
@@ -125,20 +125,20 @@ void qsgPluginTransform::updatePos(const QPoint &aPos){
     m_lastpos = aPos;
     m_wcspos = inv.map(m_lastpos);
     auto mdl = getQSGModel();
-    rea::pipeline::instance()->run<QJsonObject>("updateQSGPos_" + getParentName(), rea::Json("x", m_wcspos.x(),
+    rea2::pipeline::instance()->run<QJsonObject>("updateQSGPos_" + getParentName(), rea2::Json("x", m_wcspos.x(),
                                                                                  "y", m_wcspos.y(),
                                                                                  "ratio", 100 / inv.data()[0],
                                                                                  "transform", mdl ? mdl->value("transform") : QJsonArray()));
 }
 
 QJsonObject qsgPluginTransform::getMenu() {
-    return rea::Json("menu", rea::JArray(rea::Json("cap", "fitView", "cmd", "updateQSGAttr_" + getParentName(), "param", rea::JArray(rea::Json("key", rea::JArray("transform"), "type", "zoom")))));
+    return rea2::Json("menu", rea2::JArray(rea2::Json("cap", "fitView", "cmd", "updateQSGAttr_" + getParentName(), "param", rea2::JArray(rea2::Json("key", rea2::JArray("transform"), "type", "zoom")))));
 }
 
-static rea::regPip<QJsonObject, rea::pipePartial> create_qsgboardplugin_transform([](rea::stream<QJsonObject>* aInput){
+static rea2::regPip<QJsonObject, rea2::pipePartial> create_qsgboardplugin_transform([](rea2::stream<QJsonObject>* aInput){
     aInput->scope()->cache<std::shared_ptr<qsgBoardPlugin>>("result", std::make_shared<qsgPluginTransform>(aInput->data()));
     aInput->out();
-}, rea::Json("name", "create_qsgboardplugin_transform"));
+}, rea2::Json("name", "create_qsgboardplugin_transform"));
 
 void qsgBoard::beforeDestroy(){
     if (m_models.size() > 0){
@@ -154,9 +154,9 @@ void qsgBoard::beforeDestroy(){
 }
 
 qsgBoard::~qsgBoard(){
-    //rea::pipeline::instance()->remove("updateQSGAttr_" + m_name);
-    //rea::pipeline::instance()->remove("updateQSGCtrl_" + m_name);
-    //rea::pipeline::instance()->remove("QSGAttrUpdated_" + m_name);
+    //rea2::pipeline::instance()->remove("updateQSGAttr_" + m_name);
+    //rea2::pipeline::instance()->remove("updateQSGCtrl_" + m_name);
+    //rea2::pipeline::instance()->remove("QSGAttrUpdated_" + m_name);
 }
 
 std::shared_ptr<scopeCache> qsgImages(std::initializer_list<std::pair<QString, QImage>> aImages){
@@ -184,19 +184,19 @@ void qsgBoard::setName(const QString& aName){
 
     connect(this, &qsgBoard::heightChanged, [this](){
         if (m_models.size() > 0){
-            addUpdate(m_models.back()->updateQSGAttr(rea::Json("key", rea::JArray("transform"), "type", "refresh")));
+            addUpdate(m_models.back()->updateQSGAttr(rea2::Json("key", rea2::JArray("transform"), "type", "refresh")));
             update();
         }
     });
 
     connect(this, &qsgBoard::widthChanged, [this](){
         if (m_models.size() > 0){
-            addUpdate(m_models.back()->updateQSGAttr(rea::Json("key", rea::JArray("transform"), "type", "refresh")));
+            addUpdate(m_models.back()->updateQSGAttr(rea2::Json("key", rea2::JArray("transform"), "type", "refresh")));
             update();
         }
     });
 
-    rea::pipeline::instance()->add<QJsonArray, pipeDelegate>([this](rea::stream<QJsonArray>* aInput){
+    rea2::pipeline::instance()->add<QJsonArray, pipeDelegate>([this](rea2::stream<QJsonArray>* aInput){
         auto dt = aInput->data();
         for (auto i : dt)
             m_updates_modification.push_back(i);
@@ -216,7 +216,7 @@ void qsgBoard::setName(const QString& aName){
             auto imgs_config = scp->data<QJsonArray>("image_path");
             auto stg_config = scp->data<QJsonObject>("storage_config");
             for (auto i : imgs_config){
-                auto stm = pipeline::instance()->input(false, "", std::make_shared<scopeCache>(rea::Json("path", i, "config", stg_config.value("config"))), true)->asyncCall(stg_config.value("root").toString() + "readImage");
+                auto stm = pipeline::instance()->input(false, "", std::make_shared<scopeCache>(rea2::Json("path", i, "config", stg_config.value("config"))), true)->asyncCall(stg_config.value("root").toString() + "readImage");
                 if (stm->data())
                     m_models.back()->cacheImage(i.toString(), stm->scope()->data<QImage>("data"));
             }
@@ -224,26 +224,26 @@ void qsgBoard::setName(const QString& aName){
                 addUpdate(m_models.back()->updateQSGAttr(i.toObject()));
             update();
         }else{
-            rea::pipeline::instance()->run<QJsonArray>("QSGAttrUpdated_" + m_name, m_updates_modification);
+            rea2::pipeline::instance()->run<QJsonArray>("QSGAttrUpdated_" + m_name, m_updates_modification);
             m_updates_modification = QJsonArray();
         }
         aInput->out();
-    }, rea::Json("name", "updateQSGAttr_" + m_name,
+    }, rea2::Json("name", "updateQSGAttr_" + m_name,
                  "delegate", "QSGAttrUpdated_" + m_name,
                  "replace", true));
 
-    rea::pipeline::instance()->add<QJsonArray>([this](rea::stream<QJsonArray>* aInput){
+    rea2::pipeline::instance()->add<QJsonArray>([this](rea2::stream<QJsonArray>* aInput){
         aInput->scope()->cache("hasModel", m_models.size() > 0);
         aInput->out();
-    }, rea::Json("name", "QSGAttrUpdated_" + m_name,
+    }, rea2::Json("name", "QSGAttrUpdated_" + m_name,
                  "replace", true));
 
-    rea::pipeline::instance()->add<qsgModel*, pipePartial>([this](rea::stream<qsgModel*>* aInput){
+    rea2::pipeline::instance()->add<qsgModel*, pipePartial>([this](rea2::stream<qsgModel*>* aInput){
         if (m_models.size())
             aInput->setData(m_models.back().get())->out();
-    }, rea::Json("name", "getQSGModel_" + m_name));
+    }, rea2::Json("name", "getQSGModel_" + m_name));
 
-    rea::pipeline::instance()->add<QJsonArray>([this](rea::stream<QJsonArray>* aInput){
+    rea2::pipeline::instance()->add<QJsonArray>([this](rea2::stream<QJsonArray>* aInput){
         for (auto i : m_plugins)
             i->beforeDestroy();
         if (aInput->data().size() > 0){
@@ -251,7 +251,7 @@ void qsgBoard::setName(const QString& aName){
             installPlugins(aInput->data());
         }
         aInput->out();
-    }, rea::Json("name", "updateQSGCtrl_" + m_name,
+    }, rea2::Json("name", "updateQSGCtrl_" + m_name,
                  "replace", true));
 }
 
@@ -309,7 +309,7 @@ QSGNode* qsgBoard::updatePaintNode(QSGNode* aOldNode, UpdatePaintNodeData*){
     m_updates.clear();
     m_updates_model_index.clear();
 
-    rea::pipeline::instance()->run<QJsonArray>("QSGAttrUpdated_" + m_name, m_updates_modification, "", m_models.size() ? std::make_shared<scopeCache>()->cache("image", m_models.last()->getImageCache()) : nullptr);
+    rea2::pipeline::instance()->run<QJsonArray>("QSGAttrUpdated_" + m_name, m_updates_modification, "", m_models.size() ? std::make_shared<scopeCache>()->cache("image", m_models.last()->getImageCache()) : nullptr);
     m_updates_modification = QJsonArray();
     return ret;
 }
@@ -344,9 +344,11 @@ void qsgBoard::wheelEvent(QWheelEvent *event){
         i->wheelEvent(event);
 }
 
-static rea::regPip<QQmlApplicationEngine*> reg_imageboard([](rea::stream<QQmlApplicationEngine*>* aInput){
-    qmlRegisterType<qsgBoard>("QSGBoard", 1, 0, "QSGBoard");
+static rea2::regPip<QQmlApplicationEngine*> reg_imageboard([](rea2::stream<QQmlApplicationEngine*>* aInput){
+    auto cfg = aInput->scope()->data<QJsonObject>("rea-qsg");
+    if (cfg.value("use").toBool(true))
+        qmlRegisterType<qsgBoard>("QSGBoard", 2, 0, "QSGBoard");
     aInput->out();
-}, rea::Json("name", "install1_QSGBoard"), "initRea");
+}, rea2::Json("name", "install1_QSGBoard"), "initRea");
 
 }

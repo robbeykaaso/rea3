@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 
-namespace rea {
+namespace rea2 {
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -56,10 +56,11 @@ void loadExtendLibraries(){
 }, 0);*/
 
 static regPip<QQmlApplicationEngine*> reg_dynamic_dll([](stream<QQmlApplicationEngine*>* aInput){
-    //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype
-    loadExtendLibraries();
+    auto cfg = aInput->scope()->data<QJsonObject>("rea-dll");
+    if (cfg.value("use").toBool(true)) //ref from: https://stackoverflow.com/questions/25403363/how-to-implement-a-singleton-provider-for-qmlregistersingletontype
+        loadExtendLibraries();
     aInput->out();
-}, rea::Json("name", "initRea"));
+}, rea2::Json("name", "initRea"));
 
 static regPip<QString, pipePartial> reg_dynamic_qml([](stream<QString>* aInput){
     std::vector<std::string> m_list;

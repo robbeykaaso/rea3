@@ -7,7 +7,7 @@
 #include <QString>
 #include "util.h"
 
-namespace rea {
+namespace rea2 {
 
 class DSTDLL fsStorage {
 public:
@@ -33,6 +33,6 @@ protected:
     QString m_root = "";
 };
 
-}  // namespace rea
+}  // namespace rea2
 
 #endif

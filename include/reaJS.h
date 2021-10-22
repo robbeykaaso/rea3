@@ -1,6 +1,6 @@
 #include "rea.h"
 
-namespace rea{
+namespace rea2{
 
 class DSTDLL pipelineJS : public pipeline{
 public:

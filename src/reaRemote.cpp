@@ -7,12 +7,12 @@
 #include <QJsonDocument>
 #include <QProcess>
 
-namespace rea {
+namespace rea2 {
 
 pipelineRemote::pipelineRemote(const QString& aRemoteName, const QString& aLocalName) : pipeline(aRemoteName){
     m_localName = aLocalName;
 
-    rea::pipeline::instance()->add<QJsonObject>([this](rea::stream<QJsonObject>* aInput){
+    rea2::pipeline::instance()->add<QJsonObject>([this](rea2::stream<QJsonObject>* aInput){
         auto dt = aInput->data();
         if (dt.value("cmd") == "execute"){
             auto scp = aInput->scope();
@@ -39,7 +39,7 @@ pipelineRemote::pipelineRemote(const QString& aRemoteName, const QString& aLocal
         }else if (dt.value("cmd") == "remove"){
             removeFromRemote(dt.value("name").toString());
         }
-    }, rea::Json("name", name() + "_receiveRemote"));
+    }, rea2::Json("name", name() + "_receiveRemote"));
 };
 
 void pipelineRemote::execute(const QString& aName, std::shared_ptr<stream0> aStream, const QJsonObject& aSync, bool aFutureNeed, const QString& aFrom){
@@ -81,7 +81,7 @@ void pipelineRemote::execute(const QString& aName, std::shared_ptr<stream0> aStr
             dt.insert("data", aData.toInt());
         }
         pipeline::instance()->run(name() + "_sendRemote",
-                                  rea::Json(dt,
+                                  rea2::Json(dt,
                                       "cmd", "execute",
                                       "name", aName,
                                       "remote", name(),
@@ -96,7 +96,7 @@ void pipelineRemote::execute(const QString& aName, std::shared_ptr<stream0> aStr
 
 void pipelineRemote::remove(const QString& aName, bool){
     pipeline::instance()->run(name() + "_sendRemote",
-                              rea::Json(
+                              rea2::Json(
                                   "cmd", "remove",
                                   "name", aName,
                                   "remote", "any"
@@ -105,42 +105,42 @@ void pipelineRemote::remove(const QString& aName, bool){
 
 void pipelineRemote::executeFromRemote(const QString& aName, const QJsonValue& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
     if (aData.isObject())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toObject(), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(aData.toObject(), aTag, aScope), aSync, aNeedFuture, aFlag);
     else if (aData.isArray())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toArray(), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(aData.toArray(), aTag, aScope), aSync, aNeedFuture, aFlag);
     else if (aData.isString())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toString(), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(aData.toString(), aTag, aScope), aSync, aNeedFuture, aFlag);
     else if (aData.isBool())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toBool(), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(aData.toBool(), aTag, aScope), aSync, aNeedFuture, aFlag);
     else if (aData.isDouble())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(aData.toDouble(), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(aData.toDouble(), aTag, aScope), aSync, aNeedFuture, aFlag);
 }
 
 void pipelineRemote::removeFromRemote(const QString& aName){
-    rea::pipeline::instance(m_localName)->remove(aName, false);
+    rea2::pipeline::instance(m_localName)->remove(aName, false);
 }
 
 void pipelineQMLRemote::executeFromRemote(const QString& aName, const QJsonValue& aData, const QString& aTag, std::shared_ptr<scopeCache> aScope, const QJsonObject& aSync, bool aNeedFuture, const QString& aFlag){
     if (aData.isObject())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toObject()), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(QVariant::fromValue(aData.toObject()), aTag, aScope), aSync, aNeedFuture, aFlag);
     else if (aData.isArray())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toArray()), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(QVariant::fromValue(aData.toArray()), aTag, aScope), aSync, aNeedFuture, aFlag);
     else if (aData.isString())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toString()), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(QVariant::fromValue(aData.toString()), aTag, aScope), aSync, aNeedFuture, aFlag);
     else if (aData.isBool())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toBool()), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(QVariant::fromValue(aData.toBool()), aTag, aScope), aSync, aNeedFuture, aFlag);
     else if (aData.isDouble())
-        rea::pipeline::instance(m_localName)->execute(aName, rea::in(QVariant::fromValue(aData.toDouble()), aTag, aScope), aSync, aNeedFuture, aFlag);
+        rea2::pipeline::instance(m_localName)->execute(aName, rea2::in(QVariant::fromValue(aData.toDouble()), aTag, aScope), aSync, aNeedFuture, aFlag);
 }
 
-void connectRemote(const QString& aLocal, const QString& aRemote, rea::pipeFunc<QJsonObject> aWriteRemote, bool aClient, const QString& aRemoteLocal){
-    rea::pipeline::instance(aRemote);
-    rea::pipeline::instance(aLocal)->updateOutsideRanges({aRemote});
-    rea::pipeline::instance()->find("receiveFrom" + (aClient ? QString("Server") : "Client"))->next(aRemote + "_receiveRemote", (aRemoteLocal == "" ? aLocal : aRemoteLocal) + ";any");
-    rea::pipeline::instance()->add<QJsonObject>(aWriteRemote, rea::Json("name", aRemote + "_sendRemote"));
+void connectRemote(const QString& aLocal, const QString& aRemote, rea2::pipeFunc<QJsonObject> aWriteRemote, bool aClient, const QString& aRemoteLocal){
+    rea2::pipeline::instance(aRemote);
+    rea2::pipeline::instance(aLocal)->updateOutsideRanges({aRemote});
+    rea2::pipeline::instance()->find("receiveFrom" + (aClient ? QString("Server") : "Client"))->next(aRemote + "_receiveRemote", (aRemoteLocal == "" ? aLocal : aRemoteLocal) + ";any");
+    rea2::pipeline::instance()->add<QJsonObject>(aWriteRemote, rea2::Json("name", aRemote + "_sendRemote"));
 }
 
-QJsonObject connectRemoteConfig(const QString& aRole, const QJsonObject& aConfig, std::function<void(rea::stream<QJsonObject>*)> aWriteRemote){
+QJsonObject connectRemoteConfig(const QString& aRole, const QJsonObject& aConfig, std::function<void(rea2::stream<QJsonObject>*)> aWriteRemote){
     auto clt = aConfig.value(aRole).toObject();
     auto cnts = clt.value("connects").toArray();
     for (auto i : cnts){
@@ -148,9 +148,9 @@ QJsonObject connectRemoteConfig(const QString& aRole, const QJsonObject& aConfig
         auto local = cnt.value("local").toString();
         auto remote = cnt.value("remote").toString();
         auto qml = cnt.value("qml").toBool();
-        rea::pipeline::instance()->add<std::shared_ptr<rea::pipeline*>>([local, remote, qml](rea::stream<std::shared_ptr<rea::pipeline*>>* aInput){
-            *aInput->data() = qml ? new rea::pipelineQMLRemote(remote, local) : new rea::pipelineRemote(remote, local);
-        }, rea::Json("name", "create" + remote + "pipeline"));
+        rea2::pipeline::instance()->add<std::shared_ptr<rea2::pipeline*>>([local, remote, qml](rea2::stream<std::shared_ptr<rea2::pipeline*>>* aInput){
+            *aInput->data() = qml ? new rea2::pipelineQMLRemote(remote, local) : new rea2::pipelineRemote(remote, local);
+        }, rea2::Json("name", "create" + remote + "pipeline"));
         connectRemote(local, remote, aWriteRemote, aRole == "client", cnt.value("remoteLocal").toString());
     }
     return clt;
@@ -177,34 +177,37 @@ private:
     std::vector<std::shared_ptr<QProcess>> m_processes;
 };
 
-static rea::normalServer* server;
-static rea::regPip<QQmlApplicationEngine*> init_tcp_linker([](rea::stream<QQmlApplicationEngine*>* aInput){
-    QFile fl(QCoreApplication::applicationDirPath() + "/.rea");
-    if (fl.open(QFile::ReadOnly)){
-        auto cfg = QJsonDocument::fromJson(fl.readAll()).object();
-        if (cfg.contains("client")){
-            static rea::normalClient client;
-            aInput->scope()->cache("client", &client);
-            auto clt = connectRemoteConfig("client", cfg, [](rea::stream<QJsonObject>* aInput){
-                client.sendServer(aInput);
-            });
-            if (clt.contains("ip") && clt.contains("port") && clt.contains("id"))
-                rea::pipeline::instance()->run("tryLinkServer", rea::Json("ip", clt.value("ip"),
-                                                                          "port", clt.value("port"),
-                                                                          "id", clt.value("id")));
-        }
-        if (cfg.contains("server")){
-            server = new rea::normalServer(cfg.value("server").toObject());
-            aInput->scope()->cache("server", server);
-            connectRemoteConfig("server", cfg, [](rea::stream<QJsonObject>* aInput){
-                server->writeSocket(aInput->scope()->data<QTcpSocket*>("socket"), aInput->data());
-            });
-        }
-        if (cfg.contains("process")){
-            static processMan mn(cfg.value("process").toArray());
+static rea2::normalServer* server;
+static rea2::regPip<QQmlApplicationEngine*> init_tcp_linker([](rea2::stream<QQmlApplicationEngine*>* aInput){
+    auto cfg = aInput->scope()->data<QJsonObject>("rea-remote");
+    if (cfg.value("use").toBool(true)){
+        QFile fl(QCoreApplication::applicationDirPath() + "/.rea");
+        if (fl.open(QFile::ReadOnly)){
+            auto cfg = QJsonDocument::fromJson(fl.readAll()).object();
+            if (cfg.contains("client")){
+                static rea2::normalClient client;
+                aInput->scope()->cache("client", &client);
+                auto clt = connectRemoteConfig("client", cfg, [](rea2::stream<QJsonObject>* aInput){
+                    client.sendServer(aInput);
+                });
+                if (clt.contains("ip") && clt.contains("port") && clt.contains("id"))
+                    rea2::pipeline::instance()->run("tryLinkServer", rea2::Json("ip", clt.value("ip"),
+                                                                              "port", clt.value("port"),
+                                                                              "id", clt.value("id")));
+            }
+            if (cfg.contains("server")){
+                server = new rea2::normalServer(cfg.value("server").toObject());
+                aInput->scope()->cache("server", server);
+                connectRemoteConfig("server", cfg, [](rea2::stream<QJsonObject>* aInput){
+                    server->writeSocket(aInput->scope()->data<QTcpSocket*>("socket"), aInput->data());
+                });
+            }
+            if (cfg.contains("process")){
+                static processMan mn(cfg.value("process").toArray());
+            }
         }
     }
     aInput->out();
-}, rea::Json("name", "install0_tcp"), "initRea");
+}, rea2::Json("name", "install0_tcp"), "initRea");
 
 }

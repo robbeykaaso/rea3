@@ -11,7 +11,7 @@
 #include <qmath.h>
 #include <sstream>
 
-namespace rea {
+namespace rea2 {
 
 //qsgNode: root
 //qsgTransformNode: wcs-scs //qsgSimpleTextureNode: text //qsgGeometryNode: arrow
@@ -687,9 +687,9 @@ void shapeObject::calcArrow(const QPointF& aStart, const QPointF& aEnd, QSGGeome
     setQSGGemoetry(pts, aNode, QSGGeometry::DrawLineStrip, "");
 }
 
-static rea::regPip<QJsonObject> create_image([](rea::stream<QJsonObject>* aInput){
+static rea2::regPip<QJsonObject> create_image([](rea2::stream<QJsonObject>* aInput){
     aInput->scope()->cache<std::shared_ptr<qsgObject>>("result", std::make_shared<imageObject>(aInput->data()));
-}, rea::Json("name", "create_qsgobject_image"));
+}, rea2::Json("name", "create_qsgobject_image"));
 
 polyObject::polyObject(const QJsonObject& aConfig) : shapeObject(aConfig){
 
@@ -814,9 +814,9 @@ IUpdateQSGAttr polyObject::updateQSGAttr(const QString& aModification){
         return shapeObject::updateQSGAttr(aModification);
 }
 
-static rea::regPip<QJsonObject> create_poly([](rea::stream<QJsonObject>* aInput){
+static rea2::regPip<QJsonObject> create_poly([](rea2::stream<QJsonObject>* aInput){
     aInput->scope()->cache<std::shared_ptr<qsgObject>>("result", std::make_shared<polyObject>(aInput->data()));
-}, rea::Json("name", "create_qsgobject_poly"));
+}, rea2::Json("name", "create_qsgobject_poly"));
 
 void polyObject::checkArrowPole(){
     int sz = 0;
@@ -976,9 +976,9 @@ bool ellipseObject::getCCW(){
     return value("ccw").toBool();
 }
 
-static rea::regPip<QJsonObject> create_ellipse([](rea::stream<QJsonObject>* aInput){
+static rea2::regPip<QJsonObject> create_ellipse([](rea2::stream<QJsonObject>* aInput){
     aInput->scope()->cache<std::shared_ptr<qsgObject>>("result", std::make_shared<ellipseObject>(aInput->data()));
-}, rea::Json("name", "create_qsgobject_ellipse"));
+}, rea2::Json("name", "create_qsgobject_ellipse"));
 
 void qsgModel::clearQSGObjects(){
     for (auto i : m_objects)
@@ -1046,7 +1046,7 @@ IUpdateQSGAttr qsgModel::updateQSGAttr(const QJsonObject& aModification){
                         auto attr = aModification.value("val").toObject();
                         objs.insert(obj, attr);
                         setObjects(objs);
-                        auto nd = addObject(rea::Json(attr, "id", obj));
+                        auto nd = addObject(rea2::Json(attr, "id", obj));
                         return [this, nd](QSGNode*){
                             if (m_window) //m_window is null until the model is showed at first
                                 nd->getQSGNodes(m_window, m_trans_node, m_trans_node);
@@ -1214,7 +1214,7 @@ QString qsgModel::getTextLocation(const QJsonObject& aConfig){
 }
 
 void qsgModel::setTransform(){
-    insert("transform", rea::JArray(m_trans.m11(), m_trans.m12(), m_trans.m13(),
+    insert("transform", rea2::JArray(m_trans.m11(), m_trans.m12(), m_trans.m13(),
                                     m_trans.m21(), m_trans.m22(), m_trans.m23(),
                                     m_trans.m31(), m_trans.m32(), m_trans.m33()));
 }
@@ -1272,13 +1272,13 @@ qsgModel::qsgModel(const QJsonObject& aConfig) : QJsonObject(aConfig){
     m_min_ratio = value("min_ratio").toDouble(0.01);
 
     for (auto i : shps.keys())
-        addObject(rea::Json(shps.value(i).toObject(), "id", i));
+        addObject(rea2::Json(shps.value(i).toObject(), "id", i));
     getTransform(true);
 }
 
 qsgModel::~qsgModel(){
     for (auto i : m_creators)
-        rea::pipeline::instance()->remove(i->actName());
+        rea2::pipeline::instance()->remove(i->actName());
 }
 
 }

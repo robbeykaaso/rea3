@@ -5,7 +5,7 @@
 #include <QTcpSocket>
 #include <QTimer>
 
-namespace rea {
+namespace rea2 {
 
 class DSTDLL normalClient : public QObject{
     Q_OBJECT
@@ -19,7 +19,7 @@ public slots:
     void ServerFound(QString aIP, QString aPort, QString aID);
     void ReceiveState(QAbstractSocket::SocketState aState);
     void ReceiveMessage();
-    void sendServer(rea::stream<QJsonObject>* aInput);
+    void sendServer(rea2::stream<QJsonObject>* aInput);
 private:
     QTcpSocket m_socket;
     bool m_valid = false;

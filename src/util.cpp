@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace rea {
+namespace rea2 {
 
 QJsonArray copyJsonArray(const QJsonArray& aSrc){
     QJsonArray ret;
@@ -281,7 +281,7 @@ void progress_display::display_tic(){
         if (_tic < 51) m_os << '*';
         m_os << std::endl;
     }
-    pipeline::instance()->run<QJsonObject>("updateCommandlineProgress", rea::Json("ratio", _tic / 51.0), QString::fromStdString(m_nm));
+    pipeline::instance()->run<QJsonObject>("updateCommandlineProgress", rea2::Json("ratio", _tic / 51.0), QString::fromStdString(m_nm));
 } // display_tic
 
 //snowflake

@@ -4,7 +4,7 @@
 #include "reaRemote.h"
 #include <QTcpServer>
 
-namespace rea {
+namespace rea2 {
 
 class DSTDLL normalServer : public QObject{
     Q_OBJECT

@@ -6,7 +6,7 @@
 #include <QDoubleValidator>
 #include <QQmlApplicationEngine>
 
-namespace rea {
+namespace rea2 {
 
 static QQmlApplicationEngine* qml_engine = nullptr;
 
@@ -81,7 +81,7 @@ pipelineQMLJS::pipelineQMLJS() : pipeline("js"){
     pipeline::instance()->add<double>([](stream<double>* aInput){
         auto pip_qml = reinterpret_cast<pipelineQML*>(pipeline::instance("qmljs"));
         aInput->outs<pipelineQML*>(pip_qml)->scope()->cache<pipelineQML*>("pipeline", pip_qml);
-    }, rea::Json("name", "pipelineQMLObject", "external", getDefaultQMLPipelineName()));
+    }, rea2::Json("name", "pipelineQMLObject", "external", getDefaultQMLPipelineName()));
 }
 
 void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, const QString& aTag, const QJsonValue& aScope, const QJsonValue& aSync, bool aNeedFuture, const QString& aFlag){
@@ -89,7 +89,7 @@ void pipelineQMLJS::executeFromJS(const QString& aName, const QVariant& aData, c
     //for (auto i : aScope.keys())
     //    scp.insert(i, aScope.value(i));
     auto scp = copyJsonObject(aScope.toObject());  //js multi-object will be released if aftered reference is in multithread of c++
-    rea::pipeline::instance(getDefaultQMLPipelineName())->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync.toObject(), aNeedFuture, aFlag);
+    rea2::pipeline::instance(getDefaultQMLPipelineName())->execute(aName, in(aData, aTag, std::make_shared<scopeCache>(scp)), aSync.toObject(), aNeedFuture, aFlag);
 }
 
 void pipelineQMLJS::removeFromJS(const QString& aName){
@@ -108,7 +108,7 @@ void pipelineQMLJS::execute(const QString& aName, std::shared_ptr<stream0> aStre
 
 static regPip<std::shared_ptr<pipeline*>> reg_create_qmljspipeline([](stream<std::shared_ptr<pipeline*>>* aInput){
     *aInput->data() = new pipelineQMLJS();
-}, rea::Json("name", "createqmljspipeline"));
+}, rea2::Json("name", "createqmljspipeline"));
 
 void pipelineQML::removePipeOutside(const QString& aName){
     pipeline::removePipeOutside(aName);
@@ -140,7 +140,7 @@ bool pipelineQML::externalNextGot(pipe0* aPipe, std::shared_ptr<stream0> aStream
 
 static regPip<std::shared_ptr<pipeline*>> reg_create_qmlpipeline([](stream<std::shared_ptr<pipeline*>>* aInput){
     *aInput->data() = new pipelineQML();
-}, rea::Json("name", "createqmlpipeline"));
+}, rea2::Json("name", "createqmlpipeline"));
 
 qmlScopeCache::qmlScopeCache(std::shared_ptr<scopeCache> aScope){
     m_scope = aScope;
@@ -368,11 +368,11 @@ qmlPipeline::qmlPipeline(const QString& aName){
         fl.close();
     }
 
-    pipeline::instance()->add<double>([](rea::stream<double>* aInput){
+    pipeline::instance()->add<double>([](rea2::stream<double>* aInput){
         std::cout << "qml_pipe_counter: " << pipe_counter << std::endl;
         std::cout << "qml_stream_counter: " << stream_counter << std::endl;
         aInput->out();
-    }, rea::Json("name", "reportQMLLeak", "external", "js"));
+    }, rea2::Json("name", "reportQMLLeak", "external", "js"));
 }
 
 qmlPipeline::~qmlPipeline(){
@@ -432,7 +432,7 @@ static regPip<QQmlApplicationEngine*> reg_recative2_qml([](stream<QQmlApplicatio
         qml_engine->rootContext()->setContextObject(new globalFuncs());
     }
     aInput->out();
-}, rea::Json("name", "install2_qml"), "initRea");
+}, rea2::Json("name", "install2_qml"), "initRea");
 
 QString qmlPipeline::tr(const QString& aOrigin){
     return tr0(aOrigin);

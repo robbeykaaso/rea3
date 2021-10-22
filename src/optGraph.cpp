@@ -7,7 +7,7 @@
 //stream->scope():
 //  "param": QJsonObject
 //  "images": std::vector<QImage>
-//  "results": std::vector<std::shared_ptr<rea::stream0>>
+//  "results": std::vector<std::shared_ptr<rea2::stream0>>
 //  "from": QString
 //{
 //    "id0": {
@@ -50,17 +50,17 @@
 //    }
 //}
 
-namespace rea {
+namespace rea2 {
 
 operatorGraph::operatorGraph(const QString& aID){
     m_name = aID;
     if (m_name == "")
-        m_name = rea::generateUUID();
+        m_name = rea2::generateUUID();
 }
 
 operatorGraph::~operatorGraph(){
     for (auto i : m_pipes)
-        rea::pipeline::instance()->remove(i);
+        rea2::pipeline::instance()->remove(i);
 }
 
 void operatorGraph::build(const QJsonObject& aConfig){
@@ -76,11 +76,11 @@ void operatorGraph::build(const QJsonObject& aConfig){
         auto cfg = aConfig.value(i).toObject();
         m_pipes.push_back(i + m_name);
 
-        auto operate = [i, cfg, this](rea::stream<bool>* aInput){
+        auto operate = [i, cfg, this](rea2::stream<bool>* aInput){
             aInput->scope()->cache("param", cfg);
-            rea::pipeline::instance()->run("operatorGraphRunning", i, "", std::make_shared<rea::scopeCache>(rea::Json("progress", 0, "id", m_name)));
-            rea::pipeline::instance()->call<bool>(cfg.value("type").toString(), std::dynamic_pointer_cast<rea::stream<bool>>(aInput->shared_from_this()));
-            rea::pipeline::instance()->run("operatorGraphRunning", i, "", std::make_shared<rea::scopeCache>(rea::Json("progress", 100, "id", m_name)));
+            rea2::pipeline::instance()->run("operatorGraphRunning", i, "", std::make_shared<rea2::scopeCache>(rea2::Json("progress", 0, "id", m_name)));
+            rea2::pipeline::instance()->call<bool>(cfg.value("type").toString(), std::dynamic_pointer_cast<rea2::stream<bool>>(aInput->shared_from_this()));
+            rea2::pipeline::instance()->run("operatorGraphRunning", i, "", std::make_shared<rea2::scopeCache>(rea2::Json("progress", 100, "id", m_name)));
             if (cfg.contains("next")){
                 auto nxts = cfg.value("next").toArray();
                 for (auto j : nxts)
@@ -89,9 +89,9 @@ void operatorGraph::build(const QJsonObject& aConfig){
         };
         auto nm = i + m_name;
         if (merges.value(nm, 0) > 1){
-            rea::pipeline::instance()->add<bool, pipeMerge>(operate, rea::Json(cfg, "name", nm, "thread", cfg.value("thread").toInt()));
+            rea2::pipeline::instance()->add<bool, pipeMerge>(operate, rea2::Json(cfg, "name", nm, "thread", cfg.value("thread").toInt()));
         }else
-            rea::pipeline::instance()->add<bool>(operate, rea::Json("name", nm, "thread", cfg.value("thread").toInt()));
+            rea2::pipeline::instance()->add<bool>(operate, rea2::Json("name", nm, "thread", cfg.value("thread").toInt()));
 
         if (cfg.contains("input"))
             m_starts.push_back(std::pair<int, QString>(cfg.value("input").toInt(), nm));
@@ -103,12 +103,12 @@ void operatorGraph::build(const QJsonObject& aConfig){
 
 void operatorGraph::run(std::vector<QImage> aImages){
     for (auto i : m_starts)
-        rea::pipeline::instance()->run<bool>(i.second, true, "", std::make_shared<rea::scopeCache>()->cache("images", aImages)->cache("graph", shared_from_this()));
+        rea2::pipeline::instance()->run<bool>(i.second, true, "", std::make_shared<rea2::scopeCache>()->cache("images", aImages)->cache("graph", shared_from_this()));
 }
 
 void operatorGraph::run(){
     for (auto i : m_starts)
-        rea::pipeline::instance()->run<bool>(i.second, true, "", std::make_shared<rea::scopeCache>()->cache("graph", shared_from_this()));
+        rea2::pipeline::instance()->run<bool>(i.second, true, "", std::make_shared<rea2::scopeCache>()->cache("graph", shared_from_this()));
 }
 
 //    {
@@ -119,7 +119,7 @@ void operatorGraph::run(){
 //        "thread": 2,
 //        "next": ["output1", "output2"]
 //    },
-static rea::regPip<bool> setImageOpacity([](rea::stream<bool>* aInput){
+static rea2::regPip<bool> setImageOpacity([](rea2::stream<bool>* aInput){
     auto prms = aInput->scope()->data<QJsonObject>("param");
     auto idxes = prms.value("imageIndex").toArray();
     auto imgs = aInput->scope()->data<std::vector<QImage>>("images");
@@ -146,7 +146,7 @@ static rea::regPip<bool> setImageOpacity([](rea::stream<bool>* aInput){
     }else
         aInput->setData(false);
     aInput->out();
-}, rea::Json("name", "setImageOpacity"));
+}, rea2::Json("name", "setImageOpacity"));
 
 //    {
 //      "type": "updateImagePath",
@@ -154,7 +154,7 @@ static rea::regPip<bool> setImageOpacity([](rea::stream<bool>* aInput){
 //      "imageIndex": [],
 //      "view": "xxx"
 //    },
-static rea::regPip<bool> updateImagePath([](rea::stream<bool>* aInput){
+static rea2::regPip<bool> updateImagePath([](rea2::stream<bool>* aInput){
     auto prms = aInput->scope()->data<QJsonObject>("param");
     auto idxes = prms.value("imageIndex").toArray();
     auto imgs = aInput->scope()->data<std::vector<QImage>>("images");
@@ -164,10 +164,10 @@ static rea::regPip<bool> updateImagePath([](rea::stream<bool>* aInput){
         auto idx = idxes[i].toInt();
         auto nm = nms[i].toString();
         imgs0.insert(nm, imgs.at(size_t(idx)));
-        auto mdy = rea::JArray(rea::Json("obj", nm, "key", rea::JArray("path"), "val", nm, "force", true));
+        auto mdy = rea2::JArray(rea2::Json("obj", nm, "key", rea2::JArray("path"), "val", nm, "force", true));
         aInput->outs(mdy, "updateQSGAttr_" + prms.value("view").toString())->scope(true)->cache("image", imgs0);
     }
-}, rea::Json("name", "updateImagePath"));
+}, rea2::Json("name", "updateImagePath"));
 
 //{
 //    "type": "inputImage",
@@ -175,26 +175,26 @@ static rea::regPip<bool> updateImagePath([](rea::stream<bool>* aInput){
 //    "view": "xxx",
 //    "next": ["setImageOpacity"]
 //}
-static rea::regPip<bool> inputImage([](rea::stream<bool>* aInput){
+static rea2::regPip<bool> inputImage([](rea2::stream<bool>* aInput){
     auto prms = aInput->scope()->data<QJsonObject>("param");
     auto imgs = aInput->scope()->data<std::vector<QImage>>("images");
     if (prms.contains("view")){
-        auto mdl = rea::in<rea::qsgModel*>(nullptr, "", nullptr, true)->asyncCall("getQSGModel_" + prms.value("view").toString(), false)->data();
+        auto mdl = rea2::in<rea2::qsgModel*>(nullptr, "", nullptr, true)->asyncCall("getQSGModel_" + prms.value("view").toString(), false)->data();
         auto objs = mdl->getQSGObjects();
         for (auto i : objs.keys())
             if (i.startsWith("img_"))
-                imgs.push_back(reinterpret_cast<rea::imageObject*>(objs.value(i).get())->getImage());
+                imgs.push_back(reinterpret_cast<rea2::imageObject*>(objs.value(i).get())->getImage());
     }
     aInput->scope()->cache("images", imgs);
     aInput->out();
-}, rea::Json("name", "inputImage"));
+}, rea2::Json("name", "inputImage"));
 
 //{
 //    "type": "showOneImage",
 //    "imageIndex": 0,
 //    "view": "reagrid2_ide_image"
 //}
-static rea::regPip<bool> showOneImage([](rea::stream<bool>* aInput){
+static rea2::regPip<bool> showOneImage([](rea2::stream<bool>* aInput){
     auto prms = aInput->scope()->data<QJsonObject>("param");
     auto imgs = aInput->scope()->data<std::vector<QImage>>("images");
     auto img_idx = prms.value("imageIndex").toInt();
@@ -214,20 +214,20 @@ static rea::regPip<bool> showOneImage([](rea::stream<bool>* aInput){
 
     QHash<QString, QImage> imgs0;
     imgs0.insert("img_0", img);
-    auto cfg = rea::Json("id", "img_0",
+    auto cfg = rea2::Json("id", "img_0",
                          "width", img.width() ? img.width() : 600,
                          "height", img.height() ? img.height() : 600,
                          "max_ratio", 100,
                          "min_ratio", 0.01,
-                         "objects", rea::Json(
-                                        "img_0", rea::Json(
+                         "objects", rea2::Json(
+                                        "img_0", rea2::Json(
                                                      "type", "image",
-                                                     "range", rea::JArray(0, 0, img.width(), img.height()),
+                                                     "range", rea2::JArray(0, 0, img.width(), img.height()),
                                                      "path", "img_0")));
     aInput->outs<QJsonArray>(QJsonArray(), "updateQSGAttr_" + vw)
             ->scope(true)
             ->cache<QJsonObject>("model", cfg)
             ->cache<QHash<QString, QImage>>("image", imgs0);
-}, rea::Json("name", "showOneImage"));
+}, rea2::Json("name", "showOneImage"));
 
 }

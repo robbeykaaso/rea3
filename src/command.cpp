@@ -2,12 +2,12 @@
 #include "rea.h"
 #include <vector>
 
-namespace rea {
+namespace rea2 {
 
 class commandManager{
 public:
     commandManager(){
-        rea::pipeline::instance()->add<ICommand, pipePartial>([this](stream<ICommand>* aInput){
+        rea2::pipeline::instance()->add<ICommand, pipePartial>([this](stream<ICommand>* aInput){
             for (int i = int(m_commands.size()) - 1; i > m_cur; --i)
                 m_commands.pop_back();
             m_commands.push_back(aInput->data());
@@ -15,7 +15,7 @@ public:
             aInput->out();
         }, Json("name", "addCommand"));
 
-        rea::pipeline::instance()->add<bool, pipePartial>([this](stream<bool>* aInput){
+        rea2::pipeline::instance()->add<bool, pipePartial>([this](stream<bool>* aInput){
             if (aInput->data()){
                 if (m_cur < int(m_commands.size() - 1)){
                     if (m_commands[size_t(m_cur + 1)].redo())

@@ -8,7 +8,7 @@
 #include <QVector>
 #include <QDateTime>
 
-namespace rea {
+namespace rea2 {
 
 void fsStorage::checkPath(const QString &aPath){
     auto dirs = aPath.split("/");
@@ -98,17 +98,17 @@ long long fsStorage::lastModifiedTime(const QString& aPath){
 void fsStorage::initialize(){
 
 #define READSTORAGE(aType) \
-    rea::pipeline::instance()->add<bool, rea::pipePartial>([this](rea::stream<bool>* aInput) { \
+    rea2::pipeline::instance()->add<bool, rea2::pipePartial>([this](rea2::stream<bool>* aInput) { \
         Q##aType dt; \
         auto ret = read##aType(aInput->scope()->data<QString>("path"), dt); \
         aInput->scope()->cache("data", dt); \
         aInput->setData(ret)->out(); \
-    }, rea::Json("name", m_root + STR(read##aType), "thread", 10))
+    }, rea2::Json("name", m_root + STR(read##aType), "thread", 10))
 
 #define WRITESTORAGE(aType) \
-    rea::pipeline::instance()->add<bool, rea::pipePartial>([this](rea::stream<bool>* aInput){ \
+    rea2::pipeline::instance()->add<bool, rea2::pipePartial>([this](rea2::stream<bool>* aInput){ \
         aInput->setData(write##aType(aInput->scope()->data<QString>("path"), aInput->scope()->data<Q##aType>("data")))->out(); \
-}, rea::Json("name", m_root + STR(write##aType), "thread", 11))
+}, rea2::Json("name", m_root + STR(write##aType), "thread", 11))
 
 //https://blog.csdn.net/github_37382319/article/details/104723421 for file system
     READSTORAGE(JsonObject);
@@ -118,27 +118,27 @@ void fsStorage::initialize(){
     WRITESTORAGE(ByteArray);
     WRITESTORAGE(Image);
 
-    rea::pipeline::instance()->add<QString, pipePartial>([this](rea::stream<QString>* aInput){
+    rea2::pipeline::instance()->add<QString, pipePartial>([this](rea2::stream<QString>* aInput){
         auto fls = listFiles(aInput->data());
         aInput->scope()->cache("data", fls);
         aInput->out();
-    }, rea::Json("name", m_root + "listFiles"));
+    }, rea2::Json("name", m_root + "listFiles"));
 
-    rea::pipeline::instance()->add<QString, pipePartial>([this](rea::stream<QString>* aInput){
+    rea2::pipeline::instance()->add<QString, pipePartial>([this](rea2::stream<QString>* aInput){
         std::vector<QString> fls;
         listAllFiles(aInput->data(), fls);
         aInput->scope()->cache("data", fls);
         aInput->out();
-    }, rea::Json("name", m_root + "listAllFiles"));
+    }, rea2::Json("name", m_root + "listAllFiles"));
 
-    rea::pipeline::instance()->add<QString, pipePartial>([this](rea::stream<QString>* aInput){
+    rea2::pipeline::instance()->add<QString, pipePartial>([this](rea2::stream<QString>* aInput){
         deletePath(aInput->data());
         aInput->out();
-    }, rea::Json("name", m_root + "deletePath", "thread", 11));
+    }, rea2::Json("name", m_root + "deletePath", "thread", 11));
 
-    rea::pipeline::instance()->add<QString, pipePartial>([this](rea::stream<QString>* aInput){
+    rea2::pipeline::instance()->add<QString, pipePartial>([this](rea2::stream<QString>* aInput){
         aInput->outs(lastModifiedTime(aInput->data()));
-    }, rea::Json("name", m_root + "lastModified"));
+    }, rea2::Json("name", m_root + "lastModified"));
 }
 
 fsStorage::fsStorage(const QString& aRoot){

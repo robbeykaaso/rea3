@@ -1,0 +1,2 @@
+set(REA2_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../include")
+set(REA2_LIBS "${CMAKE_CURRENT_LIST_DIR}/../install/lib/${CMAKE_BUILD_TYPE}/REA2.lib")

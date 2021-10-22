@@ -6,7 +6,7 @@
 #include <QQuickItem>
 #include <QQueue>
 
-namespace rea {
+namespace rea2 {
 
 class qsgBoardPlugin;
 
@@ -54,7 +54,7 @@ public:
     qsgBoardPlugin(const QJsonObject& aConfig) {
         m_name = aConfig.value("name").toString();
         if (m_name == "")
-            m_name = rea::generateUUID();
+            m_name = rea2::generateUUID();
     }
     virtual ~qsgBoardPlugin() = default;
     virtual QString getName(qsgBoard* aParent = nullptr) {
@@ -95,12 +95,12 @@ protected:
 protected:
     QString newShapeID(const QString& aSuffix = "shp_");
     std::shared_ptr<shapeObject> createEllipseHandle(QSGNode* aTransformNode, int aRadius, int aFace = - 1,
-                                                     const QJsonArray& aCenter = rea::JArray(0, 0), const QString& aColor = "red");
+                                                     const QJsonArray& aCenter = rea2::JArray(0, 0), const QString& aColor = "red");
     void updateHandlePos(size_t aIndex, const QPoint& aPos);
     void updateHandleRadius(size_t aIndex, int aRadius);
     std::vector<std::shared_ptr<shapeObject>> m_handles;
 private:
-    rea::qsgModel m_mdl;
+    rea2::qsgModel m_mdl;
 };
 
 class DSTDLL qsgPluginTransform : public qsgBoardPlugin{
